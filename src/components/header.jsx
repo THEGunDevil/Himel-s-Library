@@ -56,7 +56,7 @@ export default function Header() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [sidebarOpen,isAdmin]);
+  }, [sidebarOpen, isAdmin]);
   const handleSearchDropDown = () => {
     setOpen((prev) => !prev);
   };
@@ -73,7 +73,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 md:px-8 lg:px-16 xl:px-24 h-20 md:h-28">
+      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 md:h-28">
         {/* Logo */}
         <Link href="/" className="hidden md:flex items-center">
           <Logo width={112} />
@@ -82,54 +82,72 @@ export default function Header() {
           <Logo width={82} />
         </Link>
 
-        {/* Navigation */}
-{/* Sidebar */}
-<nav
-  ref={sidebarRef}
-  className={`fixed lg:hidden top-0 left-0 h-screen w-64 md:p-8 p-4 bg-blue-200 transform transition-transform duration-300 ease-in-out ${
-    sidebarOpen ? "translate-x-0" : "-translate-x-full"
-  }`}
->
-  <div
-    onClick={() => setSidebarOpen(false)}
-    className="absolute text-blue-600 right-5 top-5 cursor-pointer"
-  >
-    <X size={28} />
-  </div>
+        {/* Desktop Navigation */}
+        <ul className="hidden md:flex gap-8 ml-10 uppercase font-medium text-gray-700">
+          {navigation.map((nav) => (
+            <li key={nav.path}>
 
-  <div>
-    <Logo width={82} />
-  </div>
+                <Link
+                  href={nav.path}
+                  className={`hover:text-blue-400 ${
+                    pathname === nav.path ? "text-blue-400 font-bold" : ""
+                  }`}
+                >
+                  {nav.title}
+                </Link>
+              
+            </li>
+          ))}
+        </ul>
 
-  <ul className="flex flex-col gap-6 uppercase font-medium text-lg mt-4">
-    {navigation.map((nav) => (
-      <li
-        key={nav.path}
-        className={nav.hiddenOnMobile ? "hidden sm:block" : ""}
-        onClick={() => setSidebarOpen(false)}
-      >
-        {nav.title === "Log Out" ? (
-          <button
-            onClick={handleLogoutClick}
-            className="hover:text-blue-400 text-gray-700 uppercase font-medium"
+        {/* Sidebar */}
+        <nav
+          ref={sidebarRef}
+          className={`fixed lg:hidden top-0 left-0 h-screen w-64 md:p-8 p-4 bg-blue-200 transform transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div
+            onClick={() => setSidebarOpen(false)}
+            className="absolute text-blue-600 right-5 top-5 cursor-pointer"
           >
-            Log Out
-          </button>
-        ) : (
-          <Link
-            href={nav.path}
-            className={`hover:text-blue-400 ${
-              pathname === nav.path ? "text-blue-400 font-bold" : "text-gray-700"
-            }`}
-          >
-            {nav.title}
-          </Link>
-        )}
-      </li>
-    ))}
-  </ul>
-</nav>
+            <X size={28} />
+          </div>
 
+          <div>
+            <Logo width={82} />
+          </div>
+
+          <ul className="flex flex-col gap-6 uppercase font-medium text-lg mt-4">
+            {navigation.map((nav) => (
+              <li
+                key={nav.path}
+                className={nav.hiddenOnMobile ? "hidden sm:block" : ""}
+                onClick={() => setSidebarOpen(false)}
+              >
+                {nav.title === "Log Out" ? (
+                  <button
+                    onClick={handleLogoutClick}
+                    className="hover:text-blue-400 text-gray-700 uppercase font-medium"
+                  >
+                    Log Out
+                  </button>
+                ) : (
+                  <Link
+                    href={nav.path}
+                    className={`hover:text-blue-400 ${
+                      pathname === nav.path
+                        ? "text-blue-400 font-bold"
+                        : "text-gray-700"
+                    }`}
+                  >
+                    {nav.title}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ul>
+        </nav>
 
         {/* Search & Sidebar Toggle */}
         <div className="flex items-center gap-2">
