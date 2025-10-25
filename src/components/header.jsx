@@ -56,7 +56,7 @@ export default function Header() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [sidebarOpen]);
+  }, [sidebarOpen,isAdmin]);
   const handleSearchDropDown = () => {
     setOpen((prev) => !prev);
   };
