@@ -39,7 +39,7 @@ export function useBorrowData() {
     };
 
     fetchBorrows();
-  }, [token]);
+  }, [token,isAdmin]);
 
   const fetchBorrowsByUserID = async (id) => {
     setBorrowsByUserLoading(true);
