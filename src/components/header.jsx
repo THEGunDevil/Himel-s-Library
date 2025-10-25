@@ -73,7 +73,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 md:h-28">
+      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-24 md:h-32">
         {/* Logo */}
         <Link href="/" className="hidden md:flex items-center">
           <Logo width={112} />
@@ -167,7 +167,7 @@ export default function Header() {
               <Search className="text-blue-400" />
             </button>
             <button onClick={() => setSidebarOpen((prev) => !prev)}>
-              <SidebarIcon className="h-7 w-7 text-blue-400" />
+              <SidebarIcon className="h-7 w-7 text-blue-400 cursor-pointer" />
             </button>
           </div>
         </div>

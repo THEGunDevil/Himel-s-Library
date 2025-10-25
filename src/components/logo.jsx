@@ -1,5 +1,6 @@
 const Logo = (props) => (
   <svg
+    className="rounded-full border-dashed border-blue-400 border-2"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 800 800"
     role="img"
