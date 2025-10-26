@@ -118,7 +118,7 @@ export default function Header() {
             <Logo width={82} />
           </div>
 
-          <ul className="flex flex-col gap-6 uppercase font-medium text-lg mt-4">
+          <ul className="flex flex-col gap-6 uppercase font-medium text-lg mt-5 sm:mt-8">
             {navigation.map((nav) => (
               <li
                 key={nav.path}

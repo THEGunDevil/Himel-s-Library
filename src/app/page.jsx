@@ -1,5 +1,6 @@
 "use client";
 import BookCard from "@/components/bookCard";
+import BookSlider from "@/components/bookSlider";
 import Loader from "@/components/loader";
 import { useBookData } from "@/hooks/useBookData";
 export default function Home() {
@@ -11,12 +12,8 @@ export default function Home() {
     return <p className="text-red-500">Failed to load books.</p>;
   }
   return (
-    <main className="md:pt-28 pt-20 xl:px-60 lg:px-30 px-4">
-      <img
-        src="ChatGPT Image Oct 12, 2025, 12_23_53 AM.webp"
-        alt="Book discount Ad"
-        className="w-full h-100 object-cover"
-      />
+    <main className="md:pt-32 pt-24 xl:px-60 lg:px-30 px-4">
+      <BookSlider bannerBooks={books}/>
       {loading ? (
         <Loader />
       ) : (
