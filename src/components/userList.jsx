@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import {
   useReactTable,
@@ -13,13 +14,12 @@ const columnHelper = createColumnHelper();
 
 export default function UserList() {
   const { data: users, loading, error } = useUserData();
-  console.log(users);
 
   const columns = [
     columnHelper.accessor((row) => `${row.first_name} ${row.last_name}`, {
-      id: "fullName", // optional, must be unique
+      id: "fullName",
       header: "User",
-      cell: (info) => info.getValue(), // will show "Firstname Lastname"
+      cell: (info) => info.getValue(),
     }),
     columnHelper.accessor("email", {
       header: "Email",
@@ -27,35 +27,14 @@ export default function UserList() {
     }),
     columnHelper.accessor("phone_number", {
       header: "Phone Number",
-      cell: (info) => info.getValue(),
+      cell: (info) => info.getValue() || "-",
     }),
-    // columnHelper.accessor("borrowed", {
-    //   header: "Borrowed",
-    //   cell: (info) => (
-    //     <span
-    //       className={`px-2 py-1 rounded ${
-    //         info.getValue() === "admin"
-    //           ? "bg-blue-500 text-white"
-    //           : info.getValue() === "member"
-    //           ? "bg-none text-black"
-    //           : null
-    //       }`}
-    //     >
-    //       {info.getValue() === "admin"
-    //         ? "Admin"
-    //         : info.getValue() === "member"
-    //         ? "Member"
-    //         : null}
-    //     </span>
-    //   ),
-    // }),
     columnHelper.accessor("created_at", {
       header: "Joined At",
       cell: (info) => {
         const rawDate = info.getValue();
+        if (!rawDate) return "-";
         const date = ConvertStringToDate(rawDate);
-
-        // Format nicely, e.g. "Oct 15, 2025, 8:30 PM"
         return date.toLocaleString(undefined, {
           year: "numeric",
           month: "short",
@@ -65,94 +44,98 @@ export default function UserList() {
         });
       },
     }),
-
     columnHelper.accessor("role", {
       header: "Role",
-      cell: (info) => (
-        <span
-          className={`px-2 py-1 rounded ${
-            info.getValue() === "admin"
-              ? "bg-blue-500 text-white"
-              : info.getValue() === "member"
-              ? "bg-none text-black border-gray-500 border"
-              : null
-          }`}
-        >
-          {info.getValue() === "admin"
-            ? "Admin"
-            : info.getValue() === "member"
-            ? "Member"
-            : null}
-        </span>
-      ),
+      cell: (info) => {
+        const role = info.getValue();
+        return (
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium ${
+              role === "admin"
+                ? "bg-blue-100 text-blue-800"
+                : role === "member"
+                ? "bg-gray-100 text-gray-800 border border-gray-300"
+                : "bg-gray-50 text-gray-500"
+            }`}
+          >
+            {role === "admin" ? "Admin" : role === "member" ? "Member" : "-"}
+          </span>
+        );
+      },
     }),
-    // columnHelper.accessor("actions", {
-    //   header: "Actions",
-    //   cell: (info) => (
-    //     <span
-    //       className={`px-2 py-1 rounded text-white ${
-    //         info.getValue() === "admin"
-    //           ? "bg-blue-500"
-    //           : info.getValue() === "member"
-    //           ? "bg-green-500"
-    //           : null
-    //       }`}
-    //     >
-    //       {info.getValue() === "admin"
-    //         ? "Admin"
-    //         : info.getValue() === "Member"
-    //         ? "Member"
-    //         : null}
-    //     </span>
-    //   ),
-    // }),
   ];
 
   const table = useReactTable({
-    data: users || [], // ✅ correct key
+    data: users || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
-  if (loading) return <div className="p-6">Loading users...</div>;
-  if (error) return <div className="p-6 text-red-500">Error loading users</div>;
+  // Loading & Error States
+  if (loading)
+    return (
+      <div className="p-6 text-center text-gray-600">Loading users...</div>
+    );
+  if (error)
+    return (
+      <div className="p-6 text-center text-red-500">
+        Error: {error.message || "Failed to load users"}
+      </div>
+    );
+  if (!users || users.length === 0)
+    return (
+      <div className="p-6 text-center text-gray-500">No users found.</div>
+    );
 
   return (
-    <div className="w-full m-auto mt-10">
-      <h1 className="text-3xl font-bold mb-4 text-blue-400">User List</h1>
-      <table className="min-w-full shadow-md">
-        <thead className="bg-gray-100">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="text-left px-4 py-2 border-b border-gray-200 font-semibold"
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </th>
+    <div className="w-full mx-auto mt-10">
+      <h1 className="text-3xl font-bold mb-6 text-blue-600">User List</h1>
+
+      {/* Scrollable Table Container */}
+      <div className="overflow-x-auto shadow-lg border border-gray-200 rounded-lg">
+        <div className="max-h-96 overflow-y-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50 sticky top-0 z-10">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="hover:bg-gray-50">
-              {row.getVisibleCells().map((cell) => (
-                <td
-                  key={cell.id}
-                  className="px-4 py-2 border-b border-gray-200"
+            </thead>
+
+            <tbody className="bg-white divide-y divide-gray-200">
+              {table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="hover:bg-gray-50 transition-colors duration-150"
                 >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

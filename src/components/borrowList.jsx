@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -10,139 +10,172 @@ import {
 import { ConvertStringToDate } from "@/utils";
 import { useBorrowData } from "@/hooks/useBorrowData";
 import { useUserData } from "@/hooks/useUserData";
-import { useBookData } from "@/hooks/useBookData"; // ✅ optional if available
+import { useBookData } from "@/hooks/useBookData";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useAuth } from "@/contexts/authContext";
 
 const columnHelper = createColumnHelper();
 
 export default function BorrowList() {
-  const { data: borrows, loading, error } = useBorrowData();
+  // ---- data hooks -------------------------------------------------
+  const { data: borrows, loading, error, refetch } = useBorrowData();
   const { data: users } = useUserData();
-  const { data: books } = useBookData(); // ✅ optional
+  const { data: books } = useBookData();
+  const { token } = useAuth();
 
-  // Combine data: map each borrow record with user & book info
-  const combinedData =
-    borrows?.map((b) => {
-      const user = users?.find((u) => u.id === b.user_id);
-      const book = books?.find((bk) => bk.id === b.book_id);
+  // ---- optimistic UI state ----------------------------------------
+  const [optimisticBorrows, setOptimisticBorrows] = useState([]);
+
+  // sync optimistic state when real data changes
+  useEffect(() => {
+    setOptimisticBorrows(borrows || []);
+  }, [borrows]);
+
+  // ---- return handler ---------------------------------------------
+  const handleReturn = async (borrowId, bookId) => {
+    if (!token) {
+      toast.error("Authentication token missing.");
+      return;
+    }
+
+    // 1. optimistic UI
+    setOptimisticBorrows((prev) =>
+      prev.map((b) =>
+        b.id === borrowId ? { ...b, returned_at: new Date().toISOString() } : b
+      )
+    );
+
+    try {
+      await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL}/borrows/borrow/${borrowId}/return`,
+        { book_id: bookId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      toast.success("Book returned!", { autoClose: 1500 });
+      // 2. real refresh (gets fresh data from server)
+      refetch();
+    } catch (err) {
+      console.error("Return error:", err);
+      toast.error("Failed to return book.");
+      // revert optimistic change on error
+      refetch();
+    }
+  };
+
+  // ---- combine users + books ---------------------------------------
+  const combinedData = useMemo(() => {
+    if (!optimisticBorrows || !users || !books) return [];
+
+    return optimisticBorrows.map((b) => {
+      const user = users.find((u) => u.id === b.user_id) || {};
+      const book = books.find((bk) => bk.id === b.book_id) || {};
 
       return {
         ...b,
-        user_name: user
-          ? `${user.first_name} ${user.last_name}`
+        user_name: user.first_name
+          ? `${user.first_name} ${user.last_name || ""}`
           : "Unknown User",
-        book_title: book ? book.title : "Unknown Book",
+        book_title: book.title || "Unknown Book",
       };
-    }) || [];
+    });
+  }, [optimisticBorrows, users, books]);
 
+  // ---- helper: not returned yet ------------------------------------
+  const isNotReturned = (returned_at) => {
+    if (!returned_at) return true;
+    return (
+      returned_at.includes("0001-01-01") || returned_at.trim() === ""
+    );
+  };
+
+  // ---- table columns ------------------------------------------------
   const columns = [
-    columnHelper.accessor("user_name", {
-      header: "User",
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("book_title", {
-      header: "Book",
-      cell: (info) => info.getValue(),
-    }),
+    columnHelper.accessor("user_name", { header: "User" }),
+    columnHelper.accessor("book_title", { header: "Book" }),
     columnHelper.accessor("borrowed_at", {
       header: "Borrowed At",
-      cell: ({ getValue }) => {
-        const rawDate = getValue();
-
-        if (!rawDate) return "N/A";
-
-        const date = typeof rawDate === "string" ? new Date(rawDate) : rawDate;
-
-        if (isNaN(date)) return "Invalid Date";
-
-        return date.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        });
-      },
+      cell: ({ getValue }) => ConvertStringToDate(getValue()),
     }),
     columnHelper.accessor("due_date", {
       header: "Due Date",
-      cell: ({ getValue }) => {
-        const rawDate = getValue();
-
-        if (!rawDate) return "N/A";
-
-        const date = typeof rawDate === "string" ? new Date(rawDate) : rawDate;
-
-        if (isNaN(date)) return "Invalid Date";
-
-        return date.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        });
-      },
+      cell: ({ getValue }) => ConvertStringToDate(getValue()),
     }),
     columnHelper.accessor("returned_at", {
       header: "Returned At",
       cell: ({ getValue }) => {
-        const raw = getValue();
-
-        // Handle null or weird default
-        if (!raw || raw.startsWith("0001-01-01")) return "Not Returned";
-
-        const date = new Date(raw);
-        if (isNaN(date)) return "Invalid Date";
-
-        return date.toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        });
+        const v = getValue();
+        return isNotReturned(v) ? (
+          <span className="text-orange-600 font-medium">Not Returned</span>
+        ) : (
+          ConvertStringToDate(v)
+        );
       },
     }),
-    columnHelper.accessor("actions", {
+    columnHelper.accessor("id", {
       header: "Actions",
-      cell: (info) => {
-        const borrow = info.row.original;
+      cell: ({ row }) => {
+        const borrow = row.original;
+        const notReturned = isNotReturned(borrow.returned_at);
 
-        // If already returned
-        if (
-          !borrow.returned_at ||
-          borrow.returned_at.startsWith("0001-01-01")
-        ) {
-          return (
-            <button
-              className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
-              onClick={() => handleReturn(borrow.id)}
-            >
-              Return
-            </button>
-          );
-        }
-
-        return <span className="text-gray-500 text-sm">Returned</span>;
+        return notReturned ? (
+          <button
+            onClick={() => handleReturn(borrow.id, borrow.book_id)}
+            className="
+              px-3 py-1 bg-green-500 text-white text-sm rounded
+              hover:bg-green-600 transition-colors duration-200
+              disabled:opacity-50 disabled:cursor-not-allowed
+            "
+            disabled={loading}
+          >
+            Return
+          </button>
+        ) : (
+          <span className="text-gray-500 text-sm">Returned</span>
+        );
       },
     }),
   ];
 
+  // ---- table instance -----------------------------------------------
   const table = useReactTable({
     data: combinedData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // ---- render --------------------------------------------------------
   if (loading) return <div className="p-6">Loading borrows...</div>;
   if (error)
-    return <div className="p-6 text-red-500">Error loading borrows</div>;
+    return (
+      <div className="p-6 text-red-500">
+        Error: {error.message || "Unknown error"}
+      </div>
+    );
+  if (!combinedData.length)
+    return <div className="p-6 text-gray-600">No borrow records found.</div>;
 
   return (
-    <div className="w-full m-auto mt-10">
-      <h1 className="text-3xl font-bold mb-4 text-blue-400">Borrow List</h1>
-      <table className="min-w-full shadow-md">
-        <thead className="bg-gray-100">
+    <div className="w-full mx-auto mt-10">
+  <h1 className="text-3xl font-bold mb-6 text-blue-600">Borrow List</h1>
+
+  {/* Table Container with Fixed Height + Scroll */}
+  <div className="overflow-x-auto shadow-lg border border-gray-200 rounded-lg">
+    <div className="max-h-3/4 overflow-y-auto"> {/* ← This enables vertical scroll */}
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50 sticky top-0 z-10">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="text-left px-4 py-2 border-b border-gray-200 font-semibold"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   {flexRender(
                     header.column.columnDef.header,
@@ -153,13 +186,17 @@ export default function BorrowList() {
             </tr>
           ))}
         </thead>
-        <tbody>
+
+        <tbody className="bg-white divide-y divide-gray-200">
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="hover:bg-gray-50">
+            <tr
+              key={row.id}
+              className="hover:bg-gray-50 transition-colors duration-150"
+            >
               {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
-                  className="px-4 py-2 border-b border-gray-200"
+                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
@@ -169,5 +206,7 @@ export default function BorrowList() {
         </tbody>
       </table>
     </div>
+  </div>
+</div>
   );
 }

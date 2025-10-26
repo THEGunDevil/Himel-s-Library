@@ -23,11 +23,8 @@ export function useUserData() {
           }
         );
 
-        console.log(response.data);
-        // console.log("Fetched users:", response.data);
         setData(response.data);
       } catch (err) {
-        // console.error("❌ Failed to fetch users:", err);
         setError(err);
       } finally {
         setLoading(false);
