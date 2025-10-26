@@ -5,9 +5,15 @@ import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
+import "swiper/css/autoplay";
+import Link from "next/link";
 
 export default function BannerSlider({ bannerBooks = [] }) {
-  const hasMultipleSlides = bannerBooks?.slice(0,5).length > 1;
+  // Slice once and reuse
+  const books = bannerBooks.slice(0, 5);
+  const hasMultipleSlides = books.length > 1;
+  if (!books || books.length === 0) return null;
+
   return (
     <section className="relative w-full h-[40vh] sm:h-[60vh] overflow-hidden">
       <Swiper
@@ -15,29 +21,28 @@ export default function BannerSlider({ bannerBooks = [] }) {
         slidesPerView={1}
         loop={hasMultipleSlides}
         effect="fade"
+        fadeEffect={{ crossFade: true }}
         speed={1000}
-autoplay={
-  hasMultipleSlides
-    ? {
-        delay: 4000,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true,
-      }
-    : false // Use false instead of undefined for clarity
-}
-        pagination={{
-          clickable: true,
-        }}
+        autoplay={
+          hasMultipleSlides
+            ? {
+                delay: 4000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+              }
+            : undefined
+        }
+        pagination={{ clickable: true }}
         allowTouchMove={hasMultipleSlides}
         className="h-full"
       >
-        {bannerBooks.slice(0,5)?.map((b) => (
+        {books?.map((b) => (
           <SwiperSlide key={b.id} className="relative">
             {/* Background image */}
             <img
               src={b.image_url}
               alt={b.title}
-              className="absolute inset-0 w-full h-full object-cover brightness-75"
+              className="absolute inset-0 h-full mx-auto brightness-75"
             />
 
             {/* Overlay */}
@@ -49,12 +54,15 @@ autoplay={
                 <h1 className="sm:text-3xl text-xl md:text-4xl lg:text-5xl font-bold leading-tight">
                   {b.title}
                 </h1>
-                <p className="text-sm md:text-2xl font-medium opacity-90">
+                <p className="text-sm md:text-2xl font-medium opacity-90 pb-2">
                   by {b.author}
                 </p>
-                <button className="sm:mt-6 mt-2 cursor-pointer bg-white text-black sm:px-6 px-3 sm:py-3 py-2 font-semibold hover:bg-gray-100 transition-all duration-300">
+                <Link
+                  href={`/book/${b.id}`}
+                  className="sm:mt-6 mt-2 cursor-pointer bg-white text-black sm:px-6 px-3 sm:py-3 py-2 font-semibold hover:bg-gray-100 transition-all duration-300"
+                >
                   Read More
-                </button>
+                </Link>
               </div>
             </div>
           </SwiperSlide>
@@ -88,4 +96,3 @@ autoplay={
     </section>
   );
 }
-
