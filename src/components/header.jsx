@@ -6,6 +6,7 @@ import { Search, SidebarIcon, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useAuth } from "@/contexts/authContext";
 import SearchBar from "./searchBar";
+import { toast } from "react-toastify";
 
 export default function Header() {
   const { token, logout, isAdmin } = useAuth();
@@ -106,11 +107,21 @@ export default function Header() {
 
   const handleLogoutClick = () => setLogoutDialogOpen(true);
 
-  const confirmLogout = () => {
-    logout();
+const confirmLogout = async () => {
+  try {
+    await logout(); // Wait for logout to complete
     setLogoutDialogOpen(false);
-    router.push("/");
-  };
+    toast.success("Log out successful");
+    // Give the toast a small delay before redirecting so it can be seen
+    setTimeout(() => {
+      router.push("/");
+    }, 2000); // 0.5 seconds delay
+  } catch (error) {
+    console.error("Logout failed:", error);
+    toast.error("Logout failed. Please try again.");
+  }
+};
+
 
   return (
     <>

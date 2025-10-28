@@ -18,6 +18,10 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+  .custom-toast .custom-progress {
+  background: #155dfc !important;
+  height: 4px;
+}
 }
 /* :root {
   --background: #ffffff;

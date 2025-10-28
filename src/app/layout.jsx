@@ -1,9 +1,12 @@
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
 import { AuthProvider } from "@/contexts/authContext";
 import { ToastContainer } from "react-toastify";
 import Footer from "@/components/footer";
+import { CheckCircle, XCircle } from "lucide-react";
+import ToastProvider from "@/components/toastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,16 +32,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <Header />
           <main className="min-h-screen">{children}</main>
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            pauseOnHover
-          />
+          <ToastProvider/>
           <Footer />
         </AuthProvider>
       </body>

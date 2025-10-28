@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 export default function LogInForm() {
   const { login } = useAuth();
   const {
@@ -25,13 +26,13 @@ export default function LogInForm() {
         data,
         { headers: { "Content-Type": "application/json" } }
       );
-
-      console.log("✅ Log In successful:");
+      toast.success("Log In successful");
       router.push("/profile");
 
       login(res.data.token);
     } catch (error) {
       console.error("❌ Log in failed:", error.response?.data || error.message);
+      toast.error("Log in failed", { position: "bottom-center" });
     } finally {
       setLoading(false);
     }

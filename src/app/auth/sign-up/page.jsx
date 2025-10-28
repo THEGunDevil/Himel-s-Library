@@ -4,6 +4,7 @@ import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 export default function SignUpForm() {
   const {
     register,
@@ -17,19 +18,19 @@ export default function SignUpForm() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const res = await axios.post(
+      await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
         data,
         { headers: { "Content-Type": "application/json" } }
       );
-
-      console.log("✅ Registration successful:", res.data);
+      toast.success("Registration successful",{position:"top-center"})
       router.push("/auth/log-in");
     } catch (error) {
       console.error(
         "❌ Registration failed:",
         error.response?.data || error.message
       );
+      toast.error("Registration failed", { position: "bottom-center" })
     } finally {
       setLoading(false);
     }
