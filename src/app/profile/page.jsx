@@ -109,11 +109,20 @@ export default function Profile() {
           ) : (
             <div className="divide-y divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
               {borrowsByUser.map((b) => (
-                <div key={b.id} className="p-3 flex justify-between">
+                <div
+                  key={b.id}
+                  className="p-3 flex justify-between items-center"
+                >
                   <span>{b.book_title}</span>
-                  <span className="text-sm text-gray-500">
-                    Borrowed: {ConvertStringToDate(b.borrowed_at)}
-                  </span>
+                  <div className="text-sm text-gray-500 flex flex-col">
+                    <span>Borrowed: {ConvertStringToDate(b.borrowed_at)}</span>
+                    <span>
+                      Returned:{" "}
+                      {b.returned_at === null
+                        ? "NOT RETURNED"
+                        : ConvertStringToDate(b.returned_at)}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
