@@ -46,7 +46,7 @@ export default function BannerSlider({ bannerBooks = [] }) {
             />
 
             {/* Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/50 to-transparent" />
 
             {/* Content */}
             <div className="relative z-10 h-full flex items-end px-6 md:px-16 pb-8 sm:pb-10">
@@ -54,7 +54,7 @@ export default function BannerSlider({ bannerBooks = [] }) {
                 <h1 className="sm:text-3xl text-xl md:text-4xl lg:text-5xl font-bold leading-tight">
                   {b.title}
                 </h1>
-                <p className="text-sm md:text-2xl font-medium opacity-90 pb-2">
+                <p className="text-sm md:text-lg lg:text-xl font-medium opacity-90 pb-2">
                   by {b.author}
                 </p>
                 <Link

@@ -6,13 +6,19 @@ import { Search, SidebarIcon, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useAuth } from "@/contexts/authContext";
 import SearchBar from "./searchBar";
+
 export default function Header() {
   const { token, logout, isAdmin } = useAuth();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+
   const sidebarRef = useRef(null);
-  const toggleRef = useRef(null); // Ref for the hamburger button
+  const toggleRef = useRef(null);
+  const searchRef = useRef(null);
+  const searchBtnRef = useRef(null);
+
   const pathname = usePathname();
   const router = useRouter();
 
@@ -22,13 +28,7 @@ export default function Header() {
     { title: "Contact us", path: "/contact" },
     ...(token ? [{ title: "Profile", path: "/profile" }] : []),
     ...(isAdmin
-      ? [
-          {
-            title: "Dashboard",
-            path: "/dashboard",
-            hiddenOnMobile: true,
-          },
-        ]
+      ? [{ title: "Dashboard", path: "/dashboard", hiddenOnMobile: true }]
       : []),
     ...(!token
       ? [
@@ -38,7 +38,25 @@ export default function Header() {
       : []),
   ];
 
-  // Close sidebar when clicking outside (ignoring the toggle button)
+  // ✅ Toggle search dropdown (mutually exclusive with sidebar)
+  const handleSearchDropDown = () => {
+    setOpen((prev) => {
+      const newState = !prev;
+      if (newState) setSidebarOpen(false);
+      return newState;
+    });
+  };
+
+  // ✅ Toggle sidebar (mutually exclusive with search dropdown)
+  const handleSidebarToggle = () => {
+    setSidebarOpen((prev) => {
+      const newState = !prev;
+      if (newState) setOpen(false);
+      return newState;
+    });
+  };
+
+  // ✅ Close sidebar when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -53,17 +71,40 @@ export default function Header() {
     }
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [sidebarOpen, isAdmin]);
-  const handleSearchDropDown = () => {
-    setOpen((prev) => !prev);
-  };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [sidebarOpen]);
 
-  const handleLogoutClick = () => {
-    setLogoutDialogOpen(true);
-  };
+  // ✅ Close search bar when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        open &&
+        searchRef.current &&
+        !searchRef.current.contains(event.target) &&
+        searchBtnRef.current &&
+        !searchBtnRef.current.contains(event.target)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  // ✅ Close sidebar or search when pressing Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setSidebarOpen(false);
+        setOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleLogoutClick = () => setLogoutDialogOpen(true);
 
   const confirmLogout = () => {
     logout();
@@ -86,21 +127,19 @@ export default function Header() {
         <ul className="hidden md:flex gap-8 ml-10 uppercase font-medium text-gray-700">
           {navigation.map((nav) => (
             <li key={nav.path}>
-
-                <Link
-                  href={nav.path}
-                  className={`hover:text-blue-400 ${
-                    pathname === nav.path ? "text-blue-400 font-bold" : ""
-                  }`}
-                >
-                  {nav.title}
-                </Link>
-              
+              <Link
+                href={nav.path}
+                className={`hover:text-blue-400 ${
+                  pathname === nav.path ? "text-blue-400 font-bold" : ""
+                }`}
+              >
+                {nav.title}
+              </Link>
             </li>
           ))}
         </ul>
 
-        {/* Sidebar */}
+        {/* Sidebar (Mobile) */}
         <nav
           ref={sidebarRef}
           className={`fixed lg:hidden top-0 left-0 h-screen w-64 md:p-8 p-4 bg-blue-200 transform transition-transform duration-300 ease-in-out ${
@@ -118,7 +157,7 @@ export default function Header() {
             <Logo width={82} />
           </div>
 
-          <ul className="flex flex-col gap-6 uppercase font-medium text-lg mt-5 sm:mt-8">
+          <ul className="flex flex-col gap-6 uppercase font-medium text-lg mt-8 sm:mt-10">
             {navigation.map((nav) => (
               <li
                 key={nav.path}
@@ -152,21 +191,26 @@ export default function Header() {
         {/* Search & Sidebar Toggle */}
         <div className="flex items-center gap-2">
           <button
+            ref={searchBtnRef}
             onClick={handleSearchDropDown}
             className="hidden md:block p-2 bg-white rounded-full"
           >
             <Search className="text-blue-400" />
           </button>
-          <SearchBar open={open} />
+
+          <div ref={searchRef}>
+            <SearchBar open={open} />
+          </div>
 
           <div ref={toggleRef} className="flex md:hidden items-center gap-2">
             <button
+              ref={searchBtnRef}
               onClick={handleSearchDropDown}
               className="p-2 bg-white rounded-full"
             >
               <Search className="text-blue-400" />
             </button>
-            <button onClick={() => setSidebarOpen((prev) => !prev)}>
+            <button onClick={handleSidebarToggle}>
               <SidebarIcon className="h-7 w-7 text-blue-400 cursor-pointer" />
             </button>
           </div>
