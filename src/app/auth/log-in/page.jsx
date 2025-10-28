@@ -28,7 +28,6 @@ export default function LogInForm() {
       );
       toast.success("Log In successful");
       router.push("/profile");
-
       login(res.data.token);
     } catch (error) {
       console.error("❌ Log in failed:", error.response?.data || error.message);
@@ -36,7 +35,6 @@ export default function LogInForm() {
     } finally {
       setLoading(false);
     }
-    console.log(data);
   };
 
   return (

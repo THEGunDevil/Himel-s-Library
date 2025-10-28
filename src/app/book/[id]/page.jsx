@@ -65,8 +65,10 @@ export default function Book() {
   return (
     <section className="flex flex-col w-full lg:flex-row md:pt-36 pt-32 justify-between gap-5 items-start xl:px-60 lg:px-30 px-4 mb-10">
       {/* Book Info */}
-      <div className="bg-white w-full lg:w-1/2 shadow-lg p-6 flex flex-col items-center hover:shadow-xl transition-shadow duration-300 
-                      h-auto lg:h-[700px] xl:h-[720px]">
+      <div
+        className="bg-white w-full lg:w-1/2 shadow-lg p-6 flex flex-col items-center hover:shadow-xl transition-shadow duration-300 
+                      h-auto lg:h-[700px] xl:h-[720px]"
+      >
         <div className="relative w-full flex justify-center items-center h-60 bg-gray-50 rounded-lg overflow-hidden">
           {book.image_url ? (
             <img
@@ -98,6 +100,10 @@ export default function Book() {
             {book.description}
           </p>
         )}
+        <p className="text-gray-500 text-sm text-center line-clamp-1">
+          Genre:{" "}
+          {Array.isArray(book.genre) ? book.genre.join(", ") : book.genre}
+        </p>
 
         <div className="mt-3 flex justify-between items-center w-full">
           <div>

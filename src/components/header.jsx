@@ -112,10 +112,6 @@ const confirmLogout = async () => {
     await logout(); // Wait for logout to complete
     setLogoutDialogOpen(false);
     toast.success("Log out successful");
-    // Give the toast a small delay before redirecting so it can be seen
-    setTimeout(() => {
-      router.push("/");
-    }, 2000); // 0.5 seconds delay
   } catch (error) {
     console.error("Logout failed:", error);
     toast.error("Logout failed. Please try again.");
