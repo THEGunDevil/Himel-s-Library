@@ -80,7 +80,7 @@ const Footer = () => {
             <span className="text-sm text-gray-500 sm:text-center">
               © 2023
               <Link href="/" className="hover:underline">
-                LoGo.
+                Himel's Library
               </Link>
               . All Rights Reserved.
             </span>
