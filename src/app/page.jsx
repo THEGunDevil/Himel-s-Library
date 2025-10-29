@@ -56,19 +56,19 @@ export default function Home() {
       <BannerSlider bannerBooks={books} />
 
       {/* Classic Romance */}
-      <div className="py-10">
+      <div className="mt-10">
         <h1 className="uppercase font-bold text-2xl text-blue-400">Classic Romance</h1>
         <BookSliderByGenre books={classicRomanceBooks} />
       </div>
 
       {/* Classic */}
-      <div className="py-10">
+      <div className="mt-5">
         <h1 className="uppercase font-bold text-2xl text-blue-400">Classic</h1>
         <BookSliderByGenre books={classicBooks} />
       </div>
 
       {/* Featured Books with Pagination */}
-      <div className="py-10">
+      <div className="mt-5">
         <h1 className="uppercase font-bold text-2xl text-blue-400">Featured Books</h1>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-5 place-items-center">
           {books?.map((book) => (
