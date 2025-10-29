@@ -5,6 +5,7 @@ import BannerSlider from "@/components/bannerSlider";
 import Loader from "@/components/loader";
 import { useBookData } from "@/hooks/useBookData";
 import BookSliderByGenre from "@/components/bookSliderByGenre";
+import { AlignRight, ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 export default function Home() {
   const [page, setPage] = useState(1);
@@ -30,7 +31,9 @@ export default function Home() {
   // Error handling
   if (hasError) {
     console.error(hasError);
-    return <p className="text-red-500 text-center mt-10">Failed to load books.</p>;
+    return (
+      <p className="text-red-500 text-center mt-10">Failed to load books.</p>
+    );
   }
 
   // Single global loader
@@ -57,7 +60,9 @@ export default function Home() {
 
       {/* Classic Romance */}
       <div className="mt-10">
-        <h1 className="uppercase font-bold text-2xl text-blue-400">Classic Romance</h1>
+        <h1 className="uppercase font-bold text-2xl text-blue-400">
+          Classic Romance
+        </h1>
         <BookSliderByGenre books={classicRomanceBooks} />
       </div>
 
@@ -69,7 +74,9 @@ export default function Home() {
 
       {/* Featured Books with Pagination */}
       <div className="mt-5">
-        <h1 className="uppercase font-bold text-2xl text-blue-400">Featured Books</h1>
+        <h1 className="uppercase font-bold text-2xl text-blue-400">
+          Featured Books
+        </h1>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-5 place-items-center">
           {books?.map((book) => (
             <BookCard key={book.id} book={book} />
@@ -77,12 +84,13 @@ export default function Home() {
         </div>
 
         {/* Pagination Buttons */}
-        <div className="flex justify-center items-center mt-8 gap-4">
+        <div className="flex justify-center items-center my-5 gap-4">
           <button
             onClick={handlePrev}
             disabled={page === 1}
-            className="px-4 py-2 bg-blue-400 text-white rounded-lg disabled:opacity-50"
+            className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
           >
+            <ArrowLeftIcon className="h-4" />
             Previous
           </button>
           <span className="text-gray-700">
@@ -91,9 +99,9 @@ export default function Home() {
           <button
             onClick={handleNext}
             disabled={page === totalPages}
-            className="px-4 py-2 bg-blue-400 text-white rounded-lg disabled:opacity-50"
+            className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
           >
-            Next
+            Next <ArrowRightIcon className="h-4" />
           </button>
         </div>
       </div>
