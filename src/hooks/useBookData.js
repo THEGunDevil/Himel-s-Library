@@ -1,21 +1,28 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useAuth } from "@/contexts/authContext";
 
-export function useBookData() {
+export function useBookData({ page = 1, limit = 14, genre = "" } = {}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { token } = useAuth();
 
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/books/`
-        );
-        setData(response.data);
+        let url;
+
+        if (genre) {
+          // Fetch books by genre
+          url = `${process.env.NEXT_PUBLIC_API_URL}/books/genre/${genre}`;
+        } else {
+          // Fetch paginated books
+          const params = new URLSearchParams({ page, limit });
+          url = `${process.env.NEXT_PUBLIC_API_URL}/books/?${params.toString()}`;
+        }
+
+        const response = await axios.get(url);
+        setData(response.data?.books ?? response.data ?? []);
       } catch (err) {
         console.error("❌ Failed to fetch books:", err);
         setError(err);
@@ -25,7 +32,7 @@ export function useBookData() {
     };
 
     fetchBooks();
-  }, [token]); // ✅ re-run only when token changes
+  }, [page, limit, genre]);
 
   return { data, loading, error };
 }
