@@ -7,11 +7,10 @@ import { useBookData } from "@/hooks/useBookData";
 import BookSliderByGenre from "@/components/bookSliderByGenre";
 
 export default function Home() {
-  // main books pagination
   const [page, setPage] = useState(1);
+
+  // Hooks
   const { data: books, loading, error, totalPages } = useBookData({ page });
-  console.log(totalPages);
-  
   const {
     data: classicRomanceBooks,
     loading: classicRomanceLoading,
@@ -24,11 +23,26 @@ export default function Home() {
     error: classicError,
   } = useBookData({ genre: "Classic" });
 
-  if (error || classicRomanceError || classicError) {
-    console.error(error || classicRomanceError || classicError);
-    return <p className="text-red-500">Failed to load books.</p>;
+  // Combine all loading and error states
+  const isLoading = loading || classicRomanceLoading || classicLoading;
+  const hasError = error || classicRomanceError || classicError;
+
+  // Error handling
+  if (hasError) {
+    console.error(hasError);
+    return <p className="text-red-500 text-center mt-10">Failed to load books.</p>;
   }
 
+  // Single global loader
+  if (isLoading) {
+    return (
+      <main className="md:pt-32 pt-24 xl:px-60 lg:px-30 px-4 flex justify-center items-center min-h-screen">
+        <Loader />
+      </main>
+    );
+  }
+
+  // Pagination controls
   const handleNext = () => {
     if (page < totalPages) setPage((prev) => prev + 1);
   };
@@ -44,50 +58,44 @@ export default function Home() {
       {/* Classic Romance */}
       <div className="py-10">
         <h1 className="uppercase font-bold text-2xl text-blue-400">Classic Romance</h1>
-        {classicRomanceLoading ? <Loader /> : <BookSliderByGenre books={classicRomanceBooks} />}
+        <BookSliderByGenre books={classicRomanceBooks} />
       </div>
 
       {/* Classic */}
       <div className="py-10">
         <h1 className="uppercase font-bold text-2xl text-blue-400">Classic</h1>
-        {classicLoading ? <Loader /> : <BookSliderByGenre books={classicBooks} />}
+        <BookSliderByGenre books={classicBooks} />
       </div>
 
       {/* Featured Books with Pagination */}
       <div className="py-10">
         <h1 className="uppercase font-bold text-2xl text-blue-400">Featured Books</h1>
-        {loading ? (
-          <Loader />
-        ) : (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-5 place-items-center">
-              {books?.map((book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-5 place-items-center">
+          {books?.map((book) => (
+            <BookCard key={book.id} book={book} />
+          ))}
+        </div>
 
-            {/* Pagination Buttons */}
-            <div className="flex justify-center items-center mt-8 gap-4">
-              <button
-                onClick={handlePrev}
-                disabled={page === 1}
-                className="px-4 py-2 bg-blue-400 text-white rounded-lg disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="text-gray-700">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={handleNext}
-                disabled={page === totalPages}
-                className="px-4 py-2 bg-blue-400 text-white rounded-lg disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </>
-        )}
+        {/* Pagination Buttons */}
+        <div className="flex justify-center items-center mt-8 gap-4">
+          <button
+            onClick={handlePrev}
+            disabled={page === 1}
+            className="px-4 py-2 bg-blue-400 text-white rounded-lg disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-gray-700">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={handleNext}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-blue-400 text-white rounded-lg disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </main>
   );
