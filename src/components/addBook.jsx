@@ -21,6 +21,8 @@ function AddBook() {
       formData.append("published_year", data.published_year);
       formData.append("isbn", data.isbn);
       formData.append("total_copies", data.total_copies);
+      formData.append("genre", data.genre);
+      formData.append("description", data.description);
 
       // File input: data.image is a FileList
       if (data.image && data.image.length > 0) {
@@ -130,6 +132,35 @@ function AddBook() {
             </p>
           )}
         </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Genre</label>
+          <input
+            type="text"
+            {...register("genre", {
+              required: "genre is required",
+            })}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Classic Romance"
+          />
+          {errors.genre && (
+            <p className="text-red-500 text-sm mt-1">{errors.genre.message}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <textarea
+            rows={4}
+            {...register("description")}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Write a short summary about the book..."
+          />
+          {errors.description && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.description.message}
+            </p>
+          )}
+        </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">Book Cover</label>
           <input

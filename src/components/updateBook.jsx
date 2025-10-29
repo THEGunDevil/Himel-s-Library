@@ -13,32 +13,40 @@ function UpdateBook() {
   const [loading, setLoading] = useState(false);
   const { token } = useAuth();
   const onSubmit = async (data) => {
-  setLoading(true);
-  try {
-    const res = await axios.patch(
-      `${process.env.NEXT_PUBLIC_API_URL}/books/${data.id}`,
-      {
-        title: data.title || null,
-        author: data.author || null,
-        published_year: data.published_year ? parseInt(data.published_year) : null,
-        isbn: data.isbn || null,
-        total_copies: data.total_copies ? parseInt(data.total_copies) : null,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    setLoading(true);
+    try {
+      const res = await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL}/books/${data.id}`,
+        {
+          title: data.title || null,
+          author: data.author || null,
+          published_year: data.published_year
+            ? parseInt(data.published_year)
+            : null,
+          isbn: data.isbn || null,
+          total_copies: data.total_copies ? parseInt(data.total_copies) : null,
+          genre: data.genre || null,
+          description: data.description || null,
 
-    console.log("✅ Updating successful:", res.data);
-  } catch (error) {
-    console.error("❌ Updating failed:", error.response?.data || error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("✅ Updating successful:", res.data);
+    } catch (error) {
+      console.error(
+        "❌ Updating failed:",
+        error.response?.data || error.message
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-lg m-auto bg-white shadow-md p-6 mt-10">
@@ -58,14 +66,15 @@ function UpdateBook() {
           {errors.id && (
             <p className="text-red-500 text-sm mt-1">{errors.id.message}</p>
           )}
-          <p className="text-gray-500 text-sm">NOTE: ID is required to update a book.</p>
+          <p className="text-gray-500 text-sm">
+            NOTE: ID is required to update a book.
+          </p>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Title</label>
           <input
             type="text"
-            {...register("title", {
-            })}
+            {...register("title", {})}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Kafka on the Shore"
           />
@@ -77,8 +86,7 @@ function UpdateBook() {
           <label className="block text-sm font-medium mb-1">Author</label>
           <input
             type="text"
-            {...register("author", {
-            })}
+            {...register("author", {})}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Haruki Murakami"
           />
@@ -94,8 +102,7 @@ function UpdateBook() {
             type="number"
             min={1900}
             max={2099}
-            {...register("published_year", {
-            })}
+            {...register("published_year", {})}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.published_year && (
@@ -109,8 +116,7 @@ function UpdateBook() {
           <label className="block text-sm font-medium mb-1">ISBN </label>
           <input
             type="text"
-            {...register("isbn", {
-            })}
+            {...register("isbn", {})}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="1-84343-110-6"
           />
@@ -124,8 +130,7 @@ function UpdateBook() {
             type="number"
             min={1}
             max={10}
-            {...register("total_copies", {
-            })}
+            {...register("total_copies", {})}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="1"
           />
@@ -136,12 +141,39 @@ function UpdateBook() {
           )}
         </div>
         <div>
+          <label className="block text-sm font-medium mb-1">Genre</label>
+          <input
+            type="text"
+            {...register("genre", {
+              required: "genre is required",
+            })}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Classic Romance"
+          />
+          {errors.genre && (
+            <p className="text-red-500 text-sm mt-1">{errors.genre.message}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <textarea
+            rows={4}
+            {...register("description")}
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Write a short summary about the book..."
+          />
+          {errors.description && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.description.message}
+            </p>
+          )}
+        </div>
+        <div>
           <label className="block text-sm font-medium mb-1">Book Cover</label>
           <input
             type="file"
             accept="image/*"
-            {...register("image", {
-            })}
+            {...register("image", {})}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.book_cover && (
