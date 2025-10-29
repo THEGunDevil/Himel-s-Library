@@ -2,8 +2,8 @@
 
 import { SearchIcon, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import SearchedPreview from "./SearchedPreview";
 import axios from "axios";
+import SearchedPreview from "./searchedPreview";
 function SearchBar({ open }) {
   const [local, setLocal] = useState("");
   const [genre, setGenre] = useState("all");
