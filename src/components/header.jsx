@@ -21,8 +21,6 @@ export default function Header() {
   const searchBtnRef = useRef(null);
 
   const pathname = usePathname();
-  const router = useRouter();
-
   const navigation = [
     { title: "Home", path: "/" },
     { title: "About us", path: "/about" },
@@ -121,13 +119,13 @@ const confirmLogout = async () => {
 
   return (
     <>
-      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-24 md:h-32">
+      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 md:h-32">
         {/* Logo */}
         <Link href="/" className="hidden md:flex items-center">
           <Logo width={112} />
         </Link>
         <Link href="/" className="flex md:hidden items-center">
-          <Logo width={82} />
+          <Logo width={70} />
         </Link>
 
         {/* Desktop Navigation */}
