@@ -41,7 +41,7 @@ export default function Dashboard() {
           </TabList>
 
           {/* Tab Panels */}
-          <div className="bg-blue-50 shadow-inner px-4 pt-1 min-h-[400px] transition-all duration-200 mt-4">
+          <div className="bg-blue-50 shadow-inner px-4 py-1 min-h-[400px] transition-all duration-200 mt-4">
             <TabPanel>
               <AddBook />
             </TabPanel>

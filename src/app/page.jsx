@@ -56,6 +56,9 @@ export default function Home() {
 
   return (
     <main className="md:pt-32 pt-24 xl:px-60 lg:px-30 px-4">
+      <h1 className="uppercase font-bold text-2xl text-blue-400 my-5">
+        Featured Books
+      </h1>
       <BannerSlider bannerBooks={books} />
 
       {/* Classic Romance */}
@@ -75,7 +78,7 @@ export default function Home() {
       {/* Featured Books with Pagination */}
       <div className="mt-5">
         <h1 className="uppercase font-bold text-2xl text-blue-400">
-          Featured Books
+          All Books
         </h1>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-5 place-items-center">
           {books?.map((book) => (
