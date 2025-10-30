@@ -34,7 +34,6 @@ export default function SignUpForm() {
     } finally {
       setLoading(false);
     }
-    console.log(data);
   };
 
   return (
@@ -169,7 +168,9 @@ export default function SignUpForm() {
             disabled={loading}
             className="w-full py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
           >
-            Sign Up
+            {
+              loading ? "Signing Up..":"Sign Up"
+          }
           </button>
         </form>
 

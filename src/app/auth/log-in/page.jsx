@@ -95,8 +95,10 @@ export default function LogInForm() {
             type="submit"
             disabled={loading}
             className="w-full py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-          >
-            Log In
+          >{
+              loading ? "Logging In..":"Log In"
+          }
+            
           </button>
         </form>
 
