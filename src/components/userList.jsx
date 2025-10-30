@@ -88,11 +88,11 @@ export default function UserList() {
     );
 
   return (
-    <div className="w-full mx-auto mt-10">
-      <h1 className="text-3xl font-bold mb-6 text-blue-600">User List</h1>
+    <div className="w-full mx-auto mt-1">
+      <h1 className="text-3xl font-bold mb-3 text-blue-400">User List</h1>
 
       {/* Scrollable Table Container */}
-      <div className="overflow-x-auto shadow-lg border border-gray-200 rounded-lg">
+      <div className="overflow-x-auto border border-gray-200">
         <div className="max-h-96 overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0 z-10">

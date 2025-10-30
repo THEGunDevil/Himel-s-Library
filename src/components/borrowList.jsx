@@ -163,7 +163,7 @@ export default function BorrowList() {
 
   return (
     <div className="w-full mx-auto my-1">
-  <h1 className="text-3xl font-bold mb-6 text-blue-400">Borrow List</h1>
+  <h1 className="text-3xl font-bold mb-3 text-blue-400">Borrow List</h1>
 
   {/* Table Container with Fixed Height + Scroll */}
   <div className="overflow-x-auto border border-gray-200">
