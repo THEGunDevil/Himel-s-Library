@@ -162,11 +162,11 @@ export default function BorrowList() {
     return <div className="p-6 text-gray-600">No borrow records found.</div>;
 
   return (
-    <div className="w-full mx-auto mt-10">
-  <h1 className="text-3xl font-bold mb-6 text-blue-600">Borrow List</h1>
+    <div className="w-full mx-auto my-1">
+  <h1 className="text-3xl font-bold mb-6 text-blue-400">Borrow List</h1>
 
   {/* Table Container with Fixed Height + Scroll */}
-  <div className="overflow-x-auto shadow-lg border border-gray-200 rounded-lg">
+  <div className="overflow-x-auto border border-gray-200">
     <div className="max-h-3/4 overflow-y-auto"> {/* ← This enables vertical scroll */}
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50 sticky top-0 z-10">
