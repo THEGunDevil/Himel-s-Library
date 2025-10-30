@@ -8,14 +8,15 @@ import AddBook from "@/components/addBook";
 import UpdateBook from "@/components/updateBook";
 import UserList from "@/components/userList";
 import BorrowList from "@/components/borrowList";
+import BookList from "@/components/bookList";
 
 export default function Dashboard() {
-  const tabNames = ["Add Book", "Update Book", "Users", "Borrows"];
+  const tabNames = ["Add Book", "Update Book", "Users", "Borrows", "Books"];
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   return (
-    <section className="pt-28 xl:px-60 lg:px-30 px-4 min-h-screen bg-gray-50">
-      <div className="bg-white border border-blue-100 shadow-lg p-5 mt-10">
+    <section className="pt-24 md:pt-32 xl:px-60 lg:px-30 px-4">
+      <div className="bg-white border border-blue-100 shadow-lg p-5 my-10">
         <Tabs selectedIndex={selectedIndex} onSelect={(index) => setSelectedIndex(index)}>
           {/* Tab List */}
           <TabList className="flex flex-wrap gap-3 border-b border-blue-200 pb-4">
@@ -53,6 +54,9 @@ export default function Dashboard() {
             </TabPanel>
             <TabPanel>
               <BorrowList />
+            </TabPanel>
+            <TabPanel>
+              <BookList />
             </TabPanel>
           </div>
         </Tabs>

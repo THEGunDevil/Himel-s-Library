@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { useUserData } from "@/hooks/useUserData";
 import { ConvertStringToDate } from "@/utils";
+import Loader from "./loader";
 
 const columnHelper = createColumnHelper();
 
@@ -72,10 +73,7 @@ export default function UserList() {
   });
 
   // Loading & Error States
-  if (loading)
-    return (
-      <div className="p-6 text-center text-gray-600">Loading users...</div>
-    );
+  if (loading) return <Loader/>;
   if (error)
     return (
       <div className="p-6 text-center text-red-500">

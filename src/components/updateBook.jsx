@@ -49,7 +49,7 @@ function UpdateBook() {
   };
 
   return (
-    <div className="w-full max-w-lg m-auto bg-white shadow-md p-6 mt-10">
+    <div className="w-full max-w-lg m-auto bg-white shadow-md p-6 my-1">
       <h2 className="text-2xl font-bold text-center mb-6">Update Book</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

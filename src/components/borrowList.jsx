@@ -14,6 +14,7 @@ import { useBookData } from "@/hooks/useBookData";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/authContext";
+import Loader from "./loader";
 
 const columnHelper = createColumnHelper();
 
@@ -151,7 +152,7 @@ export default function BorrowList() {
   });
 
   // ---- render --------------------------------------------------------
-  if (loading) return <div className="p-6">Loading borrows...</div>;
+  if (loading) return <Loader/>;
   if (error)
     return (
       <div className="p-6 text-red-500">
