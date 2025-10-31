@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Logo from "./logo";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Search, SidebarIcon, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useAuth } from "@/contexts/authContext";
@@ -9,7 +9,7 @@ import SearchBar from "./searchBar";
 import { toast } from "react-toastify";
 
 export default function Header() {
-  const { token, logout, isAdmin } = useAuth();
+  const { token, logout, isAdmin, userID } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
@@ -25,7 +25,7 @@ export default function Header() {
     { title: "Home", path: "/" },
     { title: "About us", path: "/about" },
     { title: "Contact us", path: "/contact" },
-    ...(token ? [{ title: "Profile", path: "/profile" }] : []),
+    ...(token ? [{ title: "Profile", path: `/profile/${userID}` }] : []),
     ...(isAdmin
       ? [{ title: "Dashboard", path: "/dashboard", hiddenOnMobile: true }]
       : []),

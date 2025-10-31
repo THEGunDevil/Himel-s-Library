@@ -2,34 +2,29 @@
 
 import { useAuth } from "@/contexts/authContext";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { LogOut, User, BookOpen, Star } from "lucide-react";
-import { jwtDecode } from "jwt-decode"; // ✅ fixed import
+import { useParams, useRouter } from "next/navigation";
+import { LogOut, BookOpen, Star } from "lucide-react";
 import { Avatar, ConvertStringToDate } from "@/utils";
 import axios from "axios";
 
 export default function Profile() {
+const { id: userID } = useParams();
   const { token, logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState(null);
   const router = useRouter();
+
   useEffect(() => {
     if (!token) router.push("/auth/log-in");
-  }, [token]);
 
-  // Decode token to get userId
-  const decoded = token && typeof token === "string" ? jwtDecode(token) : null;
-  const userId = decoded?.sub;
-
-  useEffect(() => {
-    if (!userId) return;
+    if (!userID) return;
     const fetchProfile = async () => {
       setProfileLoading(true);
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/user/profile/${userId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/users/user/profile/${userID}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -46,7 +41,7 @@ export default function Profile() {
     };
 
     fetchProfile();
-  }, [userId]);
+  }, [userID, token]);
 
   if (profileLoading)
     return (

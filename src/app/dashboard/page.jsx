@@ -11,7 +11,7 @@ import BorrowList from "@/components/borrowList";
 import BookList from "@/components/bookList";
 
 export default function Dashboard() {
-  const tabNames = ["Add Book", "Update Book", "Users", "Borrows", "Books"];
+  const tabNames = ["Users", "Borrows", "Books","Add Book", "Update Book"];
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   return (
@@ -44,12 +44,6 @@ export default function Dashboard() {
           {/* Tab Panels */}
           <div className="bg-blue-50 shadow-inner px-4 py-1 min-h-[400px] transition-all duration-200 mt-4">
             <TabPanel>
-              <AddBook />
-            </TabPanel>
-            <TabPanel>
-              <UpdateBook />
-            </TabPanel>
-            <TabPanel>
               <UserList />
             </TabPanel>
             <TabPanel>
@@ -57,6 +51,12 @@ export default function Dashboard() {
             </TabPanel>
             <TabPanel>
               <BookList />
+            </TabPanel>
+            <TabPanel>
+              <AddBook />
+            </TabPanel>
+            <TabPanel>
+              <UpdateBook />
             </TabPanel>
           </div>
         </Tabs>

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 export default function LogInForm() {
-  const { login } = useAuth();
+  const { login, userID } = useAuth();
   const {
     register,
     handleSubmit,
@@ -27,8 +27,8 @@ export default function LogInForm() {
         { headers: { "Content-Type": "application/json" } }
       );
       toast.success("Log In successful");
-      router.push("/profile");
       login(res.data.token);
+      router.push(`/profile/${userID}`);
     } catch (error) {
       console.error("❌ Log in failed:", error.response?.data || error.message);
       toast.error("Log in failed", { position: "bottom-center" });
@@ -95,10 +95,8 @@ export default function LogInForm() {
             type="submit"
             disabled={loading}
             className="w-full py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-          >{
-              loading ? "Logging In..":"Log In"
-          }
-            
+          >
+            {loading ? "Logging In.." : "Log In"}
           </button>
         </form>
 

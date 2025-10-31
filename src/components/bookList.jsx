@@ -86,13 +86,6 @@ export default function BookList() {
         const book = row.original;
         return (
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {/* Update button placeholder */}
-            {/* <button
-              onClick={() => handleUpdate(book.id)}
-              className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors duration-200"
-            >
-              Update
-            </button> */}
 
             <button
               onClick={() => setBookToDelete(book.id)}

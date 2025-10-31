@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "@/contexts/authContext";
 
@@ -6,33 +6,31 @@ export function useUserData() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { token } = useAuth();
+  const { token, isAdmin } = useAuth();
+
+  // ✅ useCallback makes fetchUsers stable across renders
+  const fetchUsers = useCallback(async () => {
+    if (!token || !isAdmin) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setData(response.data);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, isAdmin]); // ✅ only re-create if these change
 
   useEffect(() => {
-    if (!token) return; // ✅ wait for token before fetching
-
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        setData(response.data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
-  }, [token]); // ✅ re-run only when token changes
+  }, [fetchUsers]);
 
-  return { data, loading, error };
+  return { data, loading, error, refetch: fetchUsers };
 }

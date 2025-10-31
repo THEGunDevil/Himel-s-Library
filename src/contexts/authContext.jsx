@@ -24,9 +24,11 @@ export const AuthProvider = ({ children }) => {
   };
   const decoded = token && typeof token === "string" ? jwtDecode(token) : null;
   const isAdmin = decoded?.role === "admin"; // optional chaining prevents errors
+  const userID = decoded?.sub; // assuming JWT uses "sub" for user ID
+
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, isAdmin}}>
+    <AuthContext.Provider value={{ token, login, logout, isAdmin, userID}}>
       {children}
     </AuthContext.Provider>
   );
