@@ -6,29 +6,36 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
+  const [userID, setUserID] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Load token from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
-    if (savedToken) setToken(savedToken);
+    if (savedToken) {
+      const decoded = jwtDecode(savedToken);
+      setToken(savedToken);
+      setUserID(decoded.sub);
+      setIsAdmin(decoded.role === "admin");
+    }
   }, []);
 
   const login = (newToken) => {
     localStorage.setItem("token", newToken);
-    setToken(newToken); // 🔥 triggers re-render
+    const decoded = jwtDecode(newToken);
+    setToken(newToken);
+    setIsAdmin(decoded.role === "admin");
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    setToken(null); // 🔥 triggers re-render
+    setToken(null);
+    setUserID(null);
+    setIsAdmin(false);
   };
-  const decoded = token && typeof token === "string" ? jwtDecode(token) : null;
-  const isAdmin = decoded?.role === "admin"; // optional chaining prevents errors
-  const userID = decoded?.sub; // assuming JWT uses "sub" for user ID
-
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, isAdmin, userID}}>
+    <AuthContext.Provider value={{ token, login, logout, isAdmin, userID }}>
       {children}
     </AuthContext.Provider>
   );

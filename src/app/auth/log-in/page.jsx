@@ -1,6 +1,7 @@
 "use client";
 import { useAuth } from "@/contexts/authContext";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,7 +9,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 export default function LogInForm() {
-  const { login, userID } = useAuth();
+  const { login } = useAuth();
   const {
     register,
     handleSubmit,
@@ -18,25 +19,28 @@ export default function LogInForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const onSubmit = async (data) => {
-    setLoading(true);
-    try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
-        data,
-        { headers: { "Content-Type": "application/json" } }
-      );
-      toast.success("Log In successful");
-      login(res.data.token);
-      router.push(`/profile/${userID}`);
-    } catch (error) {
-      console.error("❌ Log in failed:", error.response?.data || error.message);
-      toast.error("Log in failed", { position: "bottom-center" });
-    } finally {
-      setLoading(false);
-    }
-  };
+const onSubmit = async (data) => {
+  setLoading(true);
+  try {
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+      data,
+      { headers: { "Content-Type": "application/json" } }
+    );
 
+    const decoded = jwtDecode(res.data.token);
+    const loggedInUserID = decoded.sub; // get user ID immediately
+
+    login(res.data.token);
+    router.push(`/profile/${loggedInUserID}`); // use decoded value here
+    toast.success("Log In successful");
+  } catch (error) {
+    console.error("❌ Log in failed:", error.response?.data || error.message);
+    toast.error("Log in failed", { position: "bottom-center" });
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-md bg-white shadow-md p-6 mt-10">
