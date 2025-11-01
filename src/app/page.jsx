@@ -5,7 +5,7 @@ import BannerSlider from "@/components/bannerSlider";
 import Loader from "@/components/loader";
 import { useBookData } from "@/hooks/useBookData";
 import BookSliderByGenre from "@/components/bookSliderByGenre";
-import { AlignRight, ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 export default function Home() {
   const [page, setPage] = useState(1);

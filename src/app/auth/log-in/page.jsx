@@ -28,10 +28,10 @@ const onSubmit = async (data) => {
       { headers: { "Content-Type": "application/json" } }
     );
 
-    const decoded = jwtDecode(res.data.token);
+    const decoded = jwtDecode(res.data.access_token);
     const loggedInUserID = decoded.sub; // get user ID immediately
 
-    login(res.data.token);
+    login(res.data.access_token);
     router.push(`/profile/${loggedInUserID}`); // use decoded value here
     toast.success("Log In successful");
   } catch (error) {

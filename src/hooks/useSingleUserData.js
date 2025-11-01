@@ -3,7 +3,7 @@ import axios from "axios";
 import { useAuth } from "@/contexts/authContext";
 
 export function useSingleUserData(userId) {
-  const { token } = useAuth();
+  const { accessToken } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,7 +18,7 @@ export function useSingleUserData(userId) {
           `${process.env.NEXT_PUBLIC_API_URL}/users/user/${userId}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${accessToken}`,
             },
           }
         );
@@ -33,7 +33,7 @@ export function useSingleUserData(userId) {
     };
 
     fetchUser();
-  }, [userId, token]);
+  }, [userId, accessToken]);
 
   return { data, loading, error };
 }

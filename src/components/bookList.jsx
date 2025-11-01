@@ -17,13 +17,13 @@ const columnHelper = createColumnHelper();
 export default function BookList() {
   // ---- hooks -------------------------------------------------
   const { data: books, loading, error, refetch } = useBookData();
-  const { isAdmin, token } = useAuth();
+  const { isAdmin, accessToken } = useAuth();
   const [bookToDelete, setBookToDelete] = useState(null); // store selected book
 
   // ---- delete handler ----------------------------------------
   const handleDelete = async () => {
     if (!bookToDelete) return;
-    if (!isAdmin || !token) {
+    if (!isAdmin || !accessToken) {
       toast.error("You are not authorized to delete books.");
       return;
     }
@@ -31,7 +31,7 @@ export default function BookList() {
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_API_URL}/books/${bookToDelete}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       toast.success("Book deleted successfully!");
       setBookToDelete(null);
@@ -86,7 +86,6 @@ export default function BookList() {
         const book = row.original;
         return (
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-
             <button
               onClick={() => setBookToDelete(book.id)}
               className="px-3 py-1 cursor-pointer bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors duration-200"

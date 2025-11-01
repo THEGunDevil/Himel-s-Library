@@ -9,7 +9,7 @@ import BookReviewSection from "@/components/bookReview";
 import { getDueDate } from "@/utils";
 
 export default function Book() {
-  const { token } = useAuth();
+  const { accessToken } = useAuth();
   const { id } = useParams();
   const [book, setBook] = useState(null);
   const {
@@ -28,7 +28,7 @@ export default function Book() {
   const [dueDate, setDueDate] = useState("");
 
   const handleBorrow = async () => {
-    if (!token) {
+    if (!accessToken) {
       setError("You must be logged in to borrow a book.");
       return;
     }
@@ -43,7 +43,7 @@ export default function Book() {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/borrows/borrow`,
         { book_id: book.id, due_date: formattedDueDate },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
       setBorrowed(true);

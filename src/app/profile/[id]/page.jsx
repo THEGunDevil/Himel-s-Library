@@ -8,8 +8,8 @@ import { Avatar, ConvertStringToDate } from "@/utils";
 import axios from "axios";
 
 export default function Profile() {
-const { id: userID } = useParams();
-  const { token, logout } = useAuth();
+  const { id: userID } = useParams();
+  const { accessToken, logout } = useAuth();
   const [profile, setProfile] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -17,7 +17,7 @@ const { id: userID } = useParams();
   const router = useRouter();
 
   useEffect(() => {
-    if (!token) router.push("/auth/log-in");
+    if (!accessToken) router.push("/auth/log-in");
 
     if (!userID) return;
     const fetchProfile = async () => {
@@ -27,7 +27,7 @@ const { id: userID } = useParams();
           `${process.env.NEXT_PUBLIC_API_URL}/users/user/profile/${userID}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${accessToken}`,
             },
           }
         );
@@ -41,7 +41,7 @@ const { id: userID } = useParams();
     };
 
     fetchProfile();
-  }, [userID, token]);
+  }, [userID, accessToken]);
 
   if (profileLoading)
     return (

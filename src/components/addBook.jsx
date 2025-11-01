@@ -11,7 +11,7 @@ function AddBook() {
   } = useForm();
 
   const [loading, setLoading] = useState(false);
-  const { token } = useAuth();
+  const { accessToken } = useAuth();
   const onSubmit = async (data) => {
     setLoading(true);
     try {
@@ -35,7 +35,7 @@ function AddBook() {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );

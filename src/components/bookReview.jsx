@@ -9,7 +9,7 @@ import { useBookReviews } from "@/hooks/useBookReviews";
 import ReviewOptions from "./dropDownMenu";
 import { toast } from "react-toastify";
 export default function BookReviewSection({ bookId }) {
-  const { token } = useAuth();
+  const { accessToken } = useAuth();
   const router = useRouter();
 
   const {
@@ -55,7 +55,7 @@ export default function BookReviewSection({ bookId }) {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
         }
@@ -71,7 +71,7 @@ export default function BookReviewSection({ bookId }) {
     } finally {
       setSubmitting(false);
     }
-  }  
+  }
   return (
     <section className="bg-white w-full shadow-lg h-full p-6 flex flex-col mx-auto hover:shadow-xl transition-shadow duration-300">
       <header className="mb-6 text-center">
@@ -83,7 +83,7 @@ export default function BookReviewSection({ bookId }) {
         </p>
       </header>
 
-      {!token && (
+      {!accessToken && (
         <div className="w-full bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm text-blue-800 font-medium">
@@ -102,7 +102,7 @@ export default function BookReviewSection({ bookId }) {
         </div>
       )}
 
-      {token && (
+      {accessToken && (
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="mb-8 w-full space-y-4"
@@ -164,9 +164,9 @@ export default function BookReviewSection({ bookId }) {
             No reviews yet — be the first to comment!
           </p>
         ) : (
-          reviews.map((r) => (
+          reviews.map((r,idx) => (
             <article
-              key={r.id}
+              key={r.id || idx}
               className="py-4 relative group hover:bg-gray-300 hover:transition-colors duration-200"
             >
               <div className="flex items-start gap-3">

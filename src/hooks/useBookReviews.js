@@ -3,7 +3,7 @@ import axios from "axios";
 import { useAuth } from "@/contexts/authContext";
 
 export function useBookReviews(bookId) {
-  const { token } = useAuth();
+  const { accessToken } = useAuth();
 
   // Fetch reviews
   const [data, setData] = useState([]);
@@ -17,7 +17,7 @@ export function useBookReviews(bookId) {
   const [reviewsByUser, setReviewsByUser] = useState([]);
   const [reviewsByUserLoading, setReviewsByUserLoading] = useState(false);
   const [reviewsByUserError, setReviewsByUserError] = useState(null);
-  // Fetch reviews function (wrapped in useCallback so refetch always has latest bookId & token)
+  // Fetch reviews function (wrapped in useCallback so refetch always has latest bookId & accessToken)
   const fetchReviews = useCallback(async () => {
     if (!bookId) return;
     setFetchLoading(true);
@@ -26,7 +26,7 @@ export function useBookReviews(bookId) {
     try {
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/reviews/review/${bookId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       setData(res.data);
     } catch (err) {
@@ -35,11 +35,11 @@ export function useBookReviews(bookId) {
     } finally {
       setFetchLoading(false);
     }
-  }, [bookId, token]); // ✅ useCallback ensures this always has latest bookId & token
+  }, [bookId, accessToken]); // ✅ useCallback ensures this always has latest bookId & accessToken
 
   // Delete review function
   const deleteReview = async (reviewId) => {
-    if (!token || !reviewId) return;
+    if (!accessToken || !reviewId) return;
 
     setDeleteLoading(true);
     setDeleteError(null);
@@ -47,7 +47,7 @@ export function useBookReviews(bookId) {
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_API_URL}/reviews/review/${reviewId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
       // Option 1: Remove from local state immediately
@@ -63,7 +63,7 @@ export function useBookReviews(bookId) {
     }
   };
   const fetchReviewsByUserID = async (userId) => {
-    if (!token || !userId) return;
+    if (!accessToken || !userId) return;
 
     setReviewsByUserLoading(true);
     setReviewsByUserError(null);
@@ -71,7 +71,7 @@ export function useBookReviews(bookId) {
     try {
       const res = await axios.delete(
         `${process.env.NEXT_PUBLIC_API_URL}/reviews/review/${userId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       setReviewsByUser(res.data);
     } catch (err) {

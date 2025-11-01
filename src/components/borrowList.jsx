@@ -23,7 +23,7 @@ export default function BorrowList() {
   const { data: borrows, loading, error, refetch } = useBorrowData();
   const { data: users } = useUserData();
   const { data: books } = useBookData();
-  const { token } = useAuth();
+  const { accessToken } = useAuth();
 
   // ---- optimistic UI state ----------------------------------------
   const [optimisticBorrows, setOptimisticBorrows] = useState([]);
@@ -35,8 +35,8 @@ export default function BorrowList() {
 
   // ---- return handler ---------------------------------------------
   const handleReturn = async (borrowId, bookId) => {
-    if (!token) {
-      toast.error("Authentication token missing.");
+    if (!accessToken) {
+      toast.error("Authentication access token missing.");
       return;
     }
 
@@ -53,7 +53,7 @@ export default function BorrowList() {
         { book_id: bookId },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
         }

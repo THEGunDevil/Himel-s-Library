@@ -28,10 +28,10 @@ export default function UserList() {
   const { data: users, loading, error, refetch } = useUserData();
   const [userBanID, setUserBanID] = useState(null);
   const [userUnBanID, setUserUnBanID] = useState(null);
-  const { isAdmin, token } = useAuth();
+  const { isAdmin, accessToken } = useAuth();
   const handleBan = async (formData) => {
     if (!userBanID) return;
-    if (!isAdmin || !token) {
+    if (!isAdmin || !accessToken) {
       toast.error("You are not authorized to ban users.");
       return;
     }
@@ -51,7 +51,7 @@ export default function UserList() {
           ban_until: banUntilDate, // RFC3339 string or null
           is_permanent_ban: isPermanent,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
       toast.success("User banned successfully!");
@@ -64,7 +64,7 @@ export default function UserList() {
   };
 
   const handleUnban = async (userId) => {
-    if (!isAdmin || !token) {
+    if (!isAdmin || !accessToken) {
       toast.error("You are not authorized to unban users.");
       return;
     }
@@ -78,7 +78,7 @@ export default function UserList() {
           ban_until: null,
           is_permanent_ban: false,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       toast.success("User unbanned successfully!");
       setUserUnBanID(null);
@@ -168,8 +168,11 @@ export default function UserList() {
                 Ban
               </button>
             )}
-            <Link href={`/profile/${user.id}`} className="p-1 cursor-pointer bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors duration-200">
-              <User size={20}/>
+            <Link
+              href={`/profile/${user.id}`}
+              className="p-1 cursor-pointer bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors duration-200"
+            >
+              <User size={20} />
             </Link>
           </div>
         );

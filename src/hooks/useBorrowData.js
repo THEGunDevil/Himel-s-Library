@@ -13,10 +13,10 @@ export function useBorrowData() {
   const [borrowsByUserLoading, setBorrowsByUserLoading] = useState(false);
   const [borrowsByUserError, setBorrowsByUserError] = useState(null);
 
-  const { token, isAdmin } = useAuth();
+  const { accessToken, isAdmin } = useAuth();
 
   const fetchAllBorrows = useCallback(async () => {
-    if (!token) return;
+    if (!accessToken) return;
 
     setLoading(true);
     setError(null);
@@ -24,7 +24,7 @@ export function useBorrowData() {
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/borrows/`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
       setData(res.data || []);
@@ -34,14 +34,14 @@ export function useBorrowData() {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [accessToken]);
 
   useEffect(() => {
-    if (token) fetchAllBorrows();
-  }, [token, fetchAllBorrows]);
+    if (accessToken) fetchAllBorrows();
+  }, [accessToken, fetchAllBorrows]);
 
   const fetchBorrowsByUserID = async (userId) => {
-    if (!token) return;
+    if (!accessToken) return;
 
     setBorrowsByUserLoading(true);
     setBorrowsByUserError(null);
@@ -49,7 +49,7 @@ export function useBorrowData() {
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/borrows/${userId}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
       setBorrowsByUser(res.data || []);
@@ -61,15 +61,13 @@ export function useBorrowData() {
     }
   };
 
-
   const refetch = () => fetchAllBorrows();
-
 
   return {
     data,
     loading,
     error,
-    refetch,            
+    refetch,
 
     borrowsByUser,
     borrowsByUserLoading,

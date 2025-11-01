@@ -1,41 +1,76 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
+import axios from "axios";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
   const [userID, setUserID] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Load token from localStorage on mount
+  const login = (token) => {
+    setAccessToken(token);
+  };
+  // Decode token whenever it changes
   useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    if (savedToken) {
-      const decoded = jwtDecode(savedToken);
-      setToken(savedToken);
+    if (accessToken) {
+      const decoded = jwtDecode(accessToken);
       setUserID(decoded.sub);
       setIsAdmin(decoded.role === "admin");
+    } else {
+      setUserID(null);
+      setIsAdmin(false);
     }
-  }, []);
-
-  const login = (newToken) => {
-    localStorage.setItem("token", newToken);
-    const decoded = jwtDecode(newToken);
-    setToken(newToken);
-    setIsAdmin(decoded.role === "admin");
+  }, [accessToken]);
+    // Refresh access token from cookie
+  const refreshToken = async () => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+        {},
+        { withCredentials: true }
+      );
+      setAccessToken(response.data.access_token);
+      return response.data.access_token;
+    } catch (err) {
+      setAccessToken(null);
+      setUserID(null);
+      setIsAdmin(false);
+      return null;
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
+  // Initialize auth on page load
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = await refreshToken();
+      if (token) {
+        const decoded = jwtDecode(token);
+        setUserID(decoded.sub);
+        setIsAdmin(decoded.role === "admin");
+      }
+    };
+    initAuth();
+  }, []);
+
+
+
+
+  const logout = async () => {
+    setAccessToken(null);
     setUserID(null);
     setIsAdmin(false);
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {}, { withCredentials: true });
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, isAdmin, userID }}>
+    <AuthContext.Provider value={{ accessToken, login, logout, isAdmin, userID, refreshToken }}>
       {children}
     </AuthContext.Provider>
   );

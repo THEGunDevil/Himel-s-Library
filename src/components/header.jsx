@@ -9,7 +9,7 @@ import SearchBar from "./searchBar";
 import { toast } from "react-toastify";
 
 export default function Header() {
-  const { token, logout, isAdmin, userID } = useAuth();
+  const { accessToken, logout, isAdmin, userID } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
@@ -25,11 +25,11 @@ export default function Header() {
     { title: "Home", path: "/" },
     { title: "About us", path: "/about" },
     { title: "Contact us", path: "/contact" },
-    ...(token ? [{ title: "Profile", path: `/profile/${userID}` }] : []),
+    ...(accessToken ? [{ title: "Profile", path: `/profile/${userID}` }] : []),
     ...(isAdmin
       ? [{ title: "Dashboard", path: "/dashboard", hiddenOnMobile: true }]
       : []),
-    ...(!token
+    ...(!accessToken
       ? [
           { title: "Log In", path: "/auth/log-in" },
           { title: "Sign Up", path: "/auth/sign-up" },
@@ -105,17 +105,16 @@ export default function Header() {
 
   const handleLogoutClick = () => setLogoutDialogOpen(true);
 
-const confirmLogout = async () => {
-  try {
-    await logout(); // Wait for logout to complete
-    setLogoutDialogOpen(false);
-    toast.success("Log out successful");
-  } catch (error) {
-    console.error("Logout failed:", error);
-    toast.error("Logout failed. Please try again.");
-  }
-};
-
+  const confirmLogout = async () => {
+    try {
+      await logout(); // Wait for logout to complete
+      setLogoutDialogOpen(false);
+      toast.success("Log out successful");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again.");
+    }
+  };
 
   return (
     <>
