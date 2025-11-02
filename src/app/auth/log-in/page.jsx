@@ -19,28 +19,31 @@ export default function LogInForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-const onSubmit = async (data) => {
-  setLoading(true);
-  try {
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
-      data,
-      { headers: { "Content-Type": "application/json" } }
-    );
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        data,
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
 
-    const decoded = jwtDecode(res.data.access_token);
-    const loggedInUserID = decoded.sub; // get user ID immediately
+      const decoded = jwtDecode(res.data.access_token);
+      const loggedInUserID = decoded.sub; // get user ID immediately
 
-    login(res.data.access_token);
-    router.push(`/profile/${loggedInUserID}`); // use decoded value here
-    toast.success("Log In successful");
-  } catch (error) {
-    console.error("❌ Log in failed:", error.response?.data || error.message);
-    toast.error("Log in failed", { position: "bottom-center" });
-  } finally {
-    setLoading(false);
-  }
-};
+      login(res.data.access_token);
+      router.push(`/profile/${loggedInUserID}`); // use decoded value here
+      toast.success("Log In successful");
+    } catch (error) {
+      console.error("❌ Log in failed:", error.response?.data || error.message);
+      toast.error("Log in failed", { position: "bottom-center" });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-md bg-white shadow-md p-6 mt-10">

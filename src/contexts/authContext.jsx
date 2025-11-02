@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
 const AuthContext = createContext();
@@ -24,12 +24,13 @@ export const AuthProvider = ({ children }) => {
       setIsAdmin(false);
     }
   }, [accessToken]);
-    // Refresh access token from cookie
+  // Refresh access token from cookie
   const refreshToken = async () => {
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-        {},
+        {
+        },
         { withCredentials: true }
       );
       setAccessToken(response.data.access_token);
@@ -55,22 +56,25 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-
-
-
   const logout = async () => {
     setAccessToken(null);
     setUserID(null);
     setIsAdmin(false);
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {}, { withCredentials: true });
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
     } catch (err) {
       console.error("Logout failed", err);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ accessToken, login, logout, isAdmin, userID, refreshToken }}>
+    <AuthContext.Provider
+      value={{ accessToken, login, logout, isAdmin, userID, refreshToken }}
+    >
       {children}
     </AuthContext.Provider>
   );
