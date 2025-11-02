@@ -61,13 +61,6 @@ export default function Home() {
       </h1>
       <BannerSlider bannerBooks={books} />
 
-      {/* Classic Romance */}
-      <div className="mt-10">
-        <h1 className="uppercase font-bold text-2xl text-blue-400">
-          Classic Romance
-        </h1>
-        <BookSliderByGenre books={classicRomanceBooks} />
-      </div>
 
       {/* Classic */}
       <div className="mt-5">
@@ -75,6 +68,14 @@ export default function Home() {
         <BookSliderByGenre books={classicBooks} />
       </div>
 
+      {/* Classic Romance */}
+      <div className="mt-10">
+        <h1 className="uppercase font-bold text-2xl text-blue-400">
+          Classic Romance
+        </h1>
+        <BookSliderByGenre books={classicRomanceBooks} />
+      </div>
+      
       {/* Featured Books with Pagination */}
       <div className="mt-5">
         <h1 className="uppercase font-bold text-2xl text-blue-400">
