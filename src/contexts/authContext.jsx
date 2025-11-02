@@ -29,8 +29,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-        {
-        },
+        {},
         { withCredentials: true }
       );
       setAccessToken(response.data.access_token);
@@ -44,17 +43,24 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Initialize auth on page load
-  useEffect(() => {
-    const initAuth = async () => {
-      const token = await refreshToken();
+useEffect(() => {
+  const initAuth = async () => {
+    try {
+      const token = await refreshToken(); // sends cookie
       if (token) {
         const decoded = jwtDecode(token);
         setUserID(decoded.sub);
         setIsAdmin(decoded.role === "admin");
       }
-    };
-    initAuth();
-  }, []);
+    } catch {
+      setAccessToken(null);
+      setUserID(null);
+      setIsAdmin(false);
+    }
+  };
+  initAuth();
+}, []);
+
 
   const logout = async () => {
     setAccessToken(null);
