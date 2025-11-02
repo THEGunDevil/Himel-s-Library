@@ -1,11 +1,13 @@
 "use client";
 
-import { useAuth } from "@/contexts/authContext";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { LogOut, BookOpen, Star } from "lucide-react";
-import { Avatar, ConvertStringToDate } from "@/utils";
-import axios from "axios";
+import { Avatar, ConvertStringToDate, StarRating } from "@/utils";
+import { toast } from "react-toastify";
+import ReviewOptions from "@/components/dropDownMenu";
+import { useAuth } from "@/contexts/authContext";
+import { useBookReviews } from "@/hooks/useBookReviews";
 
 export default function Profile() {
   const { id: userID } = useParams();
@@ -14,26 +16,36 @@ export default function Profile() {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState(null);
+
   const router = useRouter();
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editedComment, setEditedComment] = useState("");
+  const [editedRating, setEditedRating] = useState(0);
+
+  const { reviewsByUser, fetchReviewsByUserID, deleteReview, updateReview } =
+    useBookReviews();
 
   useEffect(() => {
     if (!accessToken) router.push("/auth/log-in");
+  }, [accessToken]);
 
-    if (!userID) return;
+  useEffect(() => {
+    if (!userID || !accessToken) return;
+
     const fetchProfile = async () => {
       setProfileLoading(true);
       try {
-        const response = await axios.get(
+        const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/user/profile/${userID}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${accessToken}` } }
         );
-        setProfile(response.data);
+        const data = await res.json();
+        setProfile(data);
+
+        // Fetch reviews by user
+        fetchReviewsByUserID(userID);
       } catch (err) {
-        console.error("❌ Failed to fetch borrows:", err);
+        console.error(err);
         setProfileError(err);
       } finally {
         setProfileLoading(false);
@@ -43,33 +55,49 @@ export default function Profile() {
     fetchProfile();
   }, [userID, accessToken]);
 
-  if (profileLoading)
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-gray-500 animate-pulse">Loading profile...</p>
-      </div>
-    );
-
-  if (profileError)
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-red-500">Failed to load profile data.</p>
-      </div>
-    );
-
-  if (!profile) return null; // safety
-  const user = profile?.user[0];
-  const borrowsByUser = profile?.borrows || [];
-  const reviewsByUser = profile?.reviews || [];
-  const handleLogoutClick = () => {
-    setLogoutDialogOpen(true);
+  const startEditing = (review) => {
+    setEditingReviewId(review.id);
+    setEditedComment(review.comment);
+    setEditedRating(review.rating);
   };
 
-  const confirmLogout = () => {
+  const cancelEditing = () => setEditingReviewId(null);
+
+  const handleEditSubmit = async (reviewId) => {
+    try {
+      await updateReview(reviewId, {
+        comment: editedComment,
+        rating: editedRating,
+      });
+      toast.success("Review updated ✅");
+      cancelEditing();
+      fetchReviewsByUserID(userID);
+    } catch (err) {
+      toast.error("Failed to update review ❌");
+    }
+  };
+
+  const handleLogout = () => {
     logout();
     setLogoutDialogOpen(false);
     router.push("/");
   };
+
+  if (profileLoading)
+    return (
+      <p className="text-center mt-30 animate-pulse">Loading profile...</p>
+    );
+
+  if (profileError)
+    return (
+      <p className="text-center mt-30 text-red-500">Failed to load profile.</p>
+    );
+
+  if (!profile) return null;
+
+  const user = profile.user[0];
+  const borrowsByUser = profile.borrows || [];
+
   return (
     <>
       <div className="w-full md:pt-36 pt-32 mx-auto p-6 space-y-6 xl:px-60 lg:px-30 px-4">
@@ -80,15 +108,15 @@ export default function Profile() {
               <Avatar name={profile.user_name} />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold">{profile.user_name} </h1>
+              <h1 className="text-2xl font-semibold">{profile.user_name}</h1>
               <p className="text-gray-400 text-xs">
                 Joined on {ConvertStringToDate(user.created_at)}
               </p>
             </div>
           </div>
           <button
-            onClick={handleLogoutClick}
-            className="flex items-center gap-2 bg-red-500 hover:bg-red-400 cursor-pointer text-white px-4 py-2 rounded-lg transition"
+            onClick={() => setLogoutDialogOpen(true)}
+            className="flex items-center gap-2 bg-red-500 hover:bg-red-400 text-white sm:px-4 px-2  py-2 transition"
           >
             <LogOut size={18} /> Logout
           </button>
@@ -136,28 +164,77 @@ export default function Profile() {
           ) : (
             <div className="divide-y divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
               {reviewsByUser.map((r) => (
-                <div key={r.id} className="p-3">
-                  <p className="font-medium">{r.book_title}</p>
-                  <p className="text-sm text-yellow-500">
-                    {"★".repeat(r.rating)}
-                    {"☆".repeat(5 - r.rating)}
-                  </p>
-                  <p className="text-gray-600 text-sm mt-1">{r.comment}</p>
+                <div
+                  key={r.id}
+                  className="p-3 flex justify-between items-start group relative"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium">{r.book_title}</p>
+                    <p className="text-sm text-yellow-500">
+                      {"★".repeat(r.rating)}
+                      {"☆".repeat(5 - r.rating)}
+                    </p>
+
+                    {editingReviewId === r.id ? (
+                      <div className="mt-2 space-y-2">
+                        <textarea
+                          rows={3}
+                          value={editedComment}
+                          onChange={(e) => setEditedComment(e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        />
+                        <StarRating
+                          rating={editedRating}
+                          setRating={setEditedRating}
+                        />
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={cancelEditing}
+                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleEditSubmit(r.id)}
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-600 text-sm mt-1">{r.comment}</p>
+                    )}
+                  </div>
+
+                  {/* Review Options only visible on hover */}
+                  {/* Review Options */}
+                  <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+                    <ReviewOptions
+                      onDelete={async () => {
+                        await deleteReview(r.id);
+                        toast.success("Review deleted ✅");
+                        fetchReviewsByUserID(userID);
+                      }}
+                      onEdit={() => startEditing(r)}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </section>
       </div>
+
+      {/* Logout dialog */}
       {logoutDialogOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white rounded-lg p-6 w-80 shadow-lg text-center">
             <h2 className="text-lg font-bold mb-4">Confirm Logout</h2>
             <p className="mb-6">Are you sure you want to log out?</p>
-
             <div className="flex justify-center gap-4">
               <button
-                onClick={confirmLogout}
+                onClick={handleLogout}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
                 Yes, Log Out
