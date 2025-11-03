@@ -3,7 +3,7 @@
 import { useAuth } from "@/contexts/authContext";
 import { Avatar, ConvertStringToDate, StarDisplay, StarRating } from "@/utils";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import ReviewOptions from "./dropDownMenu";
@@ -23,9 +23,15 @@ export default function BookReviewSection({ bookId }) {
     refetch,
   } = useBookReviews(bookId);
 
+  const [localReviews, setLocalReviews] = useState([]);
   const [editingReviewId, setEditingReviewId] = useState(null);
 
-  // Form for new review
+  // Sync local state whenever reviews change
+  useEffect(() => {
+    if (reviews) setLocalReviews(reviews);
+  }, [reviews]);
+
+  // New review form
   const {
     register,
     handleSubmit,
@@ -35,7 +41,7 @@ export default function BookReviewSection({ bookId }) {
     formState: { errors },
   } = useForm({ defaultValues: { comment: "", rating: 0 } });
 
-  // Form for editing review
+  // Edit form
   const {
     register: registerEdit,
     handleSubmit: handleSubmitEdit,
@@ -53,8 +59,10 @@ export default function BookReviewSection({ bookId }) {
   const [error, setError] = useState(null);
   const [editError, setEditError] = useState(null);
 
-  // Submit new review
+  // Post new review
   const onSubmit = async (data) => {
+    if (!accessToken) return;
+
     setSubmitting(true);
     setError(null);
 
@@ -70,9 +78,11 @@ export default function BookReviewSection({ bookId }) {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
+
+      // Add new review to local state for instant UI update
+      setLocalReviews((prev) => [...prev, res.data]);
       toast.success("Review posted ✅");
       reset();
-      refetch();
     } catch (err) {
       console.error(err);
       setError("Failed to post review.");
@@ -108,6 +118,16 @@ export default function BookReviewSection({ bookId }) {
         comment: data.comment,
         rating: data.rating,
       });
+
+      // Instant UI update
+      setLocalReviews((prev) =>
+        prev.map((r) =>
+          r.id === editingReviewId
+            ? { ...r, comment: data.comment, rating: data.rating }
+            : r
+        )
+      );
+
       toast.success("Review updated ✅");
       cancelEditing();
     } catch (err) {
@@ -150,14 +170,9 @@ export default function BookReviewSection({ bookId }) {
       )}
 
       {accessToken && (
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="mb-8 w-full space-y-4"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="mb-8 w-full space-y-4">
           <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-700">
-              Your review
-            </span>
+            <span className="text-sm font-medium text-gray-700">Your review</span>
             <textarea
               {...register("comment", { required: "Please write a comment." })}
               placeholder="What did you like? Any scenes, characters, or lines that stood out?"
@@ -166,21 +181,16 @@ export default function BookReviewSection({ bookId }) {
               className="mt-1 w-full p-3 border border-gray-300 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
             />
             {errors.comment && (
-              <p className="text-sm text-red-600 mt-1">
-                {errors.comment.message}
-              </p>
+              <p className="text-sm text-red-600 mt-1">{errors.comment.message}</p>
             )}
           </label>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <StarRating
-              rating={rating}
-              setRating={(val) => setValue("rating", val)}
-            />
+            <StarRating rating={rating} setRating={(val) => setValue("rating", val)} />
             <div className="flex items-center gap-3">
               <p className="text-sm text-gray-500">
-                {reviews ? reviews.length : 0} review
-                {reviews && reviews.length !== 1 ? "s" : ""}
+                {localReviews ? localReviews.length : 0} review
+                {localReviews && localReviews.length !== 1 ? "s" : ""}
               </p>
 
               <button
@@ -192,26 +202,20 @@ export default function BookReviewSection({ bookId }) {
               </button>
             </div>
           </div>
-          {error && (
-            <p className="text-sm text-red-500 mt-2 text-center">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500 mt-2 text-center">{error}</p>}
         </form>
       )}
 
-      {reviewsLoading && (
-        <p className="text-center text-gray-500">Loading reviews...</p>
-      )}
-      {reviewsError && (
-        <p className="text-center text-red-500">Failed to load reviews.</p>
-      )}
+      {reviewsLoading && <p className="text-center text-gray-500">Loading reviews...</p>}
+      {reviewsError && <p className="text-center text-red-500">Failed to load reviews.</p>}
 
       <div className="divide-y divide-gray-200 w-full max-h-96 overflow-y-auto scrollbar-hide">
-        {reviews?.length === 0 && !reviewsLoading ? (
+        {localReviews?.length === 0 && !reviewsLoading ? (
           <p className="text-sm text-gray-500 text-center py-4">
             No reviews yet — be the first to comment!
           </p>
         ) : (
-          reviews?.map((r) => (
+          localReviews?.map((r) => (
             <article
               key={r.id}
               className="py-4 relative group hover:bg-gray-300 transition-colors duration-200"
@@ -223,19 +227,16 @@ export default function BookReviewSection({ bookId }) {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-gray-800">
-                        {r.user_name}
-                      </h3>
-                      <div className="text-xs text-gray-400">
-                        {ConvertStringToDate(r.created_at)}
-                      </div>
+                      <h3 className="font-semibold text-gray-800">{r.user_name}</h3>
+                      <div className="text-xs text-gray-400">{ConvertStringToDate(r.created_at)}</div>
                     </div>
-                    <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="flex items-center justify-between w-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
                       <StarDisplay rating={r.rating} />
                       <ReviewOptions
                         onDelete={async () => {
                           await deleteReview(r.id);
                           toast.success("Review deleted ✅");
+                          setLocalReviews((prev) => prev.filter((rev) => rev.id !== r.id));
                         }}
                         onEdit={() => startEditing(r)}
                       />
@@ -248,17 +249,13 @@ export default function BookReviewSection({ bookId }) {
                       className="mt-4 w-full space-y-4"
                     >
                       <textarea
-                        {...registerEdit("comment", {
-                          required: "Please write a comment.",
-                        })}
+                        {...registerEdit("comment", { required: "Please write a comment." })}
                         rows={3}
                         maxLength={1000}
                         className="mt-1 w-full p-3 border border-gray-300 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
                       />
                       {editErrors.comment && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {editErrors.comment.message}
-                        </p>
+                        <p className="text-sm text-red-600 mt-1">{editErrors.comment.message}</p>
                       )}
 
                       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -284,9 +281,7 @@ export default function BookReviewSection({ bookId }) {
                         </div>
                       </div>
                       {editError && (
-                        <p className="text-sm text-red-500 mt-2 text-center">
-                          {editError}
-                        </p>
+                        <p className="text-sm text-red-500 mt-2 text-center">{editError}</p>
                       )}
                     </form>
                   ) : (

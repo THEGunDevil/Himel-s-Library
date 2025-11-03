@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import ReviewOptions from "@/components/dropDownMenu";
 import { useAuth } from "@/contexts/authContext";
 import { useBookReviews } from "@/hooks/useBookReviews";
+import Loader from "@/components/loader";
 
 export default function Profile() {
   const { id: userID } = useParams();
@@ -22,8 +23,13 @@ export default function Profile() {
   const [editedComment, setEditedComment] = useState("");
   const [editedRating, setEditedRating] = useState(0);
 
-  const { reviewsByUser, fetchReviewsByUserID, deleteReview, updateReview } =
-    useBookReviews();
+  const {
+    reviewsByUser,
+    fetchReviewsByUserID,
+    deleteReview,
+    updateReview,
+    setReviewsByUser, // We will need this to update state directly
+  } = useBookReviews();
 
   useEffect(() => {
     if (!accessToken) router.push("/auth/log-in");
@@ -63,17 +69,40 @@ export default function Profile() {
 
   const cancelEditing = () => setEditingReviewId(null);
 
+  // Handle instant UI update after editing
   const handleEditSubmit = async (reviewId) => {
     try {
+      const updatedReview = {
+        ...reviewsByUser.find((r) => r.id === reviewId),
+        comment: editedComment,
+        rating: editedRating,
+      };
+
+      // Optimistically update UI
+      setReviewsByUser((prev) =>
+        prev.map((r) => (r.id === reviewId ? updatedReview : r))
+      );
+
       await updateReview(reviewId, {
         comment: editedComment,
         rating: editedRating,
       });
+
       toast.success("Review updated ✅");
       cancelEditing();
-      fetchReviewsByUserID(userID);
     } catch (err) {
       toast.error("Failed to update review ❌");
+    }
+  };
+
+  const handleDelete = async (reviewId) => {
+    try {
+      await deleteReview(reviewId);
+      // Remove review immediately from UI
+      setReviewsByUser((prev) => prev.filter((r) => r.id !== reviewId));
+      toast.success("Review deleted ✅");
+    } catch (err) {
+      toast.error("Failed to delete review ❌");
     }
   };
 
@@ -85,12 +114,14 @@ export default function Profile() {
 
   if (profileLoading)
     return (
-      <p className="text-center mt-30 animate-pulse">Loading profile...</p>
+      <div className="mt-40">
+        <Loader />
+      </div>
     );
 
   if (profileError)
     return (
-      <p className="text-center mt-30 text-red-500">Failed to load profile.</p>
+      <p className="text-center sm:mt-40 mt-30 text-red-500">Failed to load profile.</p>
     );
 
   if (!profile) return null;
@@ -157,7 +188,7 @@ export default function Profile() {
           <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
             <Star size={18} /> My Reviews
           </h2>
-          {reviewsByUser?.length === 0 ? (
+          {!reviewsByUser || reviewsByUser?.length === 0 ? (
             <p className="text-gray-500 text-sm">
               You haven’t written any reviews yet.
             </p>
@@ -207,15 +238,9 @@ export default function Profile() {
                     )}
                   </div>
 
-                  {/* Review Options only visible on hover */}
-                  {/* Review Options */}
                   <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
                     <ReviewOptions
-                      onDelete={async () => {
-                        await deleteReview(r.id);
-                        toast.success("Review deleted ✅");
-                        fetchReviewsByUserID(userID);
-                      }}
+                      onDelete={() => handleDelete(r.id)}
                       onEdit={() => startEditing(r)}
                     />
                   </div>

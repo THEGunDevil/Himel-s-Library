@@ -18,7 +18,7 @@ export default function ReviewOptions({ onDelete, onEdit, disabled }) {
       </button>
 
       {open && (
-        <div className="absolute right-8 top-7 w-32 bg-white border z-10">
+        <div className="absolute right-8 top-0 w-32 bg-white border z-10">
           <button
             onClick={() => {
               onEdit();
