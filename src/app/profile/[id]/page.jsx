@@ -157,13 +157,13 @@ export default function Profile() {
           <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
             <Star size={18} /> My Reviews
           </h2>
-          {reviewsByUser.length === 0 ? (
+          {reviewsByUser?.length === 0 ? (
             <p className="text-gray-500 text-sm">
               You haven’t written any reviews yet.
             </p>
           ) : (
             <div className="divide-y divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
-              {reviewsByUser.map((r) => (
+              {reviewsByUser?.map((r) => (
                 <div
                   key={r.id}
                   className="p-3 flex justify-between items-start group relative"
