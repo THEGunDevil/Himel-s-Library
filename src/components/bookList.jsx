@@ -135,7 +135,7 @@ export default function BookList() {
     <>
       <div className="w-full mx-auto my-1">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold mb-3 text-blue-400">Borrow List</h1>
+          <h1 className="text-3xl font-bold mb-3 text-blue-400">Book List</h1>
           <DownloadOptions
             endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
             page={page}

@@ -76,6 +76,16 @@ export default function DownloadOptions({
           >
             Download <span className="text-blue-500 font-medium">CSV</span>
           </button>
+          <button
+            onClick={() => {
+              handleDownload("xlsx");
+              setOpen(false);
+            }}
+            className="block w-full text-left px-4 cursor-pointer py-2 text-sm hover:bg-gray-50 hover:rounded-b-lg disabled:opacity-50"
+            disabled={disabled}
+          >
+            Download <span className="text-blue-500 font-medium uppercase">xlsx</span>
+          </button>
         </div>
       )}
     </div>
