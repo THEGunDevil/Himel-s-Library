@@ -11,12 +11,22 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/authContext";
 import Loader from "./loader";
 import { useState } from "react";
+import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import DownloadOptions from "./downloadOptions";
 
 const columnHelper = createColumnHelper();
 
 export default function BookList() {
   // ---- hooks -------------------------------------------------
-  const { data: books, loading, error, refetch } = useBookData();
+  const [page, setPage] = useState(1);
+
+  const {
+    data: books,
+    loading,
+    error,
+    refetch,
+    totalPages,
+  } = useBookData({ page });
   const { isAdmin, accessToken } = useAuth();
   const [bookToDelete, setBookToDelete] = useState(null); // store selected book
 
@@ -51,7 +61,13 @@ export default function BookList() {
       toast.error("Failed to copy.");
     }
   };
+  const handleNext = () => {
+    if (page < totalPages) setPage((prev) => prev + 1);
+  };
 
+  const handlePrev = () => {
+    if (page > 1) setPage((prev) => prev - 1);
+  };
   // ---- columns -----------------------------------------------
   const columns = [
     columnHelper.accessor("id", {
@@ -118,8 +134,10 @@ export default function BookList() {
   return (
     <>
       <div className="w-full mx-auto my-1">
-        <h1 className="text-3xl font-bold mb-3 text-blue-400">Book List</h1>
-
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold mb-3 text-blue-400">Borrow List</h1>
+<DownloadOptions/>
+      </div>
         {/* Table Container */}
         <div className="overflow-x-auto border border-gray-200 rounded-lg">
           <div className="max-h-[75vh] overflow-y-auto">
@@ -164,6 +182,26 @@ export default function BookList() {
               </tbody>
             </table>
           </div>
+            <div className="flex justify-center items-center my-5 gap-4">
+              <button
+                onClick={handlePrev}
+                disabled={page === 1}
+                className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
+              >
+                <ArrowLeftIcon className="h-4" />
+                Previous
+              </button>
+              <span className="text-gray-700">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={handleNext}
+                disabled={page === totalPages}
+                className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
+              >
+                Next <ArrowRightIcon className="h-4" />
+              </button>
+            </div>
         </div>
       </div>
 
