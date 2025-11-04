@@ -212,7 +212,12 @@ export default function UserList() {
       <div className="w-full mx-auto mt-1">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold mb-3 text-blue-400">User List</h1>
-          <DownloadOptions />
+          <DownloadOptions
+            endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
+            page={page}
+            limit={20}
+            token={accessToken}
+          />
         </div>
         {/* Scrollable Table Container */}
         <div className="overflow-x-auto border border-gray-200">

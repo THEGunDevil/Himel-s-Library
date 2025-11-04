@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -16,32 +16,30 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/authContext";
 import Loader from "./loader";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import DownloadOptions from "./downloadOptions";
 
 const columnHelper = createColumnHelper();
 
 export default function BorrowList() {
-  // ---- data hooks -------------------------------------------------
   const [page, setPage] = useState(1);
-  const {
-    data: borrows,
-    loading,
-    error,
-    refetch,
-    totalPages,
-  } = useBorrowData();
-  // const { data: borrows, loading, error, refetch } = useBorrowData({page});
+
+  // ---- data hooks -------------------------------------------------
+  const { data, loading, error, refetch } = useBorrowData({ page });
   const { data: users } = useUserData();
   const { data: books } = useBookData();
   const { accessToken } = useAuth();
 
+  // Extract borrows array safely from API response
+  const borrowsArray = Array.isArray(data?.borrows) ? data.borrows : [];
+  const totalPages = data?.total_pages || 1;
+
   // ---- optimistic UI state ----------------------------------------
-  const [optimisticBorrows, setOptimisticBorrows] = useState([]);
-
-  // sync optimistic state when real data changes
+  const [optimisticBorrows, setOptimisticBorrows] = useState(borrowsArray);
   useEffect(() => {
-    setOptimisticBorrows(borrows || []);
-  }, [borrows]);
-
+    if (Array.isArray(data?.borrows)) {
+      setOptimisticBorrows(data.borrows);
+    }
+  }, [data?.borrows]);
   // ---- return handler ---------------------------------------------
   const handleReturn = async (borrowId, bookId) => {
     if (!accessToken) {
@@ -49,7 +47,7 @@ export default function BorrowList() {
       return;
     }
 
-    // 1. optimistic UI
+    // Optimistic UI update
     setOptimisticBorrows((prev) =>
       prev.map((b) =>
         b.id === borrowId ? { ...b, returned_at: new Date().toISOString() } : b
@@ -69,15 +67,15 @@ export default function BorrowList() {
       );
 
       toast.success("Book returned!", { autoClose: 1500 });
-      // 2. real refresh (gets fresh data from server)
-      refetch();
+      refetch(); // refresh real data
     } catch (err) {
       console.error("Return error:", err);
       toast.error("Failed to return book.");
-      // revert optimistic change on error
-      refetch();
+      refetch(); // revert optimistic change
     }
   };
+
+  // ---- pagination handlers ----------------------------------------
   const handleNext = () => {
     if (page < totalPages) setPage((prev) => prev + 1);
   };
@@ -85,9 +83,15 @@ export default function BorrowList() {
   const handlePrev = () => {
     if (page > 1) setPage((prev) => prev - 1);
   };
+
   // ---- combine users + books ---------------------------------------
   const combinedData = useMemo(() => {
-    if (!optimisticBorrows || !users || !books) return [];
+    if (
+      !Array.isArray(optimisticBorrows) ||
+      !Array.isArray(users) ||
+      !Array.isArray(books)
+    )
+      return [];
 
     return optimisticBorrows.map((b) => {
       const user = users.find((u) => u.id === b.user_id) || {};
@@ -98,12 +102,12 @@ export default function BorrowList() {
         user_name: user.first_name
           ? `${user.first_name} ${user.last_name || ""}`
           : "Unknown User",
-        book_title: book.title || "Unknown Book",
+        book_title: book.title || b.book_title || "Unknown Book",
       };
     });
   }, [optimisticBorrows, users, books]);
 
-  // ---- helper: not returned yet ------------------------------------
+  // ---- helper: check if book is returned --------------------------
   const isNotReturned = (returned_at) => {
     if (!returned_at) return true;
     return returned_at.includes("0001-01-01") || returned_at.trim() === "";
@@ -179,8 +183,14 @@ export default function BorrowList() {
     <div className="w-full mx-auto my-1">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold mb-3 text-blue-400">Borrow List</h1>
-        <DownloadOptions />
+        <DownloadOptions
+          endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/borrows`}
+          page={page}
+          limit={20}
+          token={accessToken}
+        />
       </div>
+
       <div className="overflow-x-auto border border-gray-200">
         <div className="max-h-3/4 overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -224,6 +234,7 @@ export default function BorrowList() {
             </tbody>
           </table>
         </div>
+
         <div className="flex justify-center items-center my-5 gap-4">
           <button
             onClick={handlePrev}

@@ -134,10 +134,15 @@ export default function BookList() {
   return (
     <>
       <div className="w-full mx-auto my-1">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold mb-3 text-blue-400">Borrow List</h1>
-<DownloadOptions/>
-      </div>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold mb-3 text-blue-400">Borrow List</h1>
+          <DownloadOptions
+            endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
+            page={page}
+            limit={10}
+            token={accessToken}
+          />
+        </div>
         {/* Table Container */}
         <div className="overflow-x-auto border border-gray-200 rounded-lg">
           <div className="max-h-[75vh] overflow-y-auto">
@@ -182,26 +187,26 @@ export default function BookList() {
               </tbody>
             </table>
           </div>
-            <div className="flex justify-center items-center my-5 gap-4">
-              <button
-                onClick={handlePrev}
-                disabled={page === 1}
-                className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
-              >
-                <ArrowLeftIcon className="h-4" />
-                Previous
-              </button>
-              <span className="text-gray-700">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={handleNext}
-                disabled={page === totalPages}
-                className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
-              >
-                Next <ArrowRightIcon className="h-4" />
-              </button>
-            </div>
+          <div className="flex justify-center items-center my-5 gap-4">
+            <button
+              onClick={handlePrev}
+              disabled={page === 1}
+              className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
+            >
+              <ArrowLeftIcon className="h-4" />
+              Previous
+            </button>
+            <span className="text-gray-700">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              onClick={handleNext}
+              disabled={page === totalPages}
+              className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
+            >
+              Next <ArrowRightIcon className="h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
