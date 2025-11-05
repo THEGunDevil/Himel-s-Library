@@ -24,7 +24,6 @@ export default function Contact() {
       subject: formData.subject,
       message: formData.message,
     };
-
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/contact/send`,
