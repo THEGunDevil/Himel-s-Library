@@ -8,106 +8,35 @@ import {
   createColumnHelper,
 } from "@tanstack/react-table";
 import { useUserData } from "@/hooks/useUserData";
-import { ConvertStringToDate } from "@/utils";
 import Loader from "./loader";
-import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/authContext";
-import axios from "axios";
 import { useForm } from "react-hook-form";
 import { ArrowLeftIcon, ArrowRightIcon, User } from "lucide-react";
 import Link from "next/link";
 import DownloadOptions from "./downloadOptions";
+import { handleBan, handleUnban } from "../../utlis/userActions";
+import { ConvertStringToDate } from "../../utlis/utils";
+
 
 const columnHelper = createColumnHelper();
 
 export default function UserList() {
+  const [page, setPage] = useState(1);
+  const [userBanID, setUserBanID] = useState(null);
+  const [userUnBanID, setUserUnBanID] = useState(null);
+  const { isAdmin, accessToken } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const { data: users, loading, error, refetch, totalPages } = useUserData();
-  // const { data: users, loading, error, refetch } = useUserData({page});
-  const [page, setPage] = useState(1);
-  const [userBanID, setUserBanID] = useState(null);
-  const [userUnBanID, setUserUnBanID] = useState(null);
-  const { isAdmin, accessToken } = useAuth();
-  const handleBan = async (formData) => {
-    if (!userBanID) return;
-    if (!isAdmin || !accessToken) {
-      toast.error("You are not authorized to ban users.");
-      return;
-    }
+  const { data: users, loading, error, refetch, totalPages } = useUserData({ page });
 
-    try {
-      const banUntilDate = formData.ban_until
-        ? new Date(formData.ban_until).toISOString() // convert YYYY-MM-DD → RFC3339
-        : null;
+  // ---- Handlers for pagination ----
+  const handleNext = () => page < totalPages && setPage((prev) => prev + 1);
+  const handlePrev = () => page > 1 && setPage((prev) => prev - 1);
 
-      const isPermanent = !banUntilDate;
-
-      await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/user/ban/${userBanID}`,
-        {
-          is_banned: true,
-          ban_reason: formData.ban_reason,
-          ban_until: banUntilDate, // RFC3339 string or null
-          is_permanent_ban: isPermanent,
-        },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-
-      toast.success("User banned successfully!");
-      setUserBanID(null);
-      refetch();
-    } catch (err) {
-      console.error("Ban error:", err.response?.data || err);
-      toast.error("Failed to ban user.");
-    }
-  };
-
-  const handleUnban = async (userId) => {
-    if (!isAdmin || !accessToken) {
-      toast.error("You are not authorized to unban users.");
-      return;
-    }
-
-    try {
-      await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/user/ban/${userId}`,
-        {
-          is_banned: false,
-          ban_reason: "",
-          ban_until: null,
-          is_permanent_ban: false,
-        },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-      toast.success("User unbanned successfully!");
-      setUserUnBanID(null);
-      refetch(); // Refresh the table
-    } catch (err) {
-      console.error("Unban error:", err);
-      toast.error("Failed to unban user.");
-    }
-  };
-
-  // ---- copy handler ------------------------------------------
-  // const handleCopy = async (text) => {
-  //   try {
-  //     await navigator.clipboard.writeText(text);
-  //     toast.success("Copied to clipboard!", { autoClose: 1000 });
-  //   } catch {
-  //     toast.error("Failed to copy.");
-  //   }
-  // };
-  const handleNext = () => {
-    if (page < totalPages) setPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (page > 1) setPage((prev) => prev - 1);
-  };
+  // ---- Table Columns ----
   const columns = [
     columnHelper.accessor((row) => `${row.first_name} ${row.last_name}`, {
       id: "fullName",
@@ -196,7 +125,29 @@ export default function UserList() {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Loading & Error States
+  // ---- Ban/Unban Handlers ----
+  const onBanSubmit = async (formData) => {
+    await handleBan({
+      userId: userBanID,
+      formData,
+      isAdmin,
+      accessToken,
+      refetch,
+      resetBanID: () => setUserBanID(null),
+    });
+  };
+
+  const onUnbanClick = async (userId) => {
+    await handleUnban({
+      userId,
+      isAdmin,
+      accessToken,
+      refetch,
+      resetUnBanID: () => setUserUnBanID(null),
+    });
+  };
+
+  // ---- Loading/Error States ----
   if (loading) return <Loader />;
   if (error)
     return (
@@ -219,7 +170,7 @@ export default function UserList() {
             token={accessToken}
           />
         </div>
-        {/* Scrollable Table Container */}
+
         <div className="overflow-x-auto border border-gray-200">
           <div className="max-h-96 overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -231,16 +182,12 @@ export default function UserList() {
                         key={header.id}
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        {flexRender(header.column.columnDef.header, header.getContext())}
                       </th>
                     ))}
                   </tr>
                 ))}
               </thead>
-
               <tbody className="bg-white divide-y divide-gray-200">
                 {table.getRowModel().rows.map((row) => (
                   <tr
@@ -252,10 +199,7 @@ export default function UserList() {
                         key={cell.id}
                         className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}
                   </tr>
@@ -263,6 +207,7 @@ export default function UserList() {
               </tbody>
             </table>
           </div>
+
           <div className="flex justify-center items-center my-5 gap-4">
             <button
               onClick={handlePrev}
@@ -285,22 +230,19 @@ export default function UserList() {
           </div>
         </div>
       </div>
+
+      {/* Ban Modal */}
       {userBanID && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <form
-            onSubmit={handleSubmit(handleBan)}
+            onSubmit={handleSubmit(onBanSubmit)}
             className="bg-white rounded-lg p-6 w-80 shadow-lg text-center"
           >
             <h2 className="text-lg font-bold mb-4">Confirm Ban</h2>
-            <p className="mb-4 text-gray-700">
-              Provide details for banning this user.
-            </p>
+            <p className="mb-4 text-gray-700">Provide details for banning this user.</p>
 
-            {/* Ban Reason Input */}
             <div className="mb-4 text-left">
-              <label className="block text-sm font-medium mb-1">
-                Ban Reason
-              </label>
+              <label className="block text-sm font-medium mb-1">Ban Reason</label>
               <input
                 type="text"
                 {...register("ban_reason", {
@@ -311,30 +253,21 @@ export default function UserList() {
                 placeholder="Enter reason..."
               />
               {errors.ban_reason && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.ban_reason.message}
-                </p>
+                <p className="text-red-500 text-sm mt-1">{errors.ban_reason.message}</p>
               )}
             </div>
 
-            {/* Ban Until Input */}
             <div className="mb-6 text-left">
               <label className="block text-sm font-medium mb-1">
                 Ban Until (leave empty for permanent ban)
               </label>
               <input
                 type="date"
-                {...register("ban_until")} // remove `required`
+                {...register("ban_until")}
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              {errors.ban_until && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.ban_until.message}
-                </p>
-              )}
             </div>
 
-            {/* Buttons */}
             <div className="flex justify-center gap-4">
               <button
                 type="submit"
@@ -353,6 +286,8 @@ export default function UserList() {
           </form>
         </div>
       )}
+
+      {/* Unban Modal */}
       {userUnBanID && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white rounded-lg p-6 w-80 shadow-lg text-center">
@@ -361,7 +296,7 @@ export default function UserList() {
 
             <div className="flex justify-center gap-4">
               <button
-                onClick={() => handleUnban(userUnBanID)}
+                onClick={() => onUnbanClick(userUnBanID)}
                 className="px-4 py-2 cursor-pointer bg-red-600 text-white rounded hover:bg-red-700"
               >
                 Yes, Unban

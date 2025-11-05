@@ -55,13 +55,13 @@ export default function DownloadOptions({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-0 w-32 bg-white border border-gray-400 z-50 shadow-lg">
+        <div className="absolute right-12 top-0 bg-white border border-gray-400 z-50 w-fit shadow-lg">
           <button
             onClick={() => {
               handleDownload("pdf");
               setOpen(false);
             }}
-            className="block w-full cursor-pointer text-left px-4 py-2 text-sm hover:bg-gray-50 hover:rounded-t-lg disabled:opacity-50"
+            className="block w-36 cursor-pointer text-left px-4 py-2 text-sm hover:bg-gray-50 hover:rounded-t-lg disabled:opacity-50"
             disabled={disabled}
           >
             Download <span className="text-blue-500 font-medium">PDF</span>
@@ -71,7 +71,7 @@ export default function DownloadOptions({
               handleDownload("csv");
               setOpen(false);
             }}
-            className="block w-full text-left px-4 cursor-pointer py-2 text-sm hover:bg-gray-50 hover:rounded-b-lg disabled:opacity-50"
+            className="block w-36 text-left px-4 cursor-pointer py-2 text-sm hover:bg-gray-50 hover:rounded-b-lg disabled:opacity-50"
             disabled={disabled}
           >
             Download <span className="text-blue-500 font-medium">CSV</span>
@@ -81,7 +81,7 @@ export default function DownloadOptions({
               handleDownload("xlsx");
               setOpen(false);
             }}
-            className="block w-full text-left px-4 cursor-pointer py-2 text-sm hover:bg-gray-50 hover:rounded-b-lg disabled:opacity-50"
+            className="block w-36 text-left px-4 cursor-pointer py-2 text-sm hover:bg-gray-50 hover:rounded-b-lg disabled:opacity-50"
             disabled={disabled}
           >
             Download <span className="text-blue-500 font-medium uppercase">xlsx</span>

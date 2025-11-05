@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/authContext";
 import { useParams } from "next/navigation";
 import { useSingleBookData } from "@/hooks/useSingleBookData";
 import BookReviewSection from "@/components/bookReview";
-import { getDueDate } from "@/utils";
+import { getDueDate } from "../../../../utlis/utils";
 
 export default function Book() {
   const { accessToken } = useAuth();

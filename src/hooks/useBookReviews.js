@@ -134,7 +134,7 @@ export function useBookReviews(bookId) {
     reviewsByUser,
     reviewsByUserError,
     reviewsByUserLoading,
-
+    setReviewsByUser,
     refetch: fetchReviews,
     fetchReviewsByUserID,
   };

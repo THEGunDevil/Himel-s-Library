@@ -2,15 +2,17 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "@/contexts/authContext";
 
-export function useUserData() {
+export function useUserData({page = 1, limit = 10}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { accessToken, isAdmin } = useAuth();
+  const [totalPages, setTotalPages] = useState(1);
 
   // ✅ useCallback makes fetchUsers stable across renders
   const fetchUsers = useCallback(async () => {
     if (!accessToken || !isAdmin) return;
+
     setLoading(true);
     setError(null);
     try {
@@ -21,7 +23,9 @@ export function useUserData() {
         }
       );
       setData(response.data);
+      setTotalPages(response.data?.total_pages ?? 1);      
     } catch (err) {
+      console.error("❌ Failed to fetch books:", err);
       setError(err);
     } finally {
       setLoading(false);
@@ -32,5 +36,5 @@ export function useUserData() {
     fetchUsers();
   }, [fetchUsers]);
 
-  return { data, loading, error, refetch: fetchUsers };
+  return { data, loading, error,totalPages, refetch: fetchUsers };
 }

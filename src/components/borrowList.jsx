@@ -7,7 +7,7 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { ConvertStringToDate } from "@/utils";
+import { ConvertStringToDate } from "../../utlis/utils";
 import { useBorrowData } from "@/hooks/useBorrowData";
 import { useUserData } from "@/hooks/useUserData";
 import { useBookData } from "@/hooks/useBookData";
@@ -24,15 +24,13 @@ export default function BorrowList() {
   const [page, setPage] = useState(1);
 
   // ---- data hooks -------------------------------------------------
-  const { data, loading, error, refetch } = useBorrowData({ page });
-  const { data: users } = useUserData();
+  const { data, loading, error, totalPages, refetch } = useBorrowData({ page });
+  const { data: users } = useUserData({ page }); // Fixed: Pass { page } to useUserData
   const { data: books } = useBookData();
   const { accessToken } = useAuth();
 
   // Extract borrows array safely from API response
   const borrowsArray = Array.isArray(data?.borrows) ? data.borrows : [];
-  const totalPages = data?.total_pages || 1;
-
   // ---- optimistic UI state ----------------------------------------
   const [optimisticBorrows, setOptimisticBorrows] = useState(borrowsArray);
   useEffect(() => {
@@ -178,6 +176,7 @@ export default function BorrowList() {
     );
   if (!combinedData.length)
     return <div className="p-6 text-gray-600">No borrow records found.</div>;
+console.log(data);
 
   return (
     <div className="w-full mx-auto my-1">
