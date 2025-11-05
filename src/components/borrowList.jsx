@@ -176,8 +176,6 @@ export default function BorrowList() {
     );
   if (!combinedData.length)
     return <div className="p-6 text-gray-600">No borrow records found.</div>;
-console.log(data);
-
   return (
     <div className="w-full mx-auto my-1">
       <div className="flex items-center justify-between">

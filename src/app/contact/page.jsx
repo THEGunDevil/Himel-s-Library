@@ -1,21 +1,59 @@
 "use client";
-import { useState } from "react";
+import { useAuth } from "@/contexts/authContext";
+import axios from "axios";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const { accessToken } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const [sending, setSending] = useState(false);
+  const onSubmit = async (formData) => {
+    setSending(true);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(form);
-    alert("Thanks for reaching out! We'll get back to you soon.");
-    setForm({ name: "", email: "", message: "" });
+    // Map frontend form fields to backend field names
+    const data = {
+      name: formData.user_name,
+      email: formData.user_email,
+      subject: formData.subject,
+      message: formData.message,
+    };
+
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/contact/send`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      toast.success("Email sent successfully");
+    } catch (error) {
+      toast.error("There was an issue sending the email");
+      console.error(
+        "❌There was an issue sending the email:",
+        error.response?.data || error.message
+      );
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
     <section className="md:pt-36 pt-32 min-h-screen flex flex-col items-center justify-center px-6 py-20 text-gray-800">
       <div className="max-w-3xl w-full text-center space-y-10">
-        <h1 className="text-4xl text-blue-400 md:text-5xl font-bold">Contact Us</h1>
+        <h1 className="text-4xl text-blue-400 md:text-5xl font-bold">
+          Contact Us
+        </h1>
         <p className="text-lg">
           Have a question, suggestion, or feedback? We’d love to hear from you.
         </p>
@@ -39,43 +77,65 @@ export default function Contact() {
 
           {/* Contact Form */}
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col space-y-4 p-6 shadow-md transition-all hover:shadow-lg"
           >
             <input
+              type="text"
               placeholder="Your Name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
+              {...register("user_name", { required: "name is required" })}
               className="w-full bg-transparent border-b-2 border-gray-300 dark:border-gray-600 
     focus:border-blue-500 focus:ring-0 focus:outline-none transition-colors duration-300 py-2 text-sm md:text-base"
             />
-
+            {errors.user_name && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.user_name.message}
+              </p>
+            )}
+            <input
+              type="text"
+              placeholder="Subject"
+              {...register("subject", { required: "Subject is required" })}
+              className="w-full bg-transparent border-b-2 border-gray-300 dark:border-gray-600 
+    focus:border-blue-500 focus:ring-0 focus:outline-none transition-colors duration-300 py-2 text-sm md:text-base"
+            />
+            {errors.subject && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.subject.message}
+              </p>
+            )}
             <input
               type="email"
               placeholder="Your Email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
+              {...register("user_email", {
+                required: "email is required",
+                pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
+              })}
               className="w-full bg-transparent border-b-2 border-gray-300 dark:border-gray-600 
     focus:border-blue-500 focus:ring-0 focus:outline-none transition-colors duration-300 py-2 text-sm md:text-base"
-            />
-
+            />{" "}
+            {errors.user_email && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.user_email.message}
+              </p>
+            )}
             <textarea
               placeholder="Your Message"
               rows={4}
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              required
+              {...register("message", { required: "message is required" })}
               className="w-full bg-transparent border-b-2 border-gray-300 dark:border-gray-600 
     focus:border-blue-500 focus:ring-0 focus:outline-none transition-colors duration-300 py-2 resize-none text-sm md:text-base"
             />
-
+            {errors.message && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.message.message}
+              </p>
+            )}
             <button
               type="submit"
               className="mt-2 cursor-pointer bg-primary py-2 rounded-lg hover:opacity-90 transition-all duration-200"
             >
-              Send Message
+              {sending ? "Sending Email" : "Send Email"}
             </button>
           </form>
         </div>

@@ -11,9 +11,9 @@ import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import ReviewOptions from "./dropDownMenu";
 import { useBookReviews } from "@/hooks/useBookReviews";
 import axios from "axios";
+import Options from "./options";
 
 export default function BookReviewSection({ bookId }) {
   const { accessToken } = useAuth();
@@ -25,13 +25,11 @@ export default function BookReviewSection({ bookId }) {
     fetchError: reviewsError,
     deleteReview,
     updateReview,
-    refetch,
   } = useBookReviews(bookId);
 
   const [localReviews, setLocalReviews] = useState([]);
   const [editingReviewId, setEditingReviewId] = useState(null);
 
-  // Sync local state whenever reviews change
   useEffect(() => {
     if (reviews) setLocalReviews(reviews);
   }, [reviews]);
@@ -46,7 +44,7 @@ export default function BookReviewSection({ bookId }) {
     formState: { errors },
   } = useForm({ defaultValues: { comment: "", rating: 0 } });
 
-  // Edit form
+  // Edit review form
   const {
     register: registerEdit,
     handleSubmit: handleSubmitEdit,
@@ -79,12 +77,9 @@ export default function BookReviewSection({ bookId }) {
           comment: data.comment,
           rating: data.rating,
         },
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      // Add new review to local state for instant UI update
       setLocalReviews((prev) => [...prev, res.data]);
       toast.success("Review posted ✅");
       reset();
@@ -97,7 +92,6 @@ export default function BookReviewSection({ bookId }) {
     }
   };
 
-  // Start editing
   const startEditing = (review) => {
     setEditingReviewId(review.id);
     setEditValue("comment", review.comment);
@@ -105,13 +99,11 @@ export default function BookReviewSection({ bookId }) {
     setEditError(null);
   };
 
-  // Cancel editing
   const cancelEditing = () => {
     setEditingReviewId(null);
     resetEdit();
   };
 
-  // Submit edit
   const onEditSubmit = async (data) => {
     if (!editingReviewId) return;
 
@@ -124,7 +116,6 @@ export default function BookReviewSection({ bookId }) {
         rating: data.rating,
       });
 
-      // Instant UI update
       setLocalReviews((prev) =>
         prev.map((r) =>
           r.id === editingReviewId
@@ -141,6 +132,19 @@ export default function BookReviewSection({ bookId }) {
       toast.error("Failed to update review ❌");
     } finally {
       setEditSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (reviewId) => {
+    if (!accessToken) return;
+
+    try {
+      await deleteReview(reviewId, accessToken);
+      setLocalReviews((prev) => prev.filter((r) => r.id !== reviewId));
+      toast.success("Review deleted ✅");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete review ❌");
     }
   };
 
@@ -204,10 +208,9 @@ export default function BookReviewSection({ bookId }) {
             />
             <div className="flex items-center gap-3">
               <p className="text-sm text-gray-500">
-                {localReviews ? localReviews.length : 0} review
-                {localReviews && localReviews.length !== 1 ? "s" : ""}
+                {localReviews.length} review
+                {localReviews.length !== 1 ? "s" : ""}
               </p>
-
               <button
                 type="submit"
                 disabled={submitting || editingReviewId}
@@ -228,7 +231,7 @@ export default function BookReviewSection({ bookId }) {
       )}
 
       <div className="divide-y divide-gray-200 w-full max-h-96 overflow-y-auto scrollbar-hide">
-        {localReviews?.length === 0 && !reviewsLoading ? (
+        {localReviews.length === 0 && !reviewsLoading ? (
           reviewsError ? (
             <p className="text-center text-red-500">Failed to load reviews.</p>
           ) : (
@@ -237,44 +240,38 @@ export default function BookReviewSection({ bookId }) {
             </p>
           )
         ) : (
-          localReviews?.map((r) => (
+          localReviews.map((r) => (
             <article
               key={r.id}
-              className="py-4 relative group hover:bg-gray-300 transition-colors duration-200"
+              className="group relative py-6 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-200"
             >
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <Avatar name={r.user_name} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-gray-800">
-                        {r.user_name}
-                      </h3>
-                      <div className="text-xs text-gray-400">
-                        {ConvertStringToDate(r.created_at)}
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+                <div className="w-full">
+                  <div className="relative flex flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                    <div className="flex items-center gap-2">
+                      <Avatar name={r.user_name} />
+                      <div className="flex flex-col">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                          {r.user_name}
+                        </h3>
+                        <span className="text-xs text-gray-500">
+                          {ConvertStringToDate(r.created_at)}
+                        </span>
+                        <div className="mt-1">
+                          <StarDisplay rating={r.rating} />
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between w-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
-                      <StarDisplay rating={r.rating} />
-                      <ReviewOptions
-                        onDelete={async () => {
-                          await deleteReview(r.id);
-                          toast.success("Review deleted ✅");
-                          setLocalReviews((prev) =>
-                            prev.filter((rev) => rev.id !== r.id)
-                          );
-                        }}
-                        onEdit={() => startEditing(r)}
-                      />
-                    </div>
+                    <Options
+                      onDelete={() => handleDelete(r.id)}
+                      onEdit={() => startEditing(r)}
+                    />
                   </div>
 
                   {editingReviewId === r.id ? (
                     <form
                       onSubmit={handleSubmitEdit(onEditSubmit)}
-                      className="mt-4 w-full space-y-4"
+                      className="mt-4 space-y-4"
                     >
                       <textarea
                         {...registerEdit("comment", {
@@ -282,33 +279,29 @@ export default function BookReviewSection({ bookId }) {
                         })}
                         rows={3}
                         maxLength={1000}
-                        className="mt-1 w-full p-3 border border-gray-300 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
+                        className="w-full p-3 border border-gray-200 rounded-md text-gray-800 focus:outline-none focus:border-blue-400 resize-none transition-colors duration-200"
+                        placeholder="Edit your review..."
                       />
                       {editErrors.comment && (
                         <p className="text-sm text-red-600 mt-1">
                           {editErrors.comment.message}
                         </p>
                       )}
-
                       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <StarRating
-                          rating={editRating}
-                          setRating={(val) => setEditValue("rating", val)}
-                        />
                         <div className="flex items-center gap-3">
                           <button
                             type="button"
                             onClick={cancelEditing}
-                            className="px-5 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                            className="sm:px-4 px-2 sm:py-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 text-sm"
                           >
                             Cancel
                           </button>
                           <button
                             type="submit"
                             disabled={editSubmitting}
-                            className="px-5 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                            className="sm:px-4 px-2 sm:py-2 py-1 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm duration-200"
                           >
-                            {editSubmitting ? "Saving..." : "Save changes"}
+                            {editSubmitting ? "Saving..." : "Save Changes"}
                           </button>
                         </div>
                       </div>
@@ -319,7 +312,7 @@ export default function BookReviewSection({ bookId }) {
                       )}
                     </form>
                   ) : (
-                    <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    <p className="mt-3 text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
                       {r.comment}
                     </p>
                   )}

@@ -8,13 +8,19 @@ import {
   ConvertStringToDate,
   StarRating,
 } from "../../../../utlis/utils";
-import { toast } from "react-toastify";
-import ReviewOptions from "@/components/dropDownMenu";
 import { useAuth } from "@/contexts/authContext";
 import { useBookReviews } from "@/hooks/useBookReviews";
 import Loader from "@/components/loader";
-import { handleBan, handleUnban } from "../../../../utlis/userActions";
+import {
+  handleBan,
+  handleUnban,
+  handleDeleteBio,
+  handleEditSubmit,
+  handleDelete,
+} from "../../../../utlis/userActions";
 import { useForm } from "react-hook-form";
+import Options from "@/components/options";
+import axios from "axios";
 
 export default function Profile() {
   const { id: userID } = useParams();
@@ -28,6 +34,8 @@ export default function Profile() {
   const [editingReviewId, setEditingReviewId] = useState(null);
   const [editedComment, setEditedComment] = useState("");
   const [editedRating, setEditedRating] = useState(0);
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [editedBio, setEditedBio] = useState("");
   const [userBanID, setUserBanID] = useState(null);
   const [userUnBanID, setUserUnBanID] = useState(null);
 
@@ -41,8 +49,8 @@ export default function Profile() {
     reviewsByUser,
     fetchReviewsByUserID,
     deleteReview,
-    updateReview,
     setReviewsByUser,
+    updateReview,
   } = useBookReviews();
 
   // Redirect if no access token
@@ -52,23 +60,21 @@ export default function Profile() {
     }
   }, [accessToken, router]);
 
-  // Fetch user profile
+  // Fetch user profile with Axios
   useEffect(() => {
     if (!userID || !accessToken) return;
 
     const fetchProfile = async () => {
       setProfileLoading(true);
       try {
-        const res = await fetch(
+        const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/users/user/profile/${userID}`,
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );
-        if (!res.ok) throw new Error("Failed to fetch profile");
-        const data = await res.json();
-        setProfile(data);
+        setProfile(res.data);
       } catch (err) {
-        console.error("Profile fetch error:", err);
-        setProfileError(err.message);
+        console.error("Profile fetch error:", err.response?.data || err);
+        setProfileError(err.response?.data?.error || "Failed to fetch profile");
       } finally {
         setProfileLoading(false);
       }
@@ -83,7 +89,16 @@ export default function Profile() {
     fetchReviewsByUserID(userID);
   }, [userID, accessToken, fetchReviewsByUserID]);
 
-  // Review editing handlers
+  const startEditingBio = (user) => {
+    setEditingUserId(user.id);
+    setEditedBio(user.bio || "");
+  };
+
+  const cancelEditingBio = () => {
+    setEditingUserId(null);
+    setEditedBio("");
+  };
+
   const startEditing = (review) => {
     setEditingReviewId(review.id);
     setEditedComment(review.comment);
@@ -96,47 +111,6 @@ export default function Profile() {
     setEditedRating(0);
   };
 
-  const handleEditSubmit = async (reviewId) => {
-    try {
-      const updatedReview = {
-        ...reviewsByUser.find((r) => r.id === reviewId),
-        comment: editedComment,
-        rating: editedRating,
-      };
-
-      // Optimistic UI update
-      setReviewsByUser((prev) =>
-        prev.map((r) => (r.id === reviewId ? updatedReview : r))
-      );
-
-      await updateReview(reviewId, {
-        comment: editedComment,
-        rating: editedRating,
-      });
-      toast.success("Review updated ✅");
-      cancelEditing();
-    } catch {
-      toast.error("Failed to update review ❌");
-      setReviewsByUser([...reviewsByUser]);
-    }
-  };
-
-  const handleDelete = async (reviewId) => {
-    const originalReviews = [...reviewsByUser];
-
-    try {
-      setReviewsByUser((prev) => prev.filter((r) => r.id !== reviewId));
-
-      await deleteReview(reviewId);
-
-      toast.success("Review deleted ✅");
-    } catch (err) {
-      console.error("Delete review error:", err);
-      setReviewsByUser(originalReviews);
-      toast.error("Failed to delete review ❌");
-    }
-  };
-
   const handleLogout = () => {
     logout();
     setLogoutDialogOpen(false);
@@ -147,24 +121,18 @@ export default function Profile() {
     if (!profile?.user?.[0]) return;
 
     const originalProfile = JSON.parse(JSON.stringify(profile));
-
-    setProfile((prev) => {
-      if (!prev?.user?.[0]) return prev;
-      return {
-        ...prev,
-        user: [
-          {
-            ...prev.user[0],
-            is_banned: true,
-            ban_reason: formData.ban_reason,
-            ban_until: formData.ban_until || null,
-            is_permanent_ban: !formData.ban_until,
-          },
-        ],
-      };
-    });
-
-    setUserBanID(null)
+    setProfile((prev) => ({
+      ...prev,
+      user: [
+        {
+          ...prev.user[0],
+          is_banned: true,
+          ban_reason: formData.ban_reason,
+          ban_until: formData.ban_until || null,
+          is_permanent_ban: !formData.ban_until,
+        },
+      ],
+    }));
 
     try {
       await handleBan({
@@ -172,12 +140,17 @@ export default function Profile() {
         formData,
         isAdmin,
         accessToken,
+        refetch: async () => {
+          const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/users/user/profile/${userID}`,
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+          );
+          setProfile(res.data);
+        },
+        resetBanID: () => setUserBanID(null),
       });
-      toast.success("User banned successfully ✅");
     } catch (err) {
-      console.error("Ban error:", err);
       setProfile(originalProfile);
-      toast.error("Failed to ban user ❌");
     }
   };
 
@@ -185,33 +158,34 @@ export default function Profile() {
     if (!profile?.user?.[0]) return;
 
     const originalProfile = JSON.parse(JSON.stringify(profile));
-
-    setProfile((prev) => {
-      if (!prev?.user?.[0]) return prev;
-      return {
-        ...prev,
-        user: [
-          {
-            ...prev.user[0],
-            is_banned: false,
-            ban_reason: null,
-            ban_until: null,
-            is_permanent_ban: false,
-          },
-        ],
-      };
-    });
-
-    setUserUnBanID(null);
+    setProfile((prev) => ({
+      ...prev,
+      user: [
+        {
+          ...prev.user[0],
+          is_banned: false,
+          ban_reason: null,
+          ban_until: null,
+          is_permanent_ban: false,
+        },
+      ],
+    }));
 
     try {
       await handleUnban({
         userId,
         isAdmin,
         accessToken,
+        refetch: async () => {
+          const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/users/user/profile/${userID}`,
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+          );
+          setProfile(res.data);
+        },
+        resetUnBanID: () => setUserUnBanID(null),
       });
     } catch (err) {
-      console.error("Unban error:", err);
       setProfile(originalProfile);
     }
   };
@@ -238,221 +212,283 @@ export default function Profile() {
   const borrowsByUser = profile.borrows || [];
 
   return (
-    <>
-      <div className="w-full md:pt-36 pt-32 mx-auto p-6 space-y-6 xl:px-60 lg:px-30 px-4">
-        <div className="bg-white rounded-lg p-6 mb-8 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 w-full">
-              <div className="p-4 bg-indigo-100 rounded-full">
-                <Avatar name={profile.user_name} className="h-12 w-12" />
-              </div>
-
-              <div className="flex justify-between items-center w-full">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-semibold text-gray-800">
-                      {profile.user_name}
-                    </h1>
-
-                    {user.role === "admin" ? (
-                      <span className="px-2 py-1 text-xs font-medium text-white bg-indigo-600 rounded-full">
-                        Admin
-                      </span>
-                    ) : (
-                      <span
-                        className={`px-2 py-1 text-xs font-medium text-white rounded-full ${
-                          user.is_banned ? "bg-red-500" : "bg-green-500"
-                        }`}
-                      >
-                        {user.is_banned ? "Banned" : "Member"}
-                      </span>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="text-gray-500 text-sm mt-1">
-                      Email: {user.email || "N/A"}
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      Phone: {user.phone_number || "N/A"}
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      Joined on {ConvertStringToDate(user.created_at)}
-                    </p>
-                  </div>
+    <div className="w-full md:pt-36 pt-32 mx-auto p-6 space-y-6 xl:px-60 lg:px-30 px-4">
+      <div className="bg-white rounded-lg p-6 mb-8 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 w-full">
+            <div className="p-4 bg-indigo-100 rounded-full">
+              <Avatar name={profile.user_name} className="h-12 w-12" />
+            </div>
+            <div className="flex justify-between items-center w-full">
+              <div>
+                <div className="flex md:flex-row flex-col md:items-center gap-2">
+                  <h1 className="text-2xl font-semibold text-gray-800">
+                    {profile.user_name}
+                  </h1>
+                  {user.role === "admin" ? (
+                    <span className="px-2 py-1 w-fit text-xs font-medium text-white bg-indigo-600 rounded-full">
+                      Admin
+                    </span>
+                  ) : (
+                    <span
+                      className={`px-2 py-1 text-xs font-medium text-white rounded-full ${
+                        user.is_banned ? "bg-red-500" : "bg-green-500"
+                      }`}
+                    >
+                      {user.is_banned ? "Banned" : "Member"}
+                    </span>
+                  )}
                 </div>
-
-                {isAdmin && uID !== userID && (
-                  <div className="mt-2 text-right text-lg">
-                    {user.is_banned && (
-                      <p className="text-red-500 font-medium">
-                        Reason: {user.ban_reason || "No reason provided"}
-                      </p>
-                    )}
-                    {user.is_permanent_ban ? (
-                      <p className="text-red-500 text-sm">Permanent Ban</p>
-                    ) : user.ban_until &&
-                      user.ban_until !== "0001-01-01T00:00:00Z" ? (
-                      (() => {
-                        const banEnd = new Date(user.ban_until);
-                        const now = new Date();
-                        const daysLeft = Math.ceil(
-                          (banEnd - now) / (1000 * 60 * 60 * 24)
-                        );
-                        return (
-                          <p className="text-red-500 text-sm">
-                            Banned until: {ConvertStringToDate(user.ban_until)}{" "}
-                            (
-                            {daysLeft > 0
-                              ? `${daysLeft} day${
-                                  daysLeft === 1 ? "" : "s"
-                                } remaining`
-                              : "Expired"}
-                            )
-                          </p>
-                        );
-                      })()
-                    ) : null}
-                    {user.is_banned ? (
-                      <button
-                        onClick={() => setUserUnBanID(user.id)}
-                        className="px-3 py-1 mt-3 cursor-pointer bg-green-500 text-white text-md rounded hover:bg-green-600 transition-colors duration-200"
-                      >
-                        Unban
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setUserBanID(user.id)}
-                        className="px-3 py-1 mt-3 cursor-pointer bg-red-500 text-white text-md rounded hover:bg-red-600 transition-colors duration-200"
-                      >
-                        Ban
-                      </button>
-                    )}
-                  </div>
+                <p className="text-gray-500 text-sm mt-1">
+                  Email: {user.email || "N/A"}
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Phone: {user.phone_number || "N/A"}
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Joined on {ConvertStringToDate(user.created_at)}
+                </p>
+                {uID === userID && (
+                  <button
+                    onClick={() => setLogoutDialogOpen(true)}
+                    className="flex sm:hidden items-center gap-2 bg-indigo-600 text-sm hover:bg-indigo-700 text-white px-2 py-2 font-semibold transition duration-200 mt-2.5"
+                  >
+                    <LogOut size={18} /> Logout
+                  </button>
                 )}
               </div>
+              {isAdmin && uID !== userID && (
+                <div className="mt-2 text-right text-lg">
+                  {user.is_banned && (
+                    <p className="text-red-500 font-medium">
+                      Reason: {user.ban_reason || "No reason provided"}
+                    </p>
+                  )}
+                  {user.is_permanent_ban ? (
+                    <p className="text-red-500 text-sm">Permanent Ban</p>
+                  ) : user.ban_until &&
+                    user.ban_until !== "0001-01-01T00:00:00Z" ? (
+                    (() => {
+                      const banEnd = new Date(user.ban_until);
+                      const now = new Date();
+                      const daysLeft = Math.ceil(
+                        (banEnd - now) / (1000 * 60 * 60 * 24)
+                      );
+                      return (
+                        <p className="text-red-500 text-sm">
+                          Banned until: {ConvertStringToDate(user.ban_until)} (
+                          {daysLeft > 0
+                            ? `${daysLeft} day${
+                                daysLeft === 1 ? "" : "s"
+                              } remaining`
+                            : "Expired"}
+                          )
+                        </p>
+                      );
+                    })()
+                  ) : null}
+                  {user.is_banned ? (
+                    <button
+                      onClick={() => setUserUnBanID(user.id)}
+                      className="px-3 py-1 mt-3 cursor-pointer bg-green-500 text-white text-md rounded hover:bg-green-600 transition-colors duration-200"
+                    >
+                      Unban
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setUserBanID(user.id)}
+                      className="px-3 py-1 mt-3 cursor-pointer bg-red-500 text-white text-md rounded hover:bg-red-600 transition-colors duration-200"
+                    >
+                      Ban
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-
-            {uID === userID && (
-              <button
-                onClick={() => setLogoutDialogOpen(true)}
-                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200"
-              >
-                <LogOut size={18} /> Logout
-              </button>
-            )}
           </div>
+          {uID === userID && (
+            <button
+              onClick={() => setLogoutDialogOpen(true)}
+              className="sm:flex hidden items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 font-semibold transition duration-200"
+            >
+              <LogOut size={18} /> Logout
+            </button>
+          )}
         </div>
+      </div>
 
-        <section className="bg-white rounded-lg p-6 shadow-sm">
+      <section className="bg-white rounded-lg p-6 shadow-sm">
+        <div className="flex justify-between group">
           <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
             <User size={18} /> Bio
           </h2>
-          {user.bio ? (
-            <p className="text-gray-700 text-sm leading-relaxed">{user.bio}</p>
-          ) : (
-            <p className="text-gray-500 text-sm italic">
-              No bio available. Add a short introduction about yourself!
-            </p>
-          )}
-        </section>
-
-        <section>
-          <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
-            <BookOpen size={18} /> Borrowed Books
-          </h2>
-          {borrowsByUser.length === 0 ? (
-            <p className="text-gray-500 text-sm">No borrowed books yet.</p>
-          ) : (
-            <div className="divide-y divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
-              {borrowsByUser.map((b) => (
-                <div
-                  key={b.id}
-                  className="p-3 flex justify-between items-center"
-                >
-                  <span>{b.book_title}</span>
-                  <div className="text-sm text-gray-500 flex flex-col">
-                    <span>Borrowed: {ConvertStringToDate(b.borrowed_at)}</span>
-                    <span>
-                      Returned:{" "}
-                      {b.returned_at === null
-                        ? "NOT RETURNED"
-                        : ConvertStringToDate(b.returned_at)}
-                    </span>
-                  </div>
-                </div>
-              ))}
+          <Options
+            onDelete={async () => {
+              await handleDelete({
+                type: "bio",
+                userId: user.id,
+                isAdmin,
+                accessToken,
+                refetch: async () => {
+                  const res = await axios.get(
+                    `${process.env.NEXT_PUBLIC_API_URL}/users/user/profile/${userID}`,
+                    { headers: { Authorization: `Bearer ${accessToken}` } }
+                  );
+                  setProfile(res.data);
+                },
+                setProfile,
+              });
+            }}
+            onEdit={() => startEditingBio(user)}
+          />
+        </div>
+        {editingUserId === user.id ? (
+          <div className="mt-2 space-y-2">
+            <textarea
+              rows={3}
+              value={editedBio}
+              onChange={(e) => setEditedBio(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={cancelEditingBio}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() =>
+                  handleEditSubmit({
+                    userId: user.id,
+                    editedBio,
+                    setProfile,
+                    accessToken,
+                    cancelEditing: cancelEditingBio,
+                  })
+                }
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Save
+              </button>
             </div>
-          )}
-        </section>
+          </div>
+        ) : user.bio ? (
+          <p className="text-gray-700 text-sm leading-relaxed">{user.bio}</p>
+        ) : (
+          <p className="text-gray-500 text-sm italic">
+            No bio available. Add a short introduction about yourself!
+          </p>
+        )}
+      </section>
 
-        <section>
-          <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
-            <Star size={18} /> My Reviews
-          </h2>
+      <section>
+        <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
+          <BookOpen size={18} /> Borrowed Books
+        </h2>
+        {borrowsByUser.length === 0 ? (
+          <p className="text-gray-500 text-sm">No borrowed books yet.</p>
+        ) : (
+          <div className="divide-y divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
+            {borrowsByUser.map((b) => (
+              <div key={b.id} className="p-3 flex justify-between items-center">
+                <span>{b.book_title}</span>
+                <div className="text-sm text-gray-500 flex flex-col">
+                  <span>Borrowed: {ConvertStringToDate(b.borrowed_at)}</span>
+                  <span>
+                    Returned:{" "}
+                    {b.returned_at === null
+                      ? "NOT RETURNED"
+                      : ConvertStringToDate(b.returned_at)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
-          {!reviewsByUser || reviewsByUser.length === 0 ? (
-            <p className="text-gray-500 text-sm">
-              You haven’t written any reviews yet.
-            </p>
-          ) : (
-            <div className="divide-y divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
-              {reviewsByUser.map((r) => (
-                <div
-                  key={r.id}
-                  className="p-3 flex justify-between items-start group relative"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium">{r.book_title}</p>
-                    <p className="text-sm text-yellow-500">
-                      {"★".repeat(r.rating)}
-                      {"☆".repeat(5 - r.rating)}
-                    </p>
-
-                    {editingReviewId === r.id ? (
-                      <div className="mt-2 space-y-2">
-                        <textarea
-                          rows={3}
-                          value={editedComment}
-                          onChange={(e) => setEditedComment(e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
-                        />
-                        <StarRating
-                          rating={editedRating}
-                          setRating={setEditedRating}
-                        />
-                        <div className="flex gap-2 mt-2">
-                          <button
-                            onClick={cancelEditing}
-                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => handleEditSubmit(r.id)}
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                          >
-                            Save
-                          </button>
-                        </div>
+      <section>
+        <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
+          <Star size={18} /> My Reviews
+        </h2>
+        {!reviewsByUser || reviewsByUser.length === 0 ? (
+          <p className="text-gray-500 text-sm">
+            You haven’t written any reviews yet.
+          </p>
+        ) : (
+          <div className="divide-y divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
+            {reviewsByUser.map((r) => (
+              <div
+                key={r.id}
+                className="p-3 flex justify-between items-start group relative"
+              >
+                <div className="flex-1">
+                  <p className="font-medium">{r.book_title}</p>
+                  <p className="text-sm text-yellow-500">
+                    {"★".repeat(r.rating)}
+                    {"☆".repeat(5 - r.rating)}
+                  </p>
+                  {editingReviewId === r.id ? (
+                    <div className="mt-2 space-y-2">
+                      <textarea
+                        rows={3}
+                        value={editedComment}
+                        onChange={(e) => setEditedComment(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      />
+                      <StarRating
+                        rating={editedRating}
+                        setRating={setEditedRating}
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={cancelEditing}
+                          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleEditSubmit({
+                              reviewId: r.id,
+                              editedComment,
+                              editedRating,
+                              reviewsByUser,
+                              setReviewsByUser,
+                              updateReview,
+                              cancelEditing,
+                            })
+                          }
+                          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        >
+                          Save
+                        </button>
                       </div>
-                    ) : (
-                      <p className="text-gray-600 text-sm mt-1">{r.comment}</p>
-                    )}
-                  </div>
-
-                  <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
-                    <ReviewOptions
-                      onDelete={() => handleDelete(r.id)}
-                      onEdit={() => startEditing(r)}
-                    />
-                  </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-600 text-sm mt-1">{r.comment}</p>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+                <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+                  <Options
+                    onDelete={async () => {
+                      await handleDelete({
+                        type: "review",
+                        reviewId: r.id,
+                        reviewsByUser,
+                        setReviewsByUser,
+                        deleteReview, // from useBookReviews hook
+                      });
+                    }}
+                    onEdit={() => startEditing(r)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Logout Dialog */}
       {logoutDialogOpen && (
@@ -478,6 +514,7 @@ export default function Profile() {
         </div>
       )}
 
+      {/* Unban Dialog */}
       {userUnBanID && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white rounded-lg p-6 w-80 shadow-lg text-center">
@@ -501,6 +538,7 @@ export default function Profile() {
         </div>
       )}
 
+      {/* Ban Dialog */}
       {userBanID && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <form
@@ -511,7 +549,6 @@ export default function Profile() {
             <p className="mb-4 text-gray-700">
               Provide details for banning this user.
             </p>
-
             <div className="mb-4 text-left">
               <label className="block text-sm font-medium mb-1">
                 Ban Reason
@@ -531,7 +568,6 @@ export default function Profile() {
                 </p>
               )}
             </div>
-
             <div className="mb-6 text-left">
               <label className="block text-sm font-medium mb-1">
                 Ban Until (leave empty for permanent ban)
@@ -542,7 +578,6 @@ export default function Profile() {
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
             <div className="flex justify-center gap-4">
               <button
                 type="submit"
@@ -561,6 +596,6 @@ export default function Profile() {
           </form>
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -35,6 +35,5 @@ export function useUserData({page = 1, limit = 10}) {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-
   return { data, loading, error,totalPages, refetch: fetchUsers };
 }
