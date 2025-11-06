@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [userID, setUserID] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userEmail, setUserEmail] = useState(null);
 
   const login = (token) => {
     setAccessToken(token);
@@ -43,24 +44,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Initialize auth on page load
-useEffect(() => {
-  const initAuth = async () => {
-    try {
-      const token = await refreshToken(); // sends cookie
-      if (token) {
-        const decoded = jwtDecode(token);
-        setUserID(decoded.sub);
-        setIsAdmin(decoded.role === "admin");
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const token = await refreshToken(); // sends cookie
+        if (token) {
+          const decoded = jwtDecode(token);
+          setUserID(decoded.sub);
+          setIsAdmin(decoded.role === "admin");
+        }
+      } catch {
+        setAccessToken(null);
+        setUserID(null);
+        setIsAdmin(false);
       }
-    } catch {
-      setAccessToken(null);
-      setUserID(null);
-      setIsAdmin(false);
-    }
-  };
-  initAuth();
-}, []);
+    };
+    initAuth();
+  }, []);
 
+  useEffect(() => {});
 
   const logout = async () => {
     setAccessToken(null);
