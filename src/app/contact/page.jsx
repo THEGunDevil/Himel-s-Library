@@ -7,12 +7,13 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 export default function Contact() {
-  const { accessToken } = useAuth();
+  const { accessToken, userEmail, emailLoading, emailError } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
+
   const [sending, setSending] = useState(false);
   const onSubmit = async (formData) => {
     setSending(true);
@@ -104,14 +105,16 @@ export default function Contact() {
               </p>
             )}
             <input
+              disabled={userEmail}
               type="email"
               placeholder="Your Email"
+              defaultValue={userEmail}
               {...register("user_email", {
                 required: "email is required",
                 pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
               })}
-              className="w-full bg-transparent border-b-2 border-gray-300 dark:border-gray-600 
-    focus:border-blue-500 focus:ring-0 focus:outline-none transition-colors duration-300 py-2 text-sm md:text-base"
+              className="w-full bg-transparent cursor-not-allowed border-b-2 border-gray-300 dark:border-gray-600 
+    focus:border-blue-500 focus:ring-0 text-gray-500 focus:outline-none transition-colors duration-300 py-2 text-sm md:text-base"
             />{" "}
             {errors.user_email && (
               <p className="text-red-500 text-sm mt-1">

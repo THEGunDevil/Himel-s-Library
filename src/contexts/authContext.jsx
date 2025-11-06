@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { useSingleUserData } from "@/hooks/useSingleUserData";
 
 const AuthContext = createContext();
 
@@ -9,8 +10,12 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [userID, setUserID] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const {
+    data,
+    loading: emailLoading,
+    error: emailError,
+  } = useSingleUserData(userID,accessToken);
   const [userEmail, setUserEmail] = useState(null);
-
   const login = (token) => {
     setAccessToken(token);
   };
@@ -62,7 +67,10 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  useEffect(() => {});
+useEffect(() => {
+  if (!accessToken || !userID || !data) return;
+  setUserEmail(data.email);
+}, [accessToken, userID, data]);
 
   const logout = async () => {
     setAccessToken(null);
@@ -81,7 +89,17 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ accessToken, login, logout, isAdmin, userID, refreshToken }}
+      value={{
+        accessToken,
+        login,
+        logout,
+        isAdmin,
+        userID,
+        refreshToken,
+        userEmail,
+        emailLoading,
+        emailError,
+      }}
     >
       {children}
     </AuthContext.Provider>
