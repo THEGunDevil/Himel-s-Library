@@ -1,8 +1,8 @@
 "use client";
 import { useAuth } from "@/contexts/authContext";
 import axios from "axios";
-import { Mail, Phone, MapPin } from "lucide-react";
-import { useState } from "react";
+import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -11,6 +11,7 @@ export default function Contact() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -47,7 +48,11 @@ export default function Contact() {
       setSending(false);
     }
   };
-
+  useEffect(() => {
+    if (userEmail) {
+      setValue("user_email", userEmail);
+    }
+  }, [userEmail, setValue]);
   return (
     <section className="md:pt-36 pt-32 min-h-screen flex flex-col items-center justify-center px-6 py-20 text-gray-800">
       <div className="max-w-3xl w-full text-center space-y-10">
@@ -105,7 +110,7 @@ export default function Contact() {
               </p>
             )}
             <input
-              disabled={userEmail}
+              disabled={!!userEmail}
               type="email"
               placeholder="Your Email"
               defaultValue={userEmail}
@@ -113,9 +118,9 @@ export default function Contact() {
                 required: "email is required",
                 pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
               })}
-              className="w-full bg-transparent cursor-not-allowed border-b-2 border-gray-300 dark:border-gray-600 
-    focus:border-blue-500 focus:ring-0 text-gray-500 focus:outline-none transition-colors duration-300 py-2 text-sm md:text-base"
-            />{" "}
+              className="w-full bg-transparent cursor-not-allowed border-b-2 border-b-blue-500 text-gray-500 focus:outline-none py-2 text-sm md:text-base"
+            />
+
             {errors.user_email && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.user_email.message}
@@ -133,12 +138,29 @@ export default function Contact() {
                 {errors.message.message}
               </p>
             )}
-            <button
-              type="submit"
-              className="mt-2 cursor-pointer bg-primary py-2 rounded-lg hover:opacity-90 transition-all duration-200"
-            >
-              {sending ? "Sending Email" : "Send Email"}
-            </button>
+
+            {!emailError ? (
+              <button
+                disabled={!userEmail || emailLoading || sending} // ← Changed: disabled when NO email
+                type="submit"
+                className="mt-2 group flex items-center gap-1.5 hover:text-blue-500 w-fit mx-auto cursor-pointer py-1 px-4 font-semibold border-b-3 border-b-black transition-colors duration-300 hover:border-b-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sending ? "Sending Email..." : "Send Email"}{" "}
+                <Send
+                  size={17}
+                  className="text-black transition-colors duration-300 group-hover:text-blue-500"
+                />
+              </button>
+            ) : (
+              <button
+                disabled
+                type="button"
+                className="mt-2 group flex items-center gap-1.5 w-fit mx-auto cursor-not-allowed py-1 px-4 font-semibold border-b-3 border-b-red-500"
+              >
+                <span className="text-red-400">Email Error - Cannot Send</span>
+                <Send size={17} className="text-red-400" />
+              </button>
+            )}
           </form>
         </div>
       </div>

@@ -86,9 +86,8 @@ export const handleDelete = async ({
   reviewsByUser,
   setReviewsByUser,
   deleteReview,
-  refetch,
 }) => {
-  let originalReviews; // define here so catch can access
+  let originalReviews; // for rollback if review deletion fails
 
   try {
     if (type === "bio") {
@@ -98,32 +97,40 @@ export const handleDelete = async ({
         return;
       }
 
-      if (setProfile) {
-        setProfile((prev) => ({
-          ...prev,
-          user:
-            prev.user?.map((u) => (u.id === userId ? { ...u, bio: "" } : u)) ||
-            [],
-        }));
-      }
-
+      // Call API first
       await axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL}/users/user/${userId}`,
         { bio: null },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
+      // Update local state after successful API call
+      if (setProfile) {
+        setProfile((prev) => {
+          const userData = Array.isArray(prev.user)
+            ? prev.user.map((u) => (u.id === userId ? { ...u, bio: null } : u))
+            : prev.user.id === userId
+            ? { ...prev.user, bio: null }
+            : prev.user;
+
+          return { ...prev, user: userData };
+        });
+      }
+
       toast.success("Bio deleted successfully!");
-      if (refetch) await refetch();
     } else if (type === "review") {
       if (!reviewId || !reviewsByUser || !setReviewsByUser || !deleteReview)
         return;
 
+      // Backup original reviews for rollback
       originalReviews = [...reviewsByUser];
 
+      // Optimistic UI update
       setReviewsByUser((prev) => prev.filter((r) => r.id !== reviewId));
 
+      // Delete review via API
       await deleteReview(reviewId);
+
       toast.success("Review deleted successfully!");
     } else {
       throw new Error("Invalid type for deletion");
@@ -132,6 +139,7 @@ export const handleDelete = async ({
     console.error("Delete error:", err.response?.data || err);
     toast.error("Failed to delete.");
 
+    // Rollback UI for review deletion
     if (type === "review" && originalReviews && setReviewsByUser) {
       setReviewsByUser(originalReviews);
     }

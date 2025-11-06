@@ -14,7 +14,6 @@ import Loader from "@/components/loader";
 import {
   handleBan,
   handleUnban,
-  handleDeleteBio,
   handleEditSubmit,
   handleDelete,
 } from "../../../../utlis/userActions";
@@ -56,7 +55,7 @@ export default function Profile() {
   // Redirect if no access token
   useEffect(() => {
     if (!accessToken) {
-      router.push("/auth/log-in");
+      router.push("/");
     }
   }, [accessToken, router]);
 
@@ -222,7 +221,7 @@ export default function Profile() {
             <div className="flex justify-between items-center w-full">
               <div>
                 <div className="flex md:flex-row flex-col md:items-center gap-2">
-                  <h1 className="text-2xl font-semibold text-gray-800">
+                  <h1 className="text-2xl whitespace-nowrap font-semibold text-gray-800">
                     {profile.user_name}
                   </h1>
                   {user.role === "admin" ? (
@@ -231,7 +230,7 @@ export default function Profile() {
                     </span>
                   ) : (
                     <span
-                      className={`px-2 py-1 text-xs font-medium text-white rounded-full ${
+                      className={`px-2 py-1 w-fit text-xs font-medium text-white rounded-full ${
                         user.is_banned ? "bg-red-500" : "bg-green-500"
                       }`}
                     >
@@ -253,7 +252,7 @@ export default function Profile() {
                     onClick={() => setLogoutDialogOpen(true)}
                     className="flex sm:hidden items-center gap-2 bg-indigo-600 text-sm hover:bg-indigo-700 text-white px-2 py-2 font-semibold transition duration-200 mt-2.5"
                   >
-                    <LogOut size={18} /> Logout
+                    <LogOut size={16} /> Logout
                   </button>
                 )}
               </div>
@@ -322,25 +321,19 @@ export default function Profile() {
           <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
             <User size={18} /> Bio
           </h2>
-          <Options
-            onDelete={async () => {
-              await handleDelete({
-                type: "bio",
-                userId: user.id,
-                isAdmin,
-                accessToken,
-                refetch: async () => {
-                  const res = await axios.get(
-                    `${process.env.NEXT_PUBLIC_API_URL}/users/user/profile/${userID}`,
-                    { headers: { Authorization: `Bearer ${accessToken}` } }
-                  );
-                  setProfile(res.data);
-                },
-                setProfile,
-              });
-            }}
-            onEdit={() => startEditingBio(user)}
-          />
+       <Options
+  onDelete={async () => {
+    await handleDelete({
+      type: "bio",
+      userId: user.id,
+      isAdmin,
+      accessToken,
+      setProfile,
+    });
+  }}
+  onEdit={() => startEditingBio(user)}
+/>
+
         </div>
         {editingUserId === user.id ? (
           <div className="mt-2 space-y-2">

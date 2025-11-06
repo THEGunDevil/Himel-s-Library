@@ -5,47 +5,44 @@ import { useAuth } from "@/contexts/authContext";
 export function useBookReviews(bookId) {
   const { accessToken } = useAuth();
 
-  // State for all reviews of a book
+  // --- State ---
   const [data, setData] = useState([]);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
 
-  // Delete states
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
 
-  // Update states
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState(null);
 
-  // Reviews by user
   const [reviewsByUser, setReviewsByUser] = useState([]);
   const [reviewsByUserLoading, setReviewsByUserLoading] = useState(false);
   const [reviewsByUserError, setReviewsByUserError] = useState(null);
 
-  // Fetch all reviews for a book
+  // --- Fetch all reviews for a book ---
   const fetchReviews = useCallback(async () => {
-    if (!bookId) return;
+    // Prevent fetching if no bookId or no token
+    if (!bookId || !accessToken) return;
+
     setFetchLoading(true);
     setFetchError(null);
 
     try {
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/reviews/book/${bookId}`,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       setData(res.data);
     } catch (err) {
-      console.error("❌ Failed to fetch review:", err);
+      console.error("❌ Failed to fetch reviews:", err);
       setFetchError(err);
     } finally {
       setFetchLoading(false);
     }
   }, [bookId, accessToken]);
 
-  // Delete a review
+  // --- Delete a review ---
   const deleteReview = async (reviewId) => {
     if (!accessToken || !reviewId) return;
 
@@ -66,7 +63,7 @@ export function useBookReviews(bookId) {
     }
   };
 
-  // ✅ Update (edit) a review
+  // --- Update a review ---
   const updateReview = async (reviewId, updatedFields) => {
     if (!accessToken || !reviewId) return;
 
@@ -80,7 +77,6 @@ export function useBookReviews(bookId) {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      // Update local state immediately
       setData((prev) =>
         prev.map((r) => (r.id === reviewId ? { ...r, ...res.data } : r))
       );
@@ -92,50 +88,57 @@ export function useBookReviews(bookId) {
     }
   };
 
-  // ✅ Fetch reviews by user
-  const fetchReviewsByUserID = async (userId) => {
-    if (!accessToken || !userId) return;
+  // --- Fetch reviews by user ---
+  const fetchReviewsByUserID = useCallback(
+    async (userId) => {
+      if (!accessToken || !userId) return;
 
-    setReviewsByUserLoading(true);
-    setReviewsByUserError(null);
+      setReviewsByUserLoading(true);
+      setReviewsByUserError(null);
 
-    try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/reviews/user/${userId}`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-      setReviewsByUser(res.data);
-    } catch (err) {
-      console.error("❌ Failed to fetch user reviews:", err);
-      setReviewsByUserError(err);
-    } finally {
-      setReviewsByUserLoading(false);
-    }
-  };
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/reviews/user/${userId}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        setReviewsByUser(res.data);
+      } catch (err) {
+        console.error("❌ Failed to fetch user reviews:", err);
+        setReviewsByUserError(err);
+      } finally {
+        setReviewsByUserLoading(false);
+      }
+    },
+    [accessToken]
+  );
 
-  // Auto-fetch when bookId changes
+  // --- Auto-fetch reviews when bookId or accessToken changes ---
   useEffect(() => {
     fetchReviews();
   }, [fetchReviews]);
 
   return {
+    // Reviews data
     data,
     fetchLoading,
     fetchError,
+    refetch: fetchReviews,
 
+    // Delete
     deleteReview,
     deleteLoading,
     deleteError,
 
+    // Update
     updateReview,
     updateLoading,
     updateError,
 
+    // Reviews by user
     reviewsByUser,
-    reviewsByUserError,
     reviewsByUserLoading,
+    reviewsByUserError,
     setReviewsByUser,
-    refetch: fetchReviews,
     fetchReviewsByUserID,
   };
 }

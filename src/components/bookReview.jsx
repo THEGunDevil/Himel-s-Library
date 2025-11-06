@@ -65,12 +65,11 @@ export default function BookReviewSection({ bookId }) {
   // Post new review
   const onSubmit = async (data) => {
     if (!accessToken) return;
-
     setSubmitting(true);
     setError(null);
 
     try {
-      const res = await axios.post(
+      await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/reviews/review`,
         {
           bookId,
@@ -80,7 +79,13 @@ export default function BookReviewSection({ bookId }) {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      setLocalReviews((prev) => [...prev, res.data]);
+      // Refetch all reviews for this book
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/reviews/book/${bookId}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      setLocalReviews(res.data); // now includes user_name, created_at, etc.
       toast.success("Review posted ✅");
       reset();
     } catch (err) {
@@ -243,7 +248,7 @@ export default function BookReviewSection({ bookId }) {
           localReviews.map((r) => (
             <article
               key={r.id}
-              className="group relative py-6 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-200"
+              className="group relative py-6 bg-white shadow-sm transition-all duration-200"
             >
               <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                 <div className="w-full">
