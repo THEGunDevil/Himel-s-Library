@@ -31,7 +31,11 @@ export default function Book() {
     reservationsByBookIDAndUserID,
   } = useReservations();
 
-  const { data: bookData, loading: bookLoading, error: bookError } = useSingleBookData(id);
+  const {
+    data: bookData,
+    loading: bookLoading,
+    error: bookError,
+  } = useSingleBookData(id);
 
   // Set book when loaded
   useEffect(() => {
@@ -94,11 +98,9 @@ export default function Book() {
     try {
       setLocalReserves({ status: "pending", book_id: book.id }); // optimistic
       await createReservation(userID, book.id);
-      toast.success("Reserved successfully!");
       await refetchByBookIDAndUserID(book.id, userID); // background sync
     } catch {
       setLocalReserves(null);
-      toast.error("Failed to reserve.");
     }
   };
 
@@ -107,16 +109,15 @@ export default function Book() {
     try {
       setLocalReserves({ ...localReserves, status: "cancelled" }); // optimistic
       await updateReservationStatus(localReserves.id, "cancelled");
-      toast.info("Reservation cancelled.");
       await refetchByBookIDAndUserID(book.id, userID);
     } catch {
       setLocalReserves({ ...localReserves, status: "pending" }); // rollback
-      toast.error("Failed to cancel.");
     }
   };
 
   if (bookLoading || !book) return <div className="p-6">Loading book...</div>;
-  if (bookError) return <div className="p-6 text-red-500">Failed to load book.</div>;
+  if (bookError)
+    return <div className="p-6 text-red-500">Failed to load book.</div>;
 
   return (
     <section className="flex flex-col w-full lg:flex-row md:pt-36 pt-32 justify-between gap-5 items-start xl:px-60 lg:px-30 px-4 mb-10">
@@ -143,13 +144,20 @@ export default function Book() {
         </div>
 
         {/* Book Info */}
-        <h2 className="mt-4 font-bold text-lg text-center line-clamp-2">{book.title}</h2>
-        <p className="text-gray-600 text-sm text-center line-clamp-1">{book.author}</p>
+        <h2 className="mt-4 font-bold text-lg text-center line-clamp-2">
+          {book.title}
+        </h2>
+        <p className="text-gray-600 text-sm text-center line-clamp-1">
+          {book.author}
+        </p>
         {book.description && (
-          <p className="mt-2 text-gray-500 text-sm text-center line-clamp-3">{book.description}</p>
+          <p className="mt-2 text-gray-500 text-sm text-center line-clamp-3">
+            {book.description}
+          </p>
         )}
         <p className="text-gray-500 text-sm text-center line-clamp-1">
-          Genre: {Array.isArray(book.genre) ? book.genre.join(", ") : book.genre}
+          Genre:{" "}
+          {Array.isArray(book.genre) ? book.genre.join(", ") : book.genre}
         </p>
 
         {/* Availability */}
@@ -157,14 +165,17 @@ export default function Book() {
           <div>
             <span
               className={`px-2 py-1 rounded text-xs font-medium ${
-                book.available_copies > 0 ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"
+                book.available_copies > 0
+                  ? "bg-green-200 text-green-800"
+                  : "bg-red-200 text-red-800"
               }`}
             >
               {book.available_copies > 0 ? "Available" : "Unavailable"}
             </span>
             {book.available_copies > 0 && (
               <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium">
-                {book.available_copies} {book.available_copies > 1 ? "copies" : "copy"}
+                {book.available_copies}{" "}
+                {book.available_copies > 1 ? "copies" : "copy"}
               </span>
             )}
           </div>
@@ -173,7 +184,9 @@ export default function Book() {
         {/* Borrow Section */}
         {!borrowed && book.available_copies > 0 && (
           <div className="mt-4 w-full flex flex-col items-center">
-            <label className="text-sm font-medium text-gray-700 mb-1">Select due date</label>
+            <label className="text-sm font-medium text-gray-700 mb-1">
+              Select due date
+            </label>
             <select
               className="border border-gray-300 rounded-lg px-3 py-2 w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={dueDate}
@@ -188,7 +201,9 @@ export default function Book() {
               onClick={handleBorrow}
               disabled={loading || !dueDate}
               className={`mt-4 px-4 py-2 w-1/2 rounded-lg text-white text-sm transition ${
-                loading || !dueDate ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+                loading || !dueDate
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600"
               }`}
             >
               {loading ? "Borrowing..." : "Borrow"}
@@ -199,7 +214,7 @@ export default function Book() {
         {/* Reservation Section */}
         {book.available_copies === 0 && (
           <div className="mt-4 w-full flex flex-col items-center gap-2">
-            {!localReserves || localReserves?.status ==="cancelled" && (
+            {(!localReserves || localReserves?.status === "cancelled") && (
               <button
                 className="w-fit cursor-pointer p-2 bg-gray-500 text-white font-medium"
                 disabled={loadingCreate}
@@ -208,6 +223,7 @@ export default function Book() {
                 {loadingCreate ? "Reserving..." : "Reserve"}
               </button>
             )}
+
             {localReserves?.status === "pending" && (
               <button
                 className="w-fit p-2 bg-red-400 cursor-pointer text-white font-medium"
@@ -221,8 +237,12 @@ export default function Book() {
         )}
 
         {/* Errors */}
-        {createError && <p className="mt-2 text-red-500 text-sm text-center">{createError}</p>}
-        {error && <p className="mt-2 text-red-500 text-sm text-center">{error}</p>}
+        {createError && (
+          <p className="mt-2 text-red-500 text-sm text-center">{createError}</p>
+        )}
+        {error && (
+          <p className="mt-2 text-red-500 text-sm text-center">{error}</p>
+        )}
       </div>
 
       {/* Book Review Section */}

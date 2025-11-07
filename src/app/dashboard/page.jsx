@@ -9,15 +9,26 @@ import UpdateBook from "@/components/updateBook";
 import UserList from "@/components/userList";
 import BorrowList from "@/components/borrowList";
 import BookList from "@/components/bookList";
+import ReservationList from "@/components/reservationList";
 
 export default function Dashboard() {
-  const tabNames = ["Users", "Borrows", "Books","Add Book", "Update Book"];
+  const tabNames = [
+    "Users",
+    "Borrows",
+    "Books",
+    "Reservations",
+    "Add Book",
+    "Update Book",
+  ];
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [updateBookID, setUpdateBookID] = useState(null); // store selected book
   return (
     <section className="pt-24 md:pt-32 xl:px-60 lg:px-30 px-4">
       <div className="bg-white border border-blue-100 shadow-lg p-5 my-10">
-        <Tabs selectedIndex={selectedIndex} onSelect={(index) => setSelectedIndex(index)}>
+        <Tabs
+          selectedIndex={selectedIndex}
+          onSelect={(index) => setSelectedIndex(index)}
+        >
           {/* Tab List */}
           <TabList className="flex flex-wrap gap-3 border-b border-blue-200 pb-4">
             {tabNames.map((tab, i) => {
@@ -50,7 +61,13 @@ export default function Dashboard() {
               <BorrowList />
             </TabPanel>
             <TabPanel>
-              <BookList setSelectedIndex={setSelectedIndex} setUpdateBookID={setUpdateBookID}/>
+              <BookList
+                setSelectedIndex={setSelectedIndex}
+                setUpdateBookID={setUpdateBookID}
+              />
+            </TabPanel>
+            <TabPanel>
+              <ReservationList />
             </TabPanel>
             <TabPanel>
               <AddBook />

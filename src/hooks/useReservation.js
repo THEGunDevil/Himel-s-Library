@@ -195,7 +195,7 @@ export function useReservations(bookID) {
         ]);
         return res.data;
       } catch (err) {
-        return handleError(setCreateError, err, "Failed to create reservation");
+        return handleError(setCreateError, err, "You already have a reservation for this book");
       } finally {
         setLoadingCreate(false);
       }
