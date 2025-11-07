@@ -13,7 +13,7 @@ import BookList from "@/components/bookList";
 export default function Dashboard() {
   const tabNames = ["Users", "Borrows", "Books","Add Book", "Update Book"];
   const [selectedIndex, setSelectedIndex] = useState(0);
-
+  const [updateBookID, setUpdateBookID] = useState(null); // store selected book
   return (
     <section className="pt-24 md:pt-32 xl:px-60 lg:px-30 px-4">
       <div className="bg-white border border-blue-100 shadow-lg p-5 my-10">
@@ -50,13 +50,13 @@ export default function Dashboard() {
               <BorrowList />
             </TabPanel>
             <TabPanel>
-              <BookList />
+              <BookList setSelectedIndex={setSelectedIndex} setUpdateBookID={setUpdateBookID}/>
             </TabPanel>
             <TabPanel>
               <AddBook />
             </TabPanel>
             <TabPanel>
-              <UpdateBook />
+              <UpdateBook updateBookID={updateBookID} />
             </TabPanel>
           </div>
         </Tabs>

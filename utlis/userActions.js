@@ -80,7 +80,6 @@ export const handleDelete = async ({
   type,
   userId,
   reviewId,
-  isAdmin,
   accessToken,
   setProfile,
   reviewsByUser,
@@ -92,7 +91,7 @@ export const handleDelete = async ({
   try {
     if (type === "bio") {
       if (!userId) return;
-      if (!isAdmin || !accessToken) {
+      if (!accessToken) {
         toast.error("You are not authorized to delete bios.");
         return;
       }
@@ -100,7 +99,7 @@ export const handleDelete = async ({
       // Call API first
       await axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL}/users/user/${userId}`,
-        { bio: null },
+        { bio: "" },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 

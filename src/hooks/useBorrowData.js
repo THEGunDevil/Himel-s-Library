@@ -7,6 +7,7 @@ export function useBorrowData() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
 
   // ---------- borrows by user ----------
   const [borrowsByUser, setBorrowsByUser] = useState([]);
@@ -16,7 +17,7 @@ export function useBorrowData() {
   const { accessToken, isAdmin } = useAuth();
 
   const fetchAllBorrows = useCallback(async () => {
-    if (!accessToken) return;
+    if (!accessToken || !isAdmin) return;
 
     setLoading(true);
     setError(null);
@@ -28,6 +29,7 @@ export function useBorrowData() {
         }
       );
       setData(res.data || []);
+      setTotalPages(res.data?.total_pages ?? 1);
     } catch (err) {
       console.error("Failed to fetch borrows:", err);
       setError(err);
@@ -62,11 +64,13 @@ export function useBorrowData() {
   };
 
   const refetch = () => fetchAllBorrows();
+  console.log(data);
 
   return {
     data,
     loading,
     error,
+    totalPages,
     refetch,
 
     borrowsByUser,

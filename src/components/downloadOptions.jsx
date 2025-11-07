@@ -56,7 +56,7 @@ export default function DownloadOptions({
 
       {open && (
         <div className="absolute right-12 top-0 bg-white border border-gray-400 z-50 w-fit shadow-lg">
-          <button
+          {/* <button
             onClick={() => {
               handleDownload("pdf");
               setOpen(false);
@@ -65,7 +65,7 @@ export default function DownloadOptions({
             disabled={disabled}
           >
             Download <span className="text-blue-500 font-medium">PDF</span>
-          </button>
+          </button> */}
           <button
             onClick={() => {
               handleDownload("csv");

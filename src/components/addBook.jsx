@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/authContext";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 function AddBook() {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -48,7 +49,7 @@ function AddBook() {
         formData.append("image", data.image[0]);
       }
 
-      const res = await axios.post(
+       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/books/`,
         formData,
         {
@@ -58,8 +59,7 @@ function AddBook() {
           },
         }
       );
-
-      console.log("✅ Adding successful:", res.data);
+      toast.success("Adding successful")
     } catch (error) {
       console.error("❌ Adding failed:", error.response?.data || error.message);
     } finally {

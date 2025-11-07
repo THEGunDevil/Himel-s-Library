@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { LogOut, BookOpen, Star, User } from "lucide-react";
+import { LogOut, BookOpen, Star, User, StarIcon } from "lucide-react";
 import {
   Avatar,
   ConvertStringToDate,
@@ -225,8 +225,14 @@ export default function Profile() {
                     {profile.user_name}
                   </h1>
                   {user.role === "admin" ? (
-                    <span className="px-2 py-1 w-fit text-xs font-medium text-white bg-indigo-600 rounded-full">
-                      Admin
+                    <span className="px-2 flex items-center py-1 w-fit text-xs font-medium text-white bg-indigo-600 rounded-full">
+                      Admin{" "}
+                      <StarIcon
+                        size={14}
+                        fill="orange"
+                        stroke="orange"
+                        className="ml-1"
+                      />
                     </span>
                   ) : (
                     <span
@@ -321,19 +327,17 @@ export default function Profile() {
           <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
             <User size={18} /> Bio
           </h2>
-       <Options
-  onDelete={async () => {
-    await handleDelete({
-      type: "bio",
-      userId: user.id,
-      isAdmin,
-      accessToken,
-      setProfile,
-    });
-  }}
-  onEdit={() => startEditingBio(user)}
-/>
-
+          <Options
+            onDelete={async () => {
+              await handleDelete({
+                type: "bio",
+                userId: user.id,
+                accessToken,
+                setProfile,
+              });
+            }}
+            onEdit={() => startEditingBio(user)}
+          />
         </div>
         {editingUserId === user.id ? (
           <div className="mt-2 space-y-2">

@@ -1,10 +1,11 @@
 import { useAuth } from "@/contexts/authContext";
 import axios from "axios";
 import { ClipboardPaste } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
-function UpdateBook() {
+function UpdateBook({ updateBookID }) {
   const {
     register,
     setValue,
@@ -13,45 +14,69 @@ function UpdateBook() {
   } = useForm();
   const [loading, setLoading] = useState(false);
   const { accessToken } = useAuth();
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const imageRegister = register("image", {
+    required: "Book cover is required",
+  });
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
+    }
+  };
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const res = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL}/books/${data.id}`,
-        {
-          title: data.title || null,
-          author: data.author || null,
-          published_year: data.published_year
-            ? parseInt(data.published_year)
-            : null,
-          isbn: data.isbn || null,
-          total_copies: data.total_copies ? parseInt(data.total_copies) : null,
-          genre: data.genre || null,
-          description: data.description || null,
-          image_url: data.image_url[0] || null,
-        },
+      const formData = new FormData();
+
+      if (data.title) formData.append("title", data.title);
+      if (data.author) formData.append("author", data.author);
+      if (data.published_year)
+        formData.append("published_year", parseInt(data.published_year));
+      if (data.isbn) formData.append("isbn", data.isbn);
+      if (data.total_copies)
+        formData.append("total_copies", parseInt(data.total_copies));
+      if (data.genre) formData.append("genre", data.genre);
+      if (data.description) formData.append("description", data.description);
+      if (data.image_url && data.image_url[0])
+        formData.append("image", data.image_url[0]); // file input
+
+      await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_URL}/books/${updateBookID}`,
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
+            // DO NOT manually set Content-Type; Axios sets it automatically
           },
         }
       );
 
-      console.log("✅ Updating successful:", res.data);
+      toast.success("✅ Book updated successfully!!");
     } catch (error) {
       console.error(
         "❌ Updating failed:",
         error.response?.data || error.message
       );
+      toast.error("❌ Failed to update book");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
         <h2 className="text-3xl font-bold text-gray-800 text-center mb-8">
           Update Book
@@ -73,6 +98,7 @@ function UpdateBook() {
               </label>
               <div className="relative">
                 <input
+                  defaultValue={updateBookID}
                   type="text"
                   {...register("id", { required: "ID is required" })}
                   className="w-full px-4 py-3 pr-20 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
@@ -90,7 +116,7 @@ function UpdateBook() {
                   }}
                   className="absolute inset-y-0 right-3 cursor-pointer text-gray-500"
                 >
-                  <ClipboardPaste size={18}/> 
+                  <ClipboardPaste size={18} />
                 </button>
               </div>
             </div>
@@ -232,12 +258,24 @@ function UpdateBook() {
                 type="file"
                 accept="image/*"
                 {...register("image")}
+                onChange={handleImageChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-600 file:font-medium hover:file:bg-indigo-100"
               />
               {errors.image && (
                 <p className="text-red-500 text-xs mt-2">
                   {errors.image.message}
                 </p>
+              )}{" "}
+              {previewUrl && (
+                <div className="mt-6 p-4 w-full bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex justify-center">
+                    <img
+                      src={previewUrl}
+                      alt="Book cover preview"
+                      className="max-w-xs h-64 object-cover rounded-lg shadow-md"
+                    />
+                  </div>
+                </div>
               )}
             </div>
           </div>

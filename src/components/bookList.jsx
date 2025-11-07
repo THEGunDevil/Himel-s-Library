@@ -16,7 +16,7 @@ import DownloadOptions from "./downloadOptions";
 
 const columnHelper = createColumnHelper();
 
-export default function BookList() {
+export default function BookList({ setSelectedIndex, setUpdateBookID }) {
   // ---- hooks -------------------------------------------------
   const [page, setPage] = useState(1);
 
@@ -102,6 +102,15 @@ export default function BookList() {
         const book = row.original;
         return (
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              onClick={() => {
+                setUpdateBookID(book.id);
+                setSelectedIndex(4);
+              }}
+              className="px-3 py-1 cursor-pointer bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors duration-200"
+            >
+              Update
+            </button>
             <button
               onClick={() => setBookToDelete(book.id)}
               className="px-3 py-1 cursor-pointer bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors duration-200"
