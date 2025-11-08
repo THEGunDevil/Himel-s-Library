@@ -93,25 +93,46 @@ export default function Book() {
     }
   };
 
-  const handleReserve = async () => {
-    if (!userID || !book?.id) return;
-    try {
+const handleReserve = async () => {
+  if (!userID || !book?.id) return;
+
+  try {
+    // If there's an existing reservation that was cancelled, set it to pending
+    if (localReserves?.status === "cancelled") {
+      setLocalReserves({ ...localReserves, status: "pending" }); // optimistic
+      await updateReservationStatus(localReserves.id, "pending");
+      toast.success("Your cancelled reservation has been reactivated");
+    } else {
+      // Otherwise, create a new reservation
       setLocalReserves({ status: "pending", book_id: book.id }); // optimistic
       await createReservation(userID, book.id);
-      await refetchByBookIDAndUserID(book.id, userID); // background sync
-    } catch {
+      toast.success("A reservation for this book has been placed");
+    }
+
+    // Always refetch to sync
+    await refetchByBookIDAndUserID(book.id, userID);
+  } catch {
+    // Rollback
+    if (localReserves?.status === "cancelled") {
+      setLocalReserves({ ...localReserves, status: "cancelled" });
+    } else {
       setLocalReserves(null);
     }
-  };
+    toast.error("Failed to place or reactivate the reservation");
+  }
+};
+
 
   const handleCancelReserve = async () => {
     if (!localReserves?.id) return;
     try {
       setLocalReserves({ ...localReserves, status: "cancelled" }); // optimistic
       await updateReservationStatus(localReserves.id, "cancelled");
+      toast.success("Reservation for this book has been cancelled");
       await refetchByBookIDAndUserID(book.id, userID);
     } catch {
       setLocalReserves({ ...localReserves, status: "pending" }); // rollback
+      toast.error("Failed to cancel the reservation");
     }
   };
 
@@ -213,10 +234,10 @@ export default function Book() {
 
         {/* Reservation Section */}
         {book.available_copies === 0 && (
-          <div className="mt-4 w-full flex flex-col items-center gap-2">
+          <div className="mt-12 w-1/2 flex flex-col items-center gap-2">
             {(!localReserves || localReserves?.status === "cancelled") && (
               <button
-                className="w-fit cursor-pointer p-2 bg-gray-500 text-white font-medium"
+                className="w-full cursor-pointer p-2 bg-gray-500 text-white font-medium"
                 disabled={loadingCreate}
                 onClick={handleReserve}
               >
@@ -226,7 +247,7 @@ export default function Book() {
 
             {localReserves?.status === "pending" && (
               <button
-                className="w-fit p-2 bg-red-400 cursor-pointer text-white font-medium"
+                className="w-full p-2 bg-red-400 cursor-pointer text-white font-medium"
                 disabled={loadingUpdate}
                 onClick={handleCancelReserve}
               >

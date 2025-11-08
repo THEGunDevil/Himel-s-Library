@@ -32,7 +32,6 @@ export function useReservations(bookID) {
   const [updateError, setUpdateError] = useState(null);
 
   const { accessToken, isAdmin } = useAuth();
-
   // Helper for error handling
   const handleError = (setter, err, defaultMessage) => {
     const message =
@@ -43,6 +42,50 @@ export function useReservations(bookID) {
     return message;
   };
 
+  const createReservation = useCallback(
+    async (userId, bookId) => {
+      if (!accessToken) {
+        setCreateError("No access token");
+        return null;
+      }
+
+      try {
+        setLoadingCreate(true);
+        setCreateError(null);
+
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/reservations/`,
+          { user_id: userId, book_id: bookId },
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+
+        // ✅ Keep only one reservation per user + book in state
+        setReservations((prev) => {
+          const prevArray = Array.isArray(prev) ? prev : [];
+
+          // Remove any existing reservation for the same user + book
+          const filtered = prevArray.filter(
+            (r) => !(r.bookID === bookId && r.userID === userId)
+          );
+
+          return [...filtered, res.data];
+        });
+
+        return res.data;
+      } catch (err) {
+        // Check if error is due to duplicate reservation
+        const msg =
+          err.response?.status === 409
+            ? "You already have a reservation for this book"
+            : "Failed to create reservation";
+        setCreateError(msg);
+        return null;
+      } finally {
+        setLoadingCreate(false);
+      }
+    },
+    [accessToken, setReservations]
+  );
   // Fetch all reservations (admin or user)
   const fetchReservations = useCallback(async () => {
     if (!accessToken) return;
@@ -173,35 +216,6 @@ export function useReservations(bookID) {
   );
 
   // Create a new reservation (user)
-  const createReservation = useCallback(
-    async (userId, bookId) => {
-      if (!accessToken)
-        return handleError(setCreateError, null, "No access token");
-
-      try {
-        setLoadingCreate(true);
-        setCreateError(null);
-
-        const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/reservations/`,
-          { user_id: userId, book_id: bookId },
-          { headers: { Authorization: `Bearer ${accessToken}` } }
-        );
-
-        // ✅ keep only one
-        setReservations((prev) => [
-          ...(Array.isArray(prev) ? prev : []),
-          res.data,
-        ]);
-        return res.data;
-      } catch (err) {
-        return handleError(setCreateError, err, "You already have a reservation for this book");
-      } finally {
-        setLoadingCreate(false);
-      }
-    },
-    [accessToken]
-  );
 
   // Update reservation status (admin)
   const updateReservationStatus = useCallback(
