@@ -8,6 +8,17 @@
     appearance: none;
     display: none;
   }
+  /* Hide arrows in number inputs (Chrome, Safari, Edge, Opera) */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Hide arrows in Firefox */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 
   /* Hide scrollbar but keep scroll functionality */
   .scrollbar-hide::-webkit-scrollbar {
@@ -19,9 +30,9 @@
     scrollbar-width: none; /* Firefox */
   }
   .custom-toast .custom-progress {
-  background: #155dfc !important;
-  height: 4px;
-}
+    background: #155dfc !important;
+    height: 4px;
+  }
 }
 /* :root {
   --background: #ffffff;

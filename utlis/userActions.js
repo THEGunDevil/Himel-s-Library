@@ -213,3 +213,56 @@ export const handleEditSubmit = async ({
     }
   }
 };
+// utils/userActions.js
+export const handleReserve = async ({
+  userID,
+  book,
+  localReserves,
+  setLocalReserves,
+  createReservation,
+  updateReservationStatus,
+  refetchByBookIDAndUserID,
+  toast,
+}) => {
+  if (!userID || !book?.id) return;
+
+  try {
+    if (localReserves?.status === "cancelled") {
+      setLocalReserves({ ...localReserves, status: "pending" });
+      await updateReservationStatus(localReserves.id, "pending");
+      toast.success("Your cancelled reservation has been reactivated");
+    } else {
+      setLocalReserves({ status: "pending", book_id: book.id });
+      await createReservation(userID, book.id);
+      toast.success("A reservation for this book has been placed");
+    }
+    await refetchByBookIDAndUserID(book.id, userID);
+  } catch {
+    if (localReserves?.status === "cancelled") {
+      setLocalReserves({ ...localReserves, status: "cancelled" });
+    } else {
+      setLocalReserves(null);
+    }
+    toast.error("Failed to place or reactivate the reservation");
+  }
+};
+
+export const handleCancelReserve = async ({
+  localReserves,
+  setLocalReserves,
+  updateReservationStatus,
+  refetchByBookIDAndUserID,
+  toast,
+}) => {
+  if (!localReserves?.id) return;
+
+  try {
+    setLocalReserves({ ...localReserves, status: "cancelled" });
+    await updateReservationStatus(localReserves.id, "cancelled");
+    toast.success("Reservation cancelled successfully");
+    await refetchByBookIDAndUserID(localReserves.book_id);
+  } catch {
+    setLocalReserves({ ...localReserves, status: "pending" });
+    toast.error("Failed to cancel the reservation");
+  }
+};

@@ -31,6 +31,10 @@ export function useReservations(bookID) {
   const [createError, setCreateError] = useState(null);
   const [updateError, setUpdateError] = useState(null);
 
+  const [page, setPage] = useState(1); // current page number
+  const [totalPages, setTotalPages] = useState(1); // total pages based on count & limit
+  const [limit] = useState(20);
+
   const { accessToken, isAdmin } = useAuth();
   // Helper for error handling
   const handleError = (setter, err, defaultMessage) => {
@@ -87,26 +91,39 @@ export function useReservations(bookID) {
     [accessToken, setReservations]
   );
   // Fetch all reservations (admin or user)
-  const fetchReservations = useCallback(async () => {
-    if (!accessToken) return;
+  const fetchReservations = useCallback(
+    async (page = 1, limit = 20) => {
+      if (!accessToken && !isAdmin) return;
 
-    try {
-      setLoadingFetch(true);
-      setFetchError(null);
+      try {
+        setLoadingFetch(true);
+        setFetchError(null);
 
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/reservations/`,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/reservations/`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            params: { page, limit }, // <-- pass pagination params
+          }
+        );
+
+        if (res.data?.reservations) {
+          setReservations(res.data.reservations);
+          setPage(res.data.page || page);
+          setTotalPages(Math.ceil(res.data.count / limit));
+        } else {
+          setReservations([]);
+          setPage(1);
+          setTotalPages(1);
         }
-      );
-      setReservations(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      handleError(setFetchError, err, "Failed to fetch reservations");
-    } finally {
-      setLoadingFetch(false);
-    }
-  }, [accessToken]);
+      } catch (err) {
+        handleError(setFetchError, err, "Failed to fetch reservations");
+      } finally {
+        setLoadingFetch(false);
+      }
+    },
+    [accessToken, isAdmin]
+  );
 
   const fetchReservationsByReservationID = useCallback(
     async (bookID) => {
@@ -246,16 +263,20 @@ export function useReservations(bookID) {
   );
 
   useEffect(() => {
-    fetchReservations();
-  }, [fetchReservations]);
+    fetchReservations(page, limit);
+  }, [page, limit, fetchReservations]);
 
-  useEffect(() => {
-    if (bookID) {
-      fetchReservationsByBookID(bookID);
-    }
-  }, [bookID, fetchReservationsByBookID]);
+  // useEffect(() => {
+  //   if (bookID) {
+  //     fetchReservationsByBookID(bookID);
+  //   }
+  // }, [bookID]);
 
   return {
+    page,
+    totalPages,
+    limit,
+
     reservations,
     reservationsByBookID,
     reservationsByBookIDAndUserID,

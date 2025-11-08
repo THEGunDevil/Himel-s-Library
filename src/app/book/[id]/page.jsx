@@ -9,9 +9,14 @@ import BookReviewSection from "@/components/bookReview";
 import { getDueDate } from "../../../../utlis/utils";
 import { useReservations } from "@/hooks/useReservation";
 import { toast } from "react-toastify";
+import {
+  handleCancelReserve,
+  handleReserve,
+} from "../../../../utlis/userActions";
+import { Check, Cross, Edit, Loader, X } from "lucide-react";
 
 export default function Book() {
-  const { accessToken, userID } = useAuth();
+  const { accessToken, userID, isAdmin } = useAuth();
   const { id } = useParams();
 
   const [book, setBook] = useState(null);
@@ -20,6 +25,10 @@ export default function Book() {
   const [error, setError] = useState(null);
   const [dueDate, setDueDate] = useState("");
   const [localReserves, setLocalReserves] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(1);
+  const [valueLoading, setValueLoading] = useState(false);
+  const [valueError, setValueError] = useState(null);
 
   const {
     loadingCreate,
@@ -93,48 +102,51 @@ export default function Book() {
     }
   };
 
-const handleReserve = async () => {
-  if (!userID || !book?.id) return;
+  const handleReserveClick = () =>
+    handleReserve({
+      userID,
+      book,
+      localReserves,
+      setLocalReserves,
+      createReservation,
+      updateReservationStatus,
+      refetchByBookIDAndUserID,
+      toast,
+    });
 
+  const handleCancelClick = () =>
+    handleCancelReserve({
+      localReserves,
+      setLocalReserves,
+      updateReservationStatus,
+      refetchByBookIDAndUserID,
+      toast,
+    });
+const UpdateTotalBooksAndBooksReservation = async () => {
+  setValueLoading(true);
+  setError(null);
   try {
-    // If there's an existing reservation that was cancelled, set it to pending
-    if (localReserves?.status === "cancelled") {
-      setLocalReserves({ ...localReserves, status: "pending" }); // optimistic
-      await updateReservationStatus(localReserves.id, "pending");
-      toast.success("Your cancelled reservation has been reactivated");
-    } else {
-      // Otherwise, create a new reservation
-      setLocalReserves({ status: "pending", book_id: book.id }); // optimistic
-      await createReservation(userID, book.id);
-      toast.success("A reservation for this book has been placed");
-    }
+    const resp = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/books/${bookData.id}/copies`,
+      { total_copies: Number(value) }, // ✅ wrap as JSON object
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
 
-    // Always refetch to sync
-    await refetchByBookIDAndUserID(book.id, userID);
-  } catch {
-    // Rollback
-    if (localReserves?.status === "cancelled") {
-      setLocalReserves({ ...localReserves, status: "cancelled" });
-    } else {
-      setLocalReserves(null);
-    }
-    toast.error("Failed to place or reactivate the reservation");
+    setValue(resp.data); // ✅ use resp.data
+    setOpen(false);
+    await refetchByBookIDAndUserID(bookData.id, userID);
+
+    toast.success("Total copies of the book have been updated");
+  } catch (error) {
+    console.error(error);
+    toast.error("There was an error updating total copies");
+  } finally {
+    setValueLoading(false);
   }
 };
-
-
-  const handleCancelReserve = async () => {
-    if (!localReserves?.id) return;
-    try {
-      setLocalReserves({ ...localReserves, status: "cancelled" }); // optimistic
-      await updateReservationStatus(localReserves.id, "cancelled");
-      toast.success("Reservation for this book has been cancelled");
-      await refetchByBookIDAndUserID(book.id, userID);
-    } catch {
-      setLocalReserves({ ...localReserves, status: "pending" }); // rollback
-      toast.error("Failed to cancel the reservation");
-    }
-  };
 
   if (bookLoading || !book) return <div className="p-6">Loading book...</div>;
   if (bookError)
@@ -195,11 +207,58 @@ const handleReserve = async () => {
             </span>
             {book.available_copies > 0 && (
               <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium">
-                {book.available_copies}{" "}
+                {book.available_copies}
                 {book.available_copies > 1 ? "copies" : "copy"}
               </span>
             )}
           </div>
+          {book.available_copies === 0 && isAdmin && accessToken && (
+            <div>
+              {!open && (
+                <button
+                  onClick={() => setOpen((prev) => !prev)}
+                  className="cursor-pointer flex items-center gap-1"
+                >
+                  <span className="text-blue-600 font-medium">Add Copies</span>
+                  <Edit size={20} className="text-blue-600" />
+                </button>
+              )}
+              {open && (
+                <div className="flex flex-row items-center">
+                  <div className="flex flex-row items-center border border-blue-400">
+                    <input
+                      id="availableCopies"
+                      type="number"
+                      min="1"
+                      max="10"
+                      step="1"
+                      value={value}
+                      onChange={(e) => setValue(e.target.value)} // ✅ Correct handler
+                      className="rounded appearance-none outline-0 px-2 text-blue-600 font-medium text-md w-12"
+                    />
+                    <button
+                      onClick={UpdateTotalBooksAndBooksReservation}
+                      className="px-2 cursor-pointer py-1 text-blue-500 text-xs rounded font-medium flex items-center"
+                    >
+                      {!valueLoading && <Check strokeWidth={2} />}
+                      {valueLoading && (
+                        <Loader className="animate-spin text-blue-600 w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  <button
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setValueLoading(false);
+                      setOpen(false);
+                    }}
+                  >
+                    <X className="text-red-600 ml-0.5" strokeWidth={2} />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Borrow Section */}
@@ -239,7 +298,7 @@ const handleReserve = async () => {
               <button
                 className="w-full cursor-pointer p-2 bg-gray-500 text-white font-medium"
                 disabled={loadingCreate}
-                onClick={handleReserve}
+                onClick={handleReserveClick}
               >
                 {loadingCreate ? "Reserving..." : "Reserve"}
               </button>
@@ -249,14 +308,26 @@ const handleReserve = async () => {
               <button
                 className="w-full p-2 bg-red-400 cursor-pointer text-white font-medium"
                 disabled={loadingUpdate}
-                onClick={handleCancelReserve}
+                onClick={handleCancelClick}
               >
                 {loadingUpdate ? "Cancelling..." : "Cancel Reserve"}
               </button>
             )}
+            {localReserves?.status === "fulfilled" && (
+              <div className="w-full p-2 bg-blue-300 text-center text-white font-medium">
+                Reservation fulfilled
+              </div>
+            )}
           </div>
         )}
-
+        {localReserves?.status === "fulfilled" && (
+          <p className="w-full text-center mt-3 text-lg font-medium text-green-500">
+            Good news! Your reserved book is ready. You can pick it up from the
+            library starting from{" "}
+            <strong>{localReserves?.availableDate || "today"}</strong>. Enjoy
+            reading!
+          </p>
+        )}
         {/* Errors */}
         {createError && (
           <p className="mt-2 text-red-500 text-sm text-center">{createError}</p>
