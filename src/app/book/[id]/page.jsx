@@ -13,8 +13,6 @@ import {
   handleCancelReserve,
   handleReserve,
 } from "../../../../utlis/userActions";
-import { Check, Cross, Edit, Loader, X } from "lucide-react";
-
 export default function Book() {
   const { accessToken, userID, isAdmin } = useAuth();
   const { id } = useParams();
@@ -25,10 +23,7 @@ export default function Book() {
   const [error, setError] = useState(null);
   const [dueDate, setDueDate] = useState("");
   const [localReserves, setLocalReserves] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(1);
-  const [valueLoading, setValueLoading] = useState(false);
-  const [valueError, setValueError] = useState(null);
+
 
   const {
     loadingCreate,
@@ -122,31 +117,6 @@ export default function Book() {
       refetchByBookIDAndUserID,
       toast,
     });
-const UpdateTotalBooksAndBooksReservation = async () => {
-  setValueLoading(true);
-  setError(null);
-  try {
-    const resp = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/books/${bookData.id}/copies`,
-      { total_copies: Number(value) }, // ✅ wrap as JSON object
-      {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      }
-    );
-
-    setValue(resp.data); // ✅ use resp.data
-    setOpen(false);
-    await refetchByBookIDAndUserID(bookData.id, userID);
-
-    toast.success("Total copies of the book have been updated");
-  } catch (error) {
-    console.error(error);
-    toast.error("There was an error updating total copies");
-  } finally {
-    setValueLoading(false);
-  }
-};
 
   if (bookLoading || !book) return <div className="p-6">Loading book...</div>;
   if (bookError)
@@ -208,57 +178,10 @@ const UpdateTotalBooksAndBooksReservation = async () => {
             {book.available_copies > 0 && (
               <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium">
                 {book.available_copies}
-                {book.available_copies > 1 ? "copies" : "copy"}
+                {book.available_copies > 1 ? " copies" : " copy"}
               </span>
             )}
           </div>
-          {book.available_copies === 0 && isAdmin && accessToken && (
-            <div>
-              {!open && (
-                <button
-                  onClick={() => setOpen((prev) => !prev)}
-                  className="cursor-pointer flex items-center gap-1"
-                >
-                  <span className="text-blue-600 font-medium">Add Copies</span>
-                  <Edit size={20} className="text-blue-600" />
-                </button>
-              )}
-              {open && (
-                <div className="flex flex-row items-center">
-                  <div className="flex flex-row items-center border border-blue-400">
-                    <input
-                      id="availableCopies"
-                      type="number"
-                      min="1"
-                      max="10"
-                      step="1"
-                      value={value}
-                      onChange={(e) => setValue(e.target.value)} // ✅ Correct handler
-                      className="rounded appearance-none outline-0 px-2 text-blue-600 font-medium text-md w-12"
-                    />
-                    <button
-                      onClick={UpdateTotalBooksAndBooksReservation}
-                      className="px-2 cursor-pointer py-1 text-blue-500 text-xs rounded font-medium flex items-center"
-                    >
-                      {!valueLoading && <Check strokeWidth={2} />}
-                      {valueLoading && (
-                        <Loader className="animate-spin text-blue-600 w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                  <button
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setValueLoading(false);
-                      setOpen(false);
-                    }}
-                  >
-                    <X className="text-red-600 ml-0.5" strokeWidth={2} />
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Borrow Section */}

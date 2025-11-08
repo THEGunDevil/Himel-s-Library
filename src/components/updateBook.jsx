@@ -15,9 +15,6 @@ function UpdateBook({ updateBookID }) {
   const [loading, setLoading] = useState(false);
   const { accessToken } = useAuth();
   const [previewUrl, setPreviewUrl] = useState(null);
-  const imageRegister = register("image", {
-    required: "Book cover is required",
-  });
 
   useEffect(() => {
     return () => {
@@ -47,6 +44,8 @@ function UpdateBook({ updateBookID }) {
       if (data.isbn) formData.append("isbn", data.isbn);
       if (data.total_copies)
         formData.append("total_copies", parseInt(data.total_copies));
+      if (data.available_copies)
+        formData.append("available_copies", parseInt(data.available_copies));
       if (data.genre) formData.append("genre", data.genre);
       if (data.description) formData.append("description", data.description);
       if (data.image_url && data.image_url[0])
@@ -206,12 +205,30 @@ function UpdateBook({ updateBookID }) {
                 min={1}
                 max={10}
                 {...register("total_copies")}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                className="w-full  px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
                 placeholder="1"
               />
               {errors.total_copies && (
                 <p className="text-red-500 text-xs mt-2">
                   {errors.total_copies.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Available Copies
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={10}
+                {...register("available_copies")}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                placeholder="1"
+              />
+              {errors.available_copies && (
+                <p className="text-red-500 text-xs mt-2">
+                  {errors.available_copies.message}
                 </p>
               )}
             </div>

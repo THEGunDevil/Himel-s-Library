@@ -1,20 +1,17 @@
 import { useState } from "react";
 export function ConvertStringToDate(dateStr) {
-  if (!dateStr) return "N/A";
+  if (!dateStr) return "-";
 
-  // Handle ISO strings like "2025-10-24T00:00:00Z"
   const date = new Date(dateStr);
-
-  // If it's invalid, try trimming milliseconds or using only date part
   if (isNaN(date.getTime())) {
-    // Maybe it's something like "2025-10-24 00:00:00"
     const cleanStr = dateStr.split("T")[0] || dateStr.split(" ")[0];
-    return cleanStr || "Invalid Date";
+    return cleanStr === "0001-01-01" ? "-" : cleanStr || "-";
   }
 
-  // Format nicely (YYYY-MM-DD)
-  return date.toISOString().split("T")[0];
+  const formatted = date.toISOString().split("T")[0];
+  return formatted === "0001-01-01" ? "-" : formatted;
 }
+
 
 export const getDueDate = (days) => {
   const date = new Date();

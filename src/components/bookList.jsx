@@ -13,13 +13,14 @@ import Loader from "./loader";
 import { useState } from "react";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
+import { useRouter } from "next/navigation";
 
 const columnHelper = createColumnHelper();
 
 export default function BookList({ setSelectedIndex, setUpdateBookID }) {
   // ---- hooks -------------------------------------------------
   const [page, setPage] = useState(1);
-
+  const router = useRouter();
   const {
     data: books,
     loading,
@@ -105,7 +106,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
             <button
               onClick={() => {
                 setUpdateBookID(book.id);
-                setSelectedIndex(4);
+                setSelectedIndex(5);
               }}
               className="px-3 py-1 cursor-pointer bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors duration-200"
             >
@@ -139,7 +140,6 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
     );
   if (!books.length)
     return <div className="p-6 text-gray-600">No books records found.</div>;
-
   return (
     <>
       <div className="w-full mx-auto my-1">
@@ -175,24 +175,32 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-200">
-                {table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="group hover:bg-gray-50 transition-colors duration-150"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                {table.getRowModel().rows.map((row) => {
+                  const bookID = row.original.id; // Make sure this exists in your row data
+                  console.log(bookID);
+                  
+                  return (
+                    <tr
+                      key={row.id}
+                      className="group hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+                      onClick={() => {
+                        router.push(`/book/${bookID}`)
+                      }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

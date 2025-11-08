@@ -266,3 +266,69 @@ export const handleCancelReserve = async ({
     toast.error("Failed to cancel the reservation");
   }
 };
+
+export async function updateReservationStatus({
+  reservation,
+  setLocalReservation,
+  updateReservationStatus,
+  refetch,
+  newStatus,
+  toast,
+}) {
+  if (!reservation?.id) {
+    toast.error("Invalid reservation");
+    return false;
+  }
+
+  const originalReservation = { ...reservation };
+
+  try {
+    setLocalReservation({ ...reservation, status: newStatus });
+
+    await updateReservationStatus(reservation.id, newStatus);
+
+    const statusMessages = {
+      pending: "Reservation set to pending",
+      notified: "User has been notified",
+      fulfilled: "Reservation fulfilled successfully",
+      cancelled: "Reservation cancelled",
+    };
+    toast.success(statusMessages[newStatus] || "Reservation updated");
+
+    // Refetch to ensure data consistency
+    if (refetch) {
+      await refetch();
+    }
+
+    return true;
+  } catch (error) {
+    setLocalReservation(originalReservation);
+    
+    const errorMessage = error.response?.data?.error || `Failed to ${newStatus} reservation`;
+    toast.error(errorMessage);
+    
+    console.error("Reservation update error:", error);
+    return false;
+  }
+}
+
+export async function cancelReservation(params) {
+  return updateReservationStatus({
+    ...params,
+    newStatus: "cancelled",
+  });
+}
+
+export async function fulfillReservation(params) {
+  return updateReservationStatus({
+    ...params,
+    newStatus: "fulfilled",
+  });
+}
+
+export async function notifyReservation(params) {
+  return updateReservationStatus({
+    ...params,
+    newStatus: "notified",
+  });
+}
