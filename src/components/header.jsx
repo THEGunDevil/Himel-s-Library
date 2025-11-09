@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Logo from "./logo";
 import { usePathname } from "next/navigation";
-import { Search, SidebarIcon, X } from "lucide-react";
+import { BellIcon, Search, SidebarIcon, X } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useAuth } from "@/contexts/authContext";
 import SearchBar from "./searchBar";
@@ -10,11 +10,13 @@ import { toast } from "react-toastify";
 
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
-
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState(null);
+  const [loadingNotification, setLoadingNotification] = useState(false);
+  const [notificationError, setNotificationError] = useState(null);
   const sidebarRef = useRef(null);
   const toggleRef = useRef(null);
   const searchRef = useRef(null);
@@ -103,6 +105,31 @@ export default function Header() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const fetchNotificationsByUserID = useCallback(async () => {
+    if (!accessToken) return;
+
+    setLoadingNotification(true);
+    setNotificationError(null);
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/?page=${page}&limit=${limit}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+
+      setNotifications(response.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch notifications:", err);
+      setNotificationError(err);
+    } finally {
+      setLoadingNotification(false);
+    }
+  }, [accessToken]); // ✅ only re-create if these change
+  useEffect(() => {
+    fetchNotificationsByUserID();
+  }, [fetchNotificationsByUserID]);
+
   const handleLogoutClick = () => setLogoutDialogOpen(true);
 
   const confirmLogout = async () => {
@@ -115,7 +142,7 @@ export default function Header() {
       toast.error("Logout failed. Please try again.");
     }
   };
-
+  const count = 100;
   return (
     <>
       <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 md:h-32">
@@ -193,7 +220,67 @@ export default function Header() {
         </nav>
 
         {/* Search & Sidebar Toggle */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
+          <div className="relative inline-block">
+            <button
+              onClick={() => setNotificationOpen((prev) => !prev)}
+              className="p-2 cursor-pointer
+                   hover:bg-blue-50 active:scale-95 rounded-full transition-all duration-200"
+            >
+              <BellIcon className="text-blue-400 w-7 h-7" />
+            </button>
+
+            {/* Notification badge */}
+            {count > 0 && (
+              <span
+                className="absolute -top-1 -right-1 bg-red-500 text-white text-xs
+                     font-bold rounded-full px-1.5 py-0.5 shadow-sm"
+              >
+                {count > 9 ? "9+" : count}
+              </span>
+            )}
+            {notificationOpen && (
+              <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in">
+                <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
+                  <h3 className="text-sm font-semibold text-gray-700">
+                    Notifications
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setCount(0);
+                      setIsOpen(false);
+                    }}
+                    className="text-xs text-blue-500 hover:underline"
+                  >
+                    Mark all as read
+                  </button>
+                </div>
+
+                <ul className="max-h-60 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <li className="px-4 py-3 text-gray-500 text-sm text-center">
+                      No notifications
+                    </li>
+                  ) : (
+                    notifications.map((n) => (
+                      <li
+                        key={n.id}
+                        className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
+                      >
+                        {n.icon}
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-800">{n.text}</p>
+                          <span className="text-xs text-gray-400">
+                            {n.time}
+                          </span>
+                        </div>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
           <button
             ref={searchBtnRef}
             onClick={handleSearchDropDown}
@@ -206,7 +293,66 @@ export default function Header() {
             <SearchBar open={open} />
           </div>
 
-          <div ref={toggleRef} className="flex md:hidden items-center gap-2">
+          <div ref={toggleRef} className="flex md:hidden items-center gap-2.5">
+            <div className="relative inline-block">
+              <button
+                className="p-2 cursor-pointer rounded-full
+                   hover:bg-blue-50 active:scale-95 transition-all duration-200"
+              >
+                <BellIcon className="text-blue-400 w-7 h-7" />
+              </button>
+
+              {/* Notification badge */}
+              {count > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 bg-red-500 text-white text-xs
+                     font-bold rounded-full px-1.5 py-0.5 shadow-sm"
+                >
+                  {count > 9 ? "9+" : count}
+                </span>
+              )}
+              {notificationOpen && (
+                <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in">
+                  <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      Notifications
+                    </h3>
+                    <button
+                      onClick={() => {
+                        setCount(0);
+                        setIsOpen(false);
+                      }}
+                      className="text-xs text-blue-500 hover:underline"
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
+
+                  <ul className="max-h-60 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <li className="px-4 py-3 text-gray-500 text-sm text-center">
+                        No notifications
+                      </li>
+                    ) : (
+                      notifications.map((n) => (
+                        <li
+                          key={n.id}
+                          className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
+                        >
+                          {n.icon}
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-800">{n.text}</p>
+                            <span className="text-xs text-gray-400">
+                              {n.time}
+                            </span>
+                          </div>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
             <button
               ref={searchBtnRef}
               onClick={handleSearchDropDown}
