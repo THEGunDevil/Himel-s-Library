@@ -53,6 +53,7 @@ export default function Home() {
   const handlePrev = () => {
     if (page > 1) setPage((prev) => prev - 1);
   };
+  console.log(books);
 
   return (
     <main className="md:pt-32 pt-24 xl:px-60 lg:px-30 px-4">
@@ -60,7 +61,6 @@ export default function Home() {
         Featured Books
       </h1>
       <BannerSlider bannerBooks={books} />
-
 
       {/* Classic */}
       <div className="mt-5">
@@ -75,16 +75,15 @@ export default function Home() {
         </h1>
         <BookSliderByGenre books={classicRomanceBooks} />
       </div>
-      
+
       {/* Featured Books with Pagination */}
       <div className="mt-5">
         <h1 className="uppercase font-bold text-2xl text-blue-400">
           All Books
         </h1>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-5 place-items-center">
-          {books?.map((book) => (
-            <BookCard key={book.id} book={book} />
-          ))}
+          {Array.isArray(books) &&
+            books.map((book) => <BookCard key={book.id} book={book} />)}
         </div>
 
         {/* Pagination Buttons */}

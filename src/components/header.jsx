@@ -3,7 +3,7 @@ import Link from "next/link";
 import Logo from "./logo";
 import { usePathname } from "next/navigation";
 import { BellIcon, Search, SidebarIcon, X } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/authContext";
 import SearchBar from "./searchBar";
 import { toast } from "react-toastify";
@@ -112,7 +112,7 @@ export default function Header() {
     setNotificationError(null);
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/?page=${page}&limit=${limit}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/notifications/get`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
