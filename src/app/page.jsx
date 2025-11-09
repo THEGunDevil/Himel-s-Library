@@ -53,6 +53,7 @@ export default function Home() {
   const handlePrev = () => {
     if (page > 1) setPage((prev) => prev - 1);
   };
+  
   return (
     <main className="md:pt-32 pt-24 xl:px-60 lg:px-30 px-4">
       <h1 className="uppercase font-bold text-2xl text-blue-400 my-5">

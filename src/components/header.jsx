@@ -15,7 +15,7 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState(null);
+  const [notifications, setNotifications] = useState([]);
   const [loadingNotification, setLoadingNotification] = useState(false);
   const [notificationError, setNotificationError] = useState(null);
   const sidebarRef = useRef(null);
@@ -147,8 +147,6 @@ useEffect(() => {
       toast.error("Logout failed. Please try again.");
     }
   };
-  console.log(notifications);
-
   return (
     <>
       <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 md:h-32">
