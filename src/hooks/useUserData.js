@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "@/contexts/authContext";
 
-export function useUserData({ page = 1, limit = 10 }) {
+export function useUserData({ page = 1, limit = 10 } = {}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
