@@ -36,7 +36,7 @@ export function useBorrowData() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken]);
+  }, [accessToken,isAdmin]);
 
   useEffect(() => {
     if (accessToken) fetchAllBorrows();

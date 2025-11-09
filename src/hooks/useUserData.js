@@ -33,7 +33,7 @@ export function useUserData({ page = 1, limit = 10 }) {
     }
  
     
-  }, [accessToken, isAdmin]); // ✅ only re-create if these change
+  }, [accessToken, isAdmin, page, limit]); // ✅ only re-create if these change
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
