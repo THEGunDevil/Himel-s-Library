@@ -7,6 +7,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/authContext";
 import SearchBar from "./searchBar";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
@@ -105,30 +106,34 @@ export default function Header() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const fetchNotificationsByUserID = useCallback(async () => {
-    if (!accessToken) return;
+  const fetchNotificationsByUserID = useCallback(
+    async () => {
+      if (!accessToken) return;
 
-    setLoadingNotification(true);
-    setNotificationError(null);
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/notifications/get`,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
+      setLoadingNotification(true);
+      setNotificationError(null);
+      try {
+        const response = axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/notifications/get`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+        setNotifications(response.data);
+      } catch (err) {
+        console.error("❌ Failed to fetch notifications:", err);
+        setNotificationError(err);
+      } finally {
+        setLoadingNotification(false);
+      }
+    },
+    [accessToken]
+  );
 
-      setNotifications(response.data);
-    } catch (err) {
-      console.error("❌ Failed to fetch notifications:", err);
-      setNotificationError(err);
-    } finally {
-      setLoadingNotification(false);
-    }
-  }, [accessToken]); // ✅ only re-create if these change
-  useEffect(() => {
-    fetchNotificationsByUserID();
-  }, [fetchNotificationsByUserID]);
+useEffect(() => {
+  fetchNotificationsByUserID(); // ✅ just call it, no argument
+}, [fetchNotificationsByUserID]);
+
 
   const handleLogoutClick = () => setLogoutDialogOpen(true);
 
@@ -142,7 +147,8 @@ export default function Header() {
       toast.error("Logout failed. Please try again.");
     }
   };
-  const count = 100;
+  console.log(notifications);
+
   return (
     <>
       <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 md:h-32">
@@ -231,24 +237,24 @@ export default function Header() {
             </button>
 
             {/* Notification badge */}
-            {count > 0 && (
+            {notifications?.length > 0 && (
               <span
                 className="absolute -top-1 -right-1 bg-red-500 text-white text-xs
                      font-bold rounded-full px-1.5 py-0.5 shadow-sm"
               >
-                {count > 9 ? "9+" : count}
+                {notifications?.length > 9 ? "9+" : notifications?.length}
               </span>
             )}
             {notificationOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in">
+              <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 z-50 overflow-hidden animate-fade-in">
                 <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
                   <h3 className="text-sm font-semibold text-gray-700">
                     Notifications
                   </h3>
                   <button
                     onClick={() => {
-                      setCount(0);
-                      setIsOpen(false);
+                      setNotifications(0);
+                      setNotificationOpen(false);
                     }}
                     className="text-xs text-blue-500 hover:underline"
                   >
@@ -257,12 +263,12 @@ export default function Header() {
                 </div>
 
                 <ul className="max-h-60 overflow-y-auto">
-                  {notifications.length === 0 ? (
+                  {notifications?.length === 0 ? (
                     <li className="px-4 py-3 text-gray-500 text-sm text-center">
                       No notifications
                     </li>
                   ) : (
-                    notifications.map((n) => (
+                    notifications?.map((n) => (
                       <li
                         key={n.id}
                         className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
@@ -303,12 +309,12 @@ export default function Header() {
               </button>
 
               {/* Notification badge */}
-              {count > 0 && (
+              {notifications?.length > 0 && (
                 <span
                   className="absolute -top-1 -right-1 bg-red-500 text-white text-xs
                      font-bold rounded-full px-1.5 py-0.5 shadow-sm"
                 >
-                  {count > 9 ? "9+" : count}
+                  {notifications?.length > 9 ? "9+" : notifications?.length}
                 </span>
               )}
               {notificationOpen && (
@@ -319,8 +325,8 @@ export default function Header() {
                     </h3>
                     <button
                       onClick={() => {
-                        setCount(0);
-                        setIsOpen(false);
+                        setNotifications(0);
+                        setNotificationOpen(false);
                       }}
                       className="text-xs text-blue-500 hover:underline"
                     >
@@ -329,12 +335,12 @@ export default function Header() {
                   </div>
 
                   <ul className="max-h-60 overflow-y-auto">
-                    {notifications.length === 0 ? (
+                    {notifications?.length === 0 ? (
                       <li className="px-4 py-3 text-gray-500 text-sm text-center">
                         No notifications
                       </li>
                     ) : (
-                      notifications.map((n) => (
+                      notifications?.map((n) => (
                         <li
                           key={n.id}
                           className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"

@@ -104,7 +104,8 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
         return (
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setUpdateBookID(book.id);
                 setSelectedIndex(5);
               }}
@@ -113,7 +114,10 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
               Update
             </button>
             <button
-              onClick={() => setBookToDelete(book.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setBookToDelete(book.id);
+              }}
               className="px-3 py-1 cursor-pointer bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors duration-200"
             >
               Delete
@@ -177,14 +181,12 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
               <tbody className="bg-white divide-y divide-gray-200">
                 {table.getRowModel().rows.map((row) => {
                   const bookID = row.original.id; // Make sure this exists in your row data
-                  console.log(bookID);
-                  
                   return (
                     <tr
                       key={row.id}
                       className="group hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
                       onClick={() => {
-                        router.push(`/book/${bookID}`)
+                        router.push(`/book/${bookID}`);
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
