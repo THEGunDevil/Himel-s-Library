@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/authContext";
 
-export function useReservations(bookID) {
+export function useReservations() {
   const [reservations, setReservations] = useState([]);
   const [reservationsByBookID, setReservationsByBookID] = useState([]);
   const [reservationsByBookIDAndUserID, setReservationsByBookIDAndUserID] =

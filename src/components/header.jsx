@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/authContext";
 import SearchBar from "./searchBar";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { ConvertStringToDate } from "../../utlis/utils";
 
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
@@ -112,13 +113,14 @@ export default function Header() {
     setLoadingNotification(true);
     setNotificationError(null);
     try {
-      const response = axios.get(
+      const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/notifications/get`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
       setNotifications(response.data);
+      console.log(response.data);
     } catch (err) {
       console.error("❌ Failed to fetch notifications:", err);
       setNotificationError(err);
@@ -143,7 +145,6 @@ export default function Header() {
       toast.error("Logout failed. Please try again.");
     }
   };
-  console.log(notifications);
 
   return (
     <>
@@ -276,11 +277,10 @@ export default function Header() {
                         key={n.id}
                         className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
                       >
-                        {n.icon}
                         <div className="flex-1">
-                          <p className="text-sm text-gray-800">{n.text}</p>
+                          <p className="text-sm text-gray-800">{n.message}</p>
                           <span className="text-xs text-gray-400">
-                            {n.time}
+                            {ConvertStringToDate(n.created_at)}{" "}
                           </span>
                         </div>
                       </li>
@@ -292,7 +292,7 @@ export default function Header() {
           </div>
 
           <div ref={searchRef}>
-            <SearchBar open={open} setOpen={setOpen}/>
+            <SearchBar open={open} setOpen={setOpen} />
           </div>
 
           <div
@@ -352,11 +352,10 @@ export default function Header() {
                           key={n.id}
                           className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
                         >
-                          {n.icon}
                           <div className="flex-1">
-                            <p className="text-sm text-gray-800">{n.text}</p>
+                            <p className="text-sm text-gray-800">{n.message}</p>
                             <span className="text-xs text-gray-400">
-                              {n.time}
+                              {ConvertStringToDate(n.created_at)}
                             </span>
                           </div>
                         </li>
