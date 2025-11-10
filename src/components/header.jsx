@@ -147,7 +147,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 md:h-32">
+      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 sm:h-32">
         {/* Logo */}
         <Link href="/" className="hidden md:flex items-center">
           <Logo width={112} />
@@ -223,6 +223,13 @@ export default function Header() {
 
         {/* Search & Sidebar Toggle */}
         <div className="flex items-center gap-2.5">
+          <button
+            ref={searchBtnRef}
+            onClick={handleSearchDropDown}
+            className="hidden md:block p-2 bg-white rounded-full"
+          >
+            <Search className="text-blue-400" />
+          </button>
           <div className="relative inline-block">
             <button
               onClick={() => setNotificationOpen((prev) => !prev)}
@@ -283,19 +290,22 @@ export default function Header() {
               </div>
             )}
           </div>
-          <button
-            ref={searchBtnRef}
-            onClick={handleSearchDropDown}
-            className="hidden md:block p-2 bg-white rounded-full"
-          >
-            <Search className="text-blue-400" />
-          </button>
 
           <div ref={searchRef}>
             <SearchBar open={open} />
           </div>
 
-          <div ref={toggleRef} className="flex md:hidden items-center gap-1">
+          <div
+            ref={toggleRef}
+            className="flex md:hidden items-center gap-1 sm:gap-3"
+          >
+            <button
+              ref={searchBtnRef}
+              onClick={handleSearchDropDown}
+              className="p-2 bg-white rounded-full"
+            >
+              <Search className="text-blue-400" />
+            </button>
             <div className="relative inline-block">
               <button
                 onClick={() => setNotificationOpen((prev) => !prev)}
@@ -356,13 +366,7 @@ export default function Header() {
                 </div>
               )}
             </div>
-            <button
-              ref={searchBtnRef}
-              onClick={handleSearchDropDown}
-              className="p-2 bg-white rounded-full"
-            >
-              <Search className="text-blue-400" />
-            </button>
+
             <button onClick={handleSidebarToggle}>
               <SidebarIcon className="h-7 w-7 text-blue-400 cursor-pointer" />
             </button>
