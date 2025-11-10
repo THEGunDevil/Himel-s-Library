@@ -106,34 +106,30 @@ export default function Header() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const fetchNotificationsByUserID = useCallback(
-    async () => {
-      if (!accessToken) return;
+  const fetchNotificationsByUserID = useCallback(async () => {
+    if (!accessToken) return;
 
-      setLoadingNotification(true);
-      setNotificationError(null);
-      try {
-        const response = axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/notifications/get`,
-          {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }
-        );
-        setNotifications(response.data);
-      } catch (err) {
-        console.error("❌ Failed to fetch notifications:", err);
-        setNotificationError(err);
-      } finally {
-        setLoadingNotification(false);
-      }
-    },
-    [accessToken]
-  );
+    setLoadingNotification(true);
+    setNotificationError(null);
+    try {
+      const response = axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/notifications/get`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      setNotifications(response.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch notifications:", err);
+      setNotificationError(err);
+    } finally {
+      setLoadingNotification(false);
+    }
+  }, [accessToken]);
 
-useEffect(() => {
-  fetchNotificationsByUserID(); // ✅ just call it, no argument
-}, [fetchNotificationsByUserID]);
-
+  useEffect(() => {
+    fetchNotificationsByUserID(); // ✅ just call it, no argument
+  }, [fetchNotificationsByUserID]);
 
   const handleLogoutClick = () => setLogoutDialogOpen(true);
 
@@ -147,6 +143,8 @@ useEffect(() => {
       toast.error("Logout failed. Please try again.");
     }
   };
+  console.log(notifications);
+
   return (
     <>
       <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 md:h-32">
@@ -228,7 +226,7 @@ useEffect(() => {
           <div className="relative inline-block">
             <button
               onClick={() => setNotificationOpen((prev) => !prev)}
-              className="p-2 cursor-pointer
+              className="p-2 hidden md:block cursor-pointer
                    hover:bg-blue-50 active:scale-95 rounded-full transition-all duration-200"
             >
               <BellIcon className="text-blue-400 w-7 h-7" />
@@ -237,14 +235,14 @@ useEffect(() => {
             {/* Notification badge */}
             {notifications?.length > 0 && (
               <span
-                className="absolute -top-1 -right-1 bg-red-500 text-white text-xs
+                className="absolute hidden md:block -top-1 -right-1 bg-red-500 text-white text-xs
                      font-bold rounded-full px-1.5 py-0.5 shadow-sm"
               >
                 {notifications?.length > 9 ? "9+" : notifications?.length}
               </span>
             )}
             {notificationOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 z-50 overflow-hidden animate-fade-in">
+              <div className="absolute hidden md:block right-0 mt-2 w-72 bg-white border border-gray-200 z-50 overflow-hidden animate-fade-in">
                 <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
                   <h3 className="text-sm font-semibold text-gray-700">
                     Notifications
@@ -260,7 +258,7 @@ useEffect(() => {
                   </button>
                 </div>
 
-                <ul className="max-h-60 overflow-y-auto">
+                <ul className="max-h-60 overflow-y-auto hidden md:block">
                   {notifications?.length === 0 ? (
                     <li className="px-4 py-3 text-gray-500 text-sm text-center">
                       No notifications
@@ -297,10 +295,11 @@ useEffect(() => {
             <SearchBar open={open} />
           </div>
 
-          <div ref={toggleRef} className="flex md:hidden items-center gap-2.5">
+          <div ref={toggleRef} className="flex md:hidden items-center gap-1">
             <div className="relative inline-block">
               <button
-                className="p-2 cursor-pointer rounded-full
+                onClick={() => setNotificationOpen((prev) => !prev)}
+                className="p-2 md:hidden block cursor-pointer rounded-full
                    hover:bg-blue-50 active:scale-95 transition-all duration-200"
               >
                 <BellIcon className="text-blue-400 w-7 h-7" />
@@ -309,14 +308,14 @@ useEffect(() => {
               {/* Notification badge */}
               {notifications?.length > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 bg-red-500 text-white text-xs
+                  className="absolute md:hidden block -top-1 -right-1 bg-red-500 text-white text-xs
                      font-bold rounded-full px-1.5 py-0.5 shadow-sm"
                 >
                   {notifications?.length > 9 ? "9+" : notifications?.length}
                 </span>
               )}
               {notificationOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in">
+                <div className="absolute md:hidden block right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in">
                   <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
                     <h3 className="text-sm font-semibold text-gray-700">
                       Notifications
@@ -332,7 +331,7 @@ useEffect(() => {
                     </button>
                   </div>
 
-                  <ul className="max-h-60 overflow-y-auto">
+                  <ul className="max-h-60 overflow-y-auto md:hidden block">
                     {notifications?.length === 0 ? (
                       <li className="px-4 py-3 text-gray-500 text-sm text-center">
                         No notifications
