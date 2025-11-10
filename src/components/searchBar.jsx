@@ -4,7 +4,7 @@ import { SearchIcon, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import SearchedPreview from "./searchedPreview";
-function SearchBar({ open }) {
+function SearchBar({ open, setOpen }) {
   const [local, setLocal] = useState("");
   const [genre, setGenre] = useState("all");
   const [genres, setGenres] = useState([]);
@@ -41,7 +41,7 @@ function SearchBar({ open }) {
     >
       {/* Search Input */}
       <form className="flex items-center w-fit justify-between gap-1 py-2.5">
-        <div className="border h-[36px] sm:flex hidden items-center">
+        <div className="border h-9 sm:flex hidden items-center">
           <select
             className="h-full text-sm focus:outline-none"
             value={genre}
@@ -55,7 +55,7 @@ function SearchBar({ open }) {
             ))}
           </select>
         </div>
-        <div className="border h-[36px] flex sm:hidden items-center ">
+        <div className="border h-9 flex sm:hidden items-center ">
           <select
             className="h-full text-sm w-20 focus:outline-none"
             value={genre}
@@ -75,29 +75,34 @@ function SearchBar({ open }) {
           value={local}
           onChange={(e) => setLocal(e.target.value)}
           placeholder="Search books..."
-          className="h-[36px] md:w-[350px] w-[180px] border p-4 focus:outline-none focus:ring-0"
+          className="h-9 md:w-[350px] w-[180px] border p-4 focus:outline-none focus:ring-0"
         />
 
         {local && (
           <button
             type="button"
             onClick={handleClearText}
-            className="h-[36px] border-black border w-[36px] flex justify-center items-center text-red-400 hover:text-red-600"
+            className="h-9 border-black border w-9 flex justify-center items-center text-red-400 hover:text-red-600"
             aria-label="Clear search"
           >
             <X className="h-5 w-5" />
           </button>
         )}
 
-        <div className="mx-auto border-black border h-[36px] w-[36px] flex justify-center items-center text-blue-400 cursor-pointer">
+        <div className="mx-auto border-black border h-9 w-9 flex justify-center items-center text-blue-400 cursor-pointer">
           <SearchIcon className="h-5 w-5" />
         </div>
       </form>
 
       {/* Live Search Preview */}
       {local && (
-        <div className="relative w-full sm:max-w-[550px] max-w-[420px]">
-          <SearchedPreview value={local} genre={genre} />
+        <div className="relative w-full sm:max-w-[750px] max-w-[420px]">
+          <SearchedPreview
+            value={local}
+            genre={genre}
+            setLocal={setLocal}
+            setOpen={setOpen}
+          />
         </div>
       )}
     </section>

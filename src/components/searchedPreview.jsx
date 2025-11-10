@@ -4,11 +4,20 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import axios from "axios";
 
-export default function SearchedPreview({ value, genre }) {
+export default function SearchedPreview({
+  value = "",
+  genre,
+  setLocal,
+  setOpen,
+}) {
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchBooks = useCallback(async () => {
+    if (typeof value !== "string") {
+      setFilteredBooks([]); // or handle differently
+      return;
+    }
     const trimmedValue = value.trim();
     if (!trimmedValue) {
       setFilteredBooks([]);
@@ -39,11 +48,11 @@ export default function SearchedPreview({ value, genre }) {
   }, [fetchBooks]);
 
   // Close preview if no input
-  if (!value.trim()) return null;
+  if (typeof value !== "string" || !value.trim()) return null;
 
   return (
     <div
-      className="absolute top-full left-0 w-full mt-2 bg-blue-200 shadow-lg max-h-60 overflow-y-scroll z-50"
+      className="absolute top-full left-0 w-full mt-2 bg-blue-200 shadow-lg max-h-80 min-h-80 overflow-y-scroll z-50"
       role="listbox"
       aria-live="polite"
     >
@@ -58,7 +67,14 @@ export default function SearchedPreview({ value, genre }) {
       ) : (
         <ul>
           {filteredBooks.map((book) => (
-            <li key={book.id} role="option">
+            <li
+              key={book.id}
+              role="option"
+              onClick={() => {
+                setLocal([]);
+                setOpen(false);
+              }}
+            >
               <Link
                 href={`/book/${book.id}`}
                 className="block px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors"

@@ -292,7 +292,7 @@ export default function Header() {
           </div>
 
           <div ref={searchRef}>
-            <SearchBar open={open} />
+            <SearchBar open={open} setOpen={setOpen}/>
           </div>
 
           <div
