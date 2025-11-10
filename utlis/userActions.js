@@ -303,14 +303,36 @@ export async function updateReservationStatus({
     return true;
   } catch (error) {
     setLocalReservation(originalReservation);
-    
-    const errorMessage = error.response?.data?.error || `Failed to ${newStatus} reservation`;
+
+    const errorMessage =
+      error.response?.data?.error || `Failed to ${newStatus} reservation`;
     toast.error(errorMessage);
-    
+
     console.error("Reservation update error:", error);
     return false;
   }
 }
+export const handleMarkRead = async (
+  accessToken,
+  setNotifications,
+  setNotificationOpen
+) => {
+  if (!accessToken) return;
+
+  try {
+    await axios.patch(
+      `${process.env.NEXT_PUBLIC_API_URL}/notifications/mark-read`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+    setNotifications([]);
+    setNotificationOpen(false);
+  } catch (error) {
+    console.error("Failed to mark notifications as read:", error);
+  }
+};
 
 export async function cancelReservation(params) {
   return updateReservationStatus({

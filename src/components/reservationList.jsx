@@ -14,16 +14,14 @@ import DownloadOptions from "./downloadOptions";
 import { useAuth } from "@/contexts/authContext";
 import { useReservations } from "@/hooks/useReservation";
 import { ConvertStringToDate } from "../../utlis/utils";
-import {
-  updateReservationStatus,
-  fulfillReservation,
-  cancelReservation,
-} from "../../utlis/userActions";
+import { fulfillReservation, cancelReservation } from "../../utlis/userActions";
+import { useRouter } from "next/navigation";
 
 const columnHelper = createColumnHelper();
 
 export default function ReservationList() {
   const [page, setPage] = useState(1);
+  const router = useRouter();
   const { isAdmin, accessToken } = useAuth();
   const {
     reservations,
@@ -32,6 +30,7 @@ export default function ReservationList() {
     totalPages,
     updateReservationStatus: updateStatus,
     fetchReservations,
+    refetch,
   } = useReservations({ page });
 
   const [localReservations, setLocalReservations] = useState({});
@@ -111,7 +110,10 @@ export default function ReservationList() {
       cancelled: { bg: "bg-red-100", text: "text-red-800" },
     };
 
-    const config = statusConfig[status] || { bg: "bg-gray-100", text: "text-gray-800" };
+    const config = statusConfig[status] || {
+      bg: "bg-gray-100",
+      text: "text-gray-800",
+    };
 
     return (
       <span
@@ -136,37 +138,37 @@ export default function ReservationList() {
       header: "Status",
       cell: (info) => <StatusBadge status={info.getValue()} />,
     }),
-columnHelper.accessor("created_at", {
-  header: "Created At",
-  cell: (info) => {
-    const value = info.getValue();
-    return value ? ConvertStringToDate(value).toLocaleString() : "-";
-  },
-}),
+    columnHelper.accessor("created_at", {
+      header: "Created At",
+      cell: (info) => {
+        const value = info.getValue();
+        return value ? ConvertStringToDate(value).toLocaleString() : "-";
+      },
+    }),
 
-columnHelper.accessor("notified_at", {
-  header: "Notified At",
-  cell: (info) => {
-    const value = info.getValue();
-    return value ? ConvertStringToDate(value).toLocaleString() : "-";
-  },
-}),
+    columnHelper.accessor("notified_at", {
+      header: "Notified At",
+      cell: (info) => {
+        const value = info.getValue();
+        return value ? ConvertStringToDate(value).toLocaleString() : "-";
+      },
+    }),
 
-columnHelper.accessor("fulfilled_at", {
-  header: "Fulfilled At",
-  cell: (info) => {
-    const value = info.getValue();
-    return value ? ConvertStringToDate(value).toLocaleString() : "-";
-  },
-}),
+    columnHelper.accessor("fulfilled_at", {
+      header: "Fulfilled At",
+      cell: (info) => {
+        const value = info.getValue();
+        return value ? ConvertStringToDate(value).toLocaleString() : "-";
+      },
+    }),
 
-columnHelper.accessor("cancelled_at", {
-  header: "Cancelled At",
-  cell: (info) => {
-    const value = info.getValue();
-    return value ? ConvertStringToDate(value).toLocaleString() : "-";
-  },
-}),
+    columnHelper.accessor("cancelled_at", {
+      header: "Cancelled At",
+      cell: (info) => {
+        const value = info.getValue();
+        return value ? ConvertStringToDate(value).toLocaleString() : "-";
+      },
+    }),
     columnHelper.display({
       id: "actions",
       header: "Actions",
@@ -180,31 +182,30 @@ columnHelper.accessor("cancelled_at", {
 
         return (
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {isPending && (
-              <>
-                <button
-                  onClick={() => handleFulfill(reservation)}
-                  className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors duration-200"
-                  aria-label="Fulfill reservation"
-                >
-                  Fulfill
-                </button>
-                <button
-                  onClick={() => handleCancel(reservation)}
-                  className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors duration-200"
-                  aria-label="Cancel reservation"
-                >
-                  Cancel
-                </button>
-              </>
-            )}
-            {isFulfilled && (
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                handleFulfill(reservation);
+                await refetch();
+              }}
+              className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors duration-200"
+              aria-label="Fulfill reservation"
+            >
+              {isPending && "Fulfill"}
+              {isFulfilled && "Fulfilled"}
+            </button>
+
+            {!isFulfilled && (
               <button
-                onClick={() => handleCancel(reservation)}
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  handleCancel(reservation);
+                  await refetch();
+                }}
                 className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors duration-200"
-                aria-label="Cancel fulfilled reservation"
+                aria-label="Cancel reservation"
               >
-                Cancel
+                {isPending ? "Cancel" : "Cancelled"}
               </button>
             )}
           </div>
@@ -249,10 +250,13 @@ columnHelper.accessor("cancelled_at", {
     return (
       <div className="p-6 text-center text-gray-500">
         <p className="text-lg font-medium">No reservations found</p>
-        <p className="text-sm mt-2">There are currently no reservations to display.</p>
+        <p className="text-sm mt-2">
+          There are currently no reservations to display.
+        </p>
       </div>
     );
   }
+  console.log(reservations);
 
   return (
     <div className="w-full mx-auto mt-1">
@@ -291,24 +295,32 @@ columnHelper.accessor("cancelled_at", {
               ))}
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 group transition-colors duration-150"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {table.getRowModel().rows.map((row) => {
+                const bookID = row.original.book_id; // Make sure this exists in your row data
+                console.log(bookID);
+
+                return (
+                  <tr
+                    key={row.id}
+                    className="group hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+                    onClick={() => {
+                      router.push(`/book/${bookID}`);
+                    }}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

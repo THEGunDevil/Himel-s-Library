@@ -24,7 +24,6 @@ export default function Book() {
   const [dueDate, setDueDate] = useState("");
   const [localReserves, setLocalReserves] = useState(null);
 
-
   const {
     loadingCreate,
     createError,
@@ -121,7 +120,6 @@ export default function Book() {
   if (bookLoading || !book) return <div className="p-6">Loading book...</div>;
   if (bookError)
     return <div className="p-6 text-red-500">Failed to load book.</div>;
-
   return (
     <section className="flex flex-col w-full lg:flex-row md:pt-36 pt-32 justify-between gap-5 items-start xl:px-60 lg:px-30 px-4 mb-10">
       {/* Book Info */}
@@ -209,7 +207,7 @@ export default function Book() {
                   : "bg-blue-500 hover:bg-blue-600"
               }`}
             >
-              {loading ? "Borrowing..." : "Borrow"}
+              {loading ? "Sending Request..." : "Request to Borrow"}
             </button>
           </div>
         )}
@@ -227,15 +225,16 @@ export default function Book() {
               </button>
             )}
 
-            {localReserves?.status === "pending" && (
-              <button
-                className="w-full p-2 bg-red-400 cursor-pointer text-white font-medium"
-                disabled={loadingUpdate}
-                onClick={handleCancelClick}
-              >
-                {loadingUpdate ? "Cancelling..." : "Cancel Reserve"}
-              </button>
-            )}
+            {localReserves?.status === "pending" &&
+              localReserves?.user_id === userID && (
+                <button
+                  className="w-full p-2 bg-red-400 cursor-pointer text-white font-medium"
+                  disabled={loadingUpdate}
+                  onClick={handleCancelClick}
+                >
+                  {loadingUpdate ? "Cancelling..." : "Cancel Reserve"}
+                </button>
+              )}
             {localReserves?.status === "fulfilled" && (
               <div className="w-full p-2 bg-blue-300 text-center text-white font-medium">
                 Reservation fulfilled

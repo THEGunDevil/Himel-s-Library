@@ -9,7 +9,7 @@ import SearchBar from "./searchBar";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { ConvertStringToDate } from "../../utlis/utils";
-
+import { handleBan, handleMarkRead } from "../../utlis/userActions";
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -77,23 +77,23 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [sidebarOpen]);
 
-  // ✅ Close search bar when clicking outside
+  const searchBtnDesktopRef = useRef(null);
+  const searchBtnMobileRef = useRef(null);
   useEffect(() => {
-    function handleClickOutside(event) {
+    const handleClickOutside = (event) => {
       if (
-        open &&
         searchRef.current &&
         !searchRef.current.contains(event.target) &&
-        searchBtnRef.current &&
-        !searchBtnRef.current.contains(event.target)
+        !searchBtnDesktopRef.current?.contains(event.target) &&
+        !searchBtnMobileRef.current?.contains(event.target)
       ) {
         setOpen(false);
       }
-    }
+    };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
+  }, []);
 
   // ✅ Close sidebar or search when pressing Escape
   useEffect(() => {
@@ -145,7 +145,10 @@ export default function Header() {
       toast.error("Logout failed. Please try again.");
     }
   };
-
+  let unreadCount = 0;
+  notifications?.forEach((n) => {
+    if (!n.is_read) unreadCount++;
+  });
   return (
     <>
       <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 sm:h-32">
@@ -225,7 +228,7 @@ export default function Header() {
         {/* Search & Sidebar Toggle */}
         <div className="flex items-center gap-2.5">
           <button
-            ref={searchBtnRef}
+            ref={searchBtnDesktopRef}
             onClick={handleSearchDropDown}
             className="hidden md:block p-2 bg-white rounded-full"
           >
@@ -241,12 +244,12 @@ export default function Header() {
             </button>
 
             {/* Notification badge */}
-            {notifications?.length > 0 && (
+            {unreadCount > 0 && (
               <span
-                className="absolute hidden md:block -top-1 -right-1 bg-red-500 text-white text-xs
-                     font-bold rounded-full px-1.5 py-0.5 shadow-sm"
+                className="absolute md:hidden block -top-1 -right-1 bg-red-500 text-white text-xs
+       font-bold rounded-full px-1.5 py-0.5 shadow-sm"
               >
-                {notifications?.length > 9 ? "9+" : notifications?.length}
+                {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
             {notificationOpen && (
@@ -256,35 +259,40 @@ export default function Header() {
                     Notifications
                   </h3>
                   <button
-                    onClick={() => {
-                      setNotifications(0);
-                      setNotificationOpen(false);
-                    }}
-                    className="text-xs text-blue-500 hover:underline"
+                    onClick={() =>
+                      handleMarkRead(
+                        accessToken,
+                        setNotifications,
+                        setNotificationOpen
+                      )
+                    }
+                    className="text-xs text-blue-500 cursor-pointer hover:underline"
                   >
                     Mark all as read
                   </button>
                 </div>
 
                 <ul className="max-h-60 overflow-y-auto hidden md:block">
-                  {notifications?.length === 0 ? (
+                  {notifications?.filter((n) => !n.is_read).length === 0 ? (
                     <li className="px-4 py-3 text-gray-500 text-sm text-center">
                       No notifications
                     </li>
                   ) : (
-                    notifications?.map((n) => (
-                      <li
-                        key={n.id}
-                        className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
-                      >
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-800">{n.message}</p>
-                          <span className="text-xs text-gray-400">
-                            {ConvertStringToDate(n.created_at)}{" "}
-                          </span>
-                        </div>
-                      </li>
-                    ))
+                    notifications
+                      ?.filter((n) => !n.is_read)
+                      .map((n) => (
+                        <li
+                          key={n.id}
+                          className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
+                        >
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-800">{n.message}</p>
+                            <span className="text-xs text-gray-400">
+                              {ConvertStringToDate(n.created_at)}
+                            </span>
+                          </div>
+                        </li>
+                      ))
                   )}
                 </ul>
               </div>
@@ -300,7 +308,7 @@ export default function Header() {
             className="flex md:hidden items-center gap-1 sm:gap-3"
           >
             <button
-              ref={searchBtnRef}
+              ref={searchBtnMobileRef}
               onClick={handleSearchDropDown}
               className="p-2 bg-white rounded-full"
             >
@@ -316,12 +324,12 @@ export default function Header() {
               </button>
 
               {/* Notification badge */}
-              {notifications?.length > 0 && (
+              {unreadCount > 0 && (
                 <span
                   className="absolute md:hidden block -top-1 -right-1 bg-red-500 text-white text-xs
-                     font-bold rounded-full px-1.5 py-0.5 shadow-sm"
+       font-bold rounded-full px-1.5 py-0.5 shadow-sm"
                 >
-                  {notifications?.length > 9 ? "9+" : notifications?.length}
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
               {notificationOpen && (
@@ -331,35 +339,42 @@ export default function Header() {
                       Notifications
                     </h3>
                     <button
-                      onClick={() => {
-                        setNotifications(0);
-                        setNotificationOpen(false);
-                      }}
-                      className="text-xs text-blue-500 hover:underline"
+                      onClick={() =>
+                        handleMarkRead(
+                          accessToken,
+                          setNotifications,
+                          setNotificationOpen
+                        )
+                      }
+                      className="text-xs text-blue-500 cursor-pointer hover:underline"
                     >
                       Mark all as read
                     </button>
                   </div>
 
                   <ul className="max-h-60 overflow-y-auto md:hidden block">
-                    {notifications?.length === 0 ? (
+                    {notifications?.filter((n) => !n.is_read).length === 0 ? (
                       <li className="px-4 py-3 text-gray-500 text-sm text-center">
                         No notifications
                       </li>
                     ) : (
-                      notifications?.map((n) => (
-                        <li
-                          key={n.id}
-                          className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
-                        >
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-800">{n.message}</p>
-                            <span className="text-xs text-gray-400">
-                              {ConvertStringToDate(n.created_at)}
-                            </span>
-                          </div>
-                        </li>
-                      ))
+                      notifications
+                        ?.filter((n) => !n.is_read)
+                        .map((n) => (
+                          <li
+                            key={n.id}
+                            className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
+                          >
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-800">
+                                {n.message}
+                              </p>
+                              <span className="text-xs text-gray-400">
+                                {ConvertStringToDate(n.created_at)}
+                              </span>
+                            </div>
+                          </li>
+                        ))
                     )}
                   </ul>
                 </div>
