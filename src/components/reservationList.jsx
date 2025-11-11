@@ -17,6 +17,7 @@ import { ConvertStringToDate } from "../../utlis/utils";
 import { fulfillReservation, cancelReservation } from "../../utlis/userActions";
 import { useRouter } from "next/navigation";
 import FilterComponent from "./filterComponent";
+import { useQuery } from "@tanstack/react-query";
 
 const columnHelper = createColumnHelper();
 
@@ -220,20 +221,20 @@ export default function ReservationList() {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const options = ["Pending", "Fulfilled", "Notified" ,"Cancelled"];
-  const { data, isLoading, error, refetch:refetchList } = useQuery(
-    ["filteredData", selectedStatus],
-    async () => {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/list/data-paginated?status=${selectedStatus}`
-      );
-      return res.data;
-    },
-    {
-      enabled: !!selectedStatus, // only run if status is defined
-    }
-  );
+  // const [selectedStatus, setSelectedStatus] = useState("");
+  // const options = ["Pending", "Fulfilled", "Notified" ,"Cancelled"];
+  // const { data, isLoading, error, refetch:refetchList } = useQuery(
+  //   ["filteredData", selectedStatus],
+  //   async () => {
+  //     const res = await axios.get(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/list/data-paginated?status=${selectedStatus}`
+  //     );
+  //     return res.data;
+  //   },
+  //   {
+  //     enabled: !!selectedStatus, // only run if status is defined
+  //   }
+  // );
   // Loading state
   if (loadingFetch) {
     return (
@@ -277,9 +278,9 @@ export default function ReservationList() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold text-blue-400">Reservation List</h1>
         <div className="flex gap-1 p-1">
-          {isAdmin && reservations.length > 0 && (
+          {/* {isAdmin && reservations.length > 0 && (
             <FilterComponent options={options} />
-          )}
+          )} */}
           {isAdmin && (
             <DownloadOptions
               endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/reservations`}
