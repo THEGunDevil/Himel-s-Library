@@ -1,17 +1,12 @@
-
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
-import { AuthProvider } from "@/contexts/authContext";
 import Footer from "@/components/footer";
+import { AuthProvider } from "@/contexts/authContext";
 import ToastProvider from "@/components/toastProvider";
-import BanCheck from '@/components/banCheck';
+import BanCheck from "@/components/banCheck";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -29,14 +24,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-blue-100 flex flex-col min-h-screen`}
       >
         <AuthProvider>
-          <ToastProvider>
-            <Header />
-            <main className="min-h-screen">
-              <BanCheck />
-              {children}
-            </main>
-            <Footer />
-          </ToastProvider>
+          <Header />
+          <BanCheck />
+          <main className="min-h-screen">{children}</main>
+          <ToastProvider />
+          <Footer />
         </AuthProvider>
       </body>
     </html>

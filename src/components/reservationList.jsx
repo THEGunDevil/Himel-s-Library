@@ -16,6 +16,7 @@ import { useReservations } from "@/hooks/useReservation";
 import { ConvertStringToDate } from "../../utlis/utils";
 import { fulfillReservation, cancelReservation } from "../../utlis/userActions";
 import { useRouter } from "next/navigation";
+import FilterComponent from "./filterComponent";
 
 const columnHelper = createColumnHelper();
 
@@ -219,6 +220,7 @@ export default function ReservationList() {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+  const options = ["Pending", "Fulfilled", "Cancelled"];
 
   // Loading state
   if (loadingFetch) {
@@ -256,21 +258,25 @@ export default function ReservationList() {
       </div>
     );
   }
-  console.log(reservations);
 
   return (
     <div className="w-full mx-auto mt-1">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold text-blue-400">Reservation List</h1>
-        {isAdmin && (
-          <DownloadOptions
-            endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/reservations`}
-            page={page}
-            limit={20}
-            token={accessToken}
-          />
-        )}
+        <div className="flex gap-1 p-1">
+          {isAdmin && reservations.length > 0 && (
+            <FilterComponent options={options} />
+          )}
+          {isAdmin && (
+            <DownloadOptions
+              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/reservations`}
+              page={page}
+              limit={20}
+              token={accessToken}
+            />
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -297,8 +303,6 @@ export default function ReservationList() {
             <tbody className="bg-white divide-y divide-gray-200">
               {table.getRowModel().rows.map((row) => {
                 const bookID = row.original.book_id; // Make sure this exists in your row data
-                console.log(bookID);
-
                 return (
                   <tr
                     key={row.id}

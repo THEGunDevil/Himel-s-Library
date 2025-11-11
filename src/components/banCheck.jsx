@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/authContext";
 import BannedComponent from "@/app/banned/page";
+import Loader from "./loader";
 
 export default function BanCheck() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function BanCheck() {
     }
   }, [user, loading, pathname, router]);
 
-  if (loading) return null; // or a spinner
+  if (loading) return <Loader />; // or a spinner
 
   if (user?.is_banned) {
     return (
@@ -29,7 +30,5 @@ export default function BanCheck() {
       />
     );
   }
-
   return null;
 }
-

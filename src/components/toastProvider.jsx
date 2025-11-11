@@ -1,5 +1,5 @@
-// components/ToastProvider.tsx
-"use client"; // <-- This makes it a Client Component
+"use client";
+
 
 import { ToastContainer } from "react-toastify";
 import { CheckCircle, XCircle } from "lucide-react";

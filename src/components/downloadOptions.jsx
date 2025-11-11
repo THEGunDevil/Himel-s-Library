@@ -51,7 +51,7 @@ export default function DownloadOptions({
         onClick={handleDropDownOpen}
         className="p-1.5 cursor-pointer bg-white flex justify-center items-center rounded border border-gray-300"
       >
-        <DownloadIcon className="h-5 text-blue-600" />
+        <DownloadIcon className= "h-5 text-blue-600" />
       </button>
 
       {open && (

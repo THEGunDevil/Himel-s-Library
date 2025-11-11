@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -17,7 +16,6 @@ export default function BannedComponent({
     try {
       router.push("/logout");
     } catch (err) {
-      // server-rendered environments: nothing to do
       console.error("Logging out failed.",err);
     }
   }, []);

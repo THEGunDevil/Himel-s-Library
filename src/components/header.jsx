@@ -9,7 +9,7 @@ import SearchBar from "./searchBar";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { ConvertStringToDate } from "../../utlis/utils";
-import {  handleMarkRead } from "../../utlis/userActions";
+import { handleMarkRead } from "../../utlis/userActions";
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -117,8 +117,7 @@ export default function Header() {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-  setNotifications(Array.isArray(response.data) ? response.data : []);
-      console.log(response.data);
+      setNotifications(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error("❌ Failed to fetch notifications:", err);
       setNotificationError(err);
@@ -146,7 +145,7 @@ export default function Header() {
   let unreadCount = 0;
   notifications?.forEach((n) => {
     if (!n.is_read) unreadCount++;
-  });
+  });  
   return (
     <>
       <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 sm:h-32">

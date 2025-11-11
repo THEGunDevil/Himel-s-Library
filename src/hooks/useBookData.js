@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
@@ -27,7 +29,6 @@ export function useBookData({ page = 1, limit = 10, genre = "" } = {}) {
       // Support both paginated and non-paginated responses
       setData(response.data?.books ?? response.data ?? []);
       setTotalPages(response.data?.total_pages ?? 1);
-      console.log(response.data?.books ?? response.data ?? []);
     } catch (err) {
       console.error("❌ Failed to fetch books:", err);
       setError(err);
