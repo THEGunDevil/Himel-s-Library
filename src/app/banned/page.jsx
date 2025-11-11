@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import Loader from "@/components/loader";
 
 export default function BannedComponent({
   title = "Account Permanently Banned",
@@ -12,14 +14,24 @@ export default function BannedComponent({
   contactHref = "/contact",
 }) {
   const router = useRouter();
-  useEffect(() => {
-    try {
-      router.push("/logout");
-    } catch (err) {
-      console.error("Logging out failed.",err);
-    }
-  }, []);
+  const [redirecting, setRedirecting] = useState(true);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Small delay to show loader before redirect
+      const timer = setTimeout(() => {
+        router.push("/logout");
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [router]);
+
+  if (redirecting) {
+    return <Loader />; // Show loader while redirecting
+  }
+
+  // The actual banned page UI
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <motion.div
