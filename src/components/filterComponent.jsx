@@ -15,6 +15,7 @@ function FilterComponent({ options }) {
   return (
     <div className="border-gray-300 rounded z-50">
       <Select
+        isSearchable={false}
         defaultValue={selectOptions[0]}
         value={status}
         onChange={handleChange}
