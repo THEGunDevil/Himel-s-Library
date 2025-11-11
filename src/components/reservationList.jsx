@@ -220,8 +220,20 @@ export default function ReservationList() {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-  const options = ["Pending", "Fulfilled", "Cancelled"];
-
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const options = ["Pending", "Fulfilled", "Notified" ,"Cancelled"];
+  const { data, isLoading, error, refetch:refetchList } = useQuery(
+    ["filteredData", selectedStatus],
+    async () => {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/list/data-paginated?status=${selectedStatus}`
+      );
+      return res.data;
+    },
+    {
+      enabled: !!selectedStatus, // only run if status is defined
+    }
+  );
   // Loading state
   if (loadingFetch) {
     return (

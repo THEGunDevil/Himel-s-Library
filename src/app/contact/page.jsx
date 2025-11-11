@@ -110,7 +110,7 @@ export default function Contact() {
               </p>
             )}
             <input
-              disabled={!!userEmail}
+              readOnly={true}
               type="email"
               placeholder="Your Email"
               defaultValue={userEmail}
