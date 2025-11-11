@@ -25,6 +25,7 @@ export function useUserData({ page = 1, limit = 10 } = {}) {
 
       setData(response.data);
       setTotalPages(response.data?.total_pages ?? 1);
+      console.log(response.data)
     } catch (err) {
       console.error("❌ Failed to fetch users:", err);
       setError(err);

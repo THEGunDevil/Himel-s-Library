@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode"; // remove curly braces
 import axios from "axios";
 import { useSingleUserData } from "@/hooks/useSingleUserData";
 
@@ -10,15 +10,14 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [userID, setUserID] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const {
-    data,
-    loading: emailLoading,
-    error: emailError,
-  } = useSingleUserData(userID,accessToken);
-  const [userEmail, setUserEmail] = useState(null);
+  const [user, setUser] = useState(null); // initialize as null
+  const [authLoading, setAuthLoading] = useState(true); // track overall auth loading
+  const { data, loading: userLoading, error } = useSingleUserData(userID, accessToken);
+
   const login = (token) => {
     setAccessToken(token);
   };
+
   // Decode token whenever it changes
   useEffect(() => {
     if (accessToken) {
@@ -30,6 +29,7 @@ export const AuthProvider = ({ children }) => {
       setIsAdmin(false);
     }
   }, [accessToken]);
+
   // Refresh access token from cookie
   const refreshToken = async () => {
     try {
@@ -51,31 +51,34 @@ export const AuthProvider = ({ children }) => {
   // Initialize auth on page load
   useEffect(() => {
     const initAuth = async () => {
+      setAuthLoading(true);
       try {
         const token = await refreshToken(); // sends cookie
         if (token) {
-          const decoded = jwtDecode(token);
-          setUserID(decoded.sub);
-          setIsAdmin(decoded.role === "admin");
+          setAccessToken(token);
         }
       } catch {
         setAccessToken(null);
         setUserID(null);
         setIsAdmin(false);
+      } finally {
+        setAuthLoading(false);
       }
     };
     initAuth();
   }, []);
 
-useEffect(() => {
-  if (!accessToken || !userID || !data) return;
-  setUserEmail(data.email);
-}, [accessToken, userID, data]);
+  // Update user state when data from hook changes
+  useEffect(() => {
+    if (data) setUser(data);
+    else setUser(null);
+  }, [data]);
 
   const logout = async () => {
     setAccessToken(null);
     setUserID(null);
     setIsAdmin(false);
+    setUser(null);
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/logout`,
@@ -96,9 +99,9 @@ useEffect(() => {
         isAdmin,
         userID,
         refreshToken,
-        userEmail,
-        emailLoading,
-        emailError,
+        user,
+        loading: authLoading || userLoading, // combined loading
+        error,
       }}
     >
       {children}

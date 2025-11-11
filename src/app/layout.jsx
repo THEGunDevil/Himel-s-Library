@@ -3,10 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
 import { AuthProvider } from "@/contexts/authContext";
-import { ToastContainer } from "react-toastify";
 import Footer from "@/components/footer";
-import { CheckCircle, XCircle } from "lucide-react";
 import ToastProvider from "@/components/toastProvider";
+import BanCheck from '@/components/banCheck';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,10 +29,14 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-blue-100 flex flex-col min-h-screen`}
       >
         <AuthProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <ToastProvider/>
-          <Footer />
+          <ToastProvider>
+            <Header />
+            <main className="min-h-screen">
+              <BanCheck />
+              {children}
+            </main>
+            <Footer />
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

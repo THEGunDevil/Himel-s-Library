@@ -11,18 +11,26 @@ export function useSingleUserData(userID, accessToken) {
     if (!userID || !accessToken) return;
     setLoading(true);
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/user/${userID}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      const res = await axios.get(`${API_URL}/users/user/${userID}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
+
       setData(res.data);
+      
     } catch (err) {
-      setError(err);
+      const message =
+        err.response?.data?.message || err.message || "Something went wrong";
+      setError(message);
     } finally {
       setLoading(false);
     }
   }, [userID, accessToken]);
 
-  useEffect(() => { fetchUser(); }, [fetchUser]);
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   return { data, loading, error, refetch: fetchUser };
 }

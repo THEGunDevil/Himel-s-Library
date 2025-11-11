@@ -9,7 +9,7 @@ import SearchBar from "./searchBar";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { ConvertStringToDate } from "../../utlis/utils";
-import { handleBan, handleMarkRead } from "../../utlis/userActions";
+import {  handleMarkRead } from "../../utlis/userActions";
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,8 +22,6 @@ export default function Header() {
   const sidebarRef = useRef(null);
   const toggleRef = useRef(null);
   const searchRef = useRef(null);
-  const searchBtnRef = useRef(null);
-
   const pathname = usePathname();
   const navigation = [
     { title: "Home", path: "/" },
@@ -119,7 +117,7 @@ export default function Header() {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
-      setNotifications(response.data);
+  setNotifications(Array.isArray(response.data) ? response.data : []);
       console.log(response.data);
     } catch (err) {
       console.error("❌ Failed to fetch notifications:", err);
