@@ -17,17 +17,22 @@ export function useUserData({ page = 1, limit = 10 } = {}) {
     setError(null);
     try {
       const params = new URLSearchParams({ page, limit });
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/users?${params.toString()}`;
-      const res = await axios.get(url,{}, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      const url = `${
+        process.env.NEXT_PUBLIC_API_URL
+      }/users/?${params.toString()}`;
+
+      const res = await axios.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}` }, // ✅ fixed
       });
+
       setData(res.data?.users ?? []);
       setTotalPages(res.data?.total_pages ?? 1);
-      
     } catch (err) {
       setError(err);
-
-      console.error("❌ Failed to fetch users:", err.response?.data || err.message);
+      console.error(
+        "❌ Failed to fetch users:",
+        err.response?.data || err.message
+      );
     } finally {
       setLoading(false);
     }

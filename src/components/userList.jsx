@@ -30,14 +30,17 @@ export default function UserList() {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const { data, loading, error, refetch } = useUserData({ page });
-  const users = data?.users || [];
-  const totalPages = data?.total_pages || 1;
-  // ---- Handlers for pagination ----
+  const {
+    data: users,
+    loading,
+    error,
+    totalPages = 1,
+    refetch,
+  } = useUserData({ page });
+
   const handleNext = () => page < totalPages && setPage((prev) => prev + 1);
   const handlePrev = () => page > 1 && setPage((prev) => prev - 1);
 
-  // ---- Table Columns ----
   const columns = [
     columnHelper.accessor((row) => `${row.first_name} ${row.last_name}`, {
       id: "fullName",
@@ -140,7 +143,7 @@ export default function UserList() {
   ];
 
   const table = useReactTable({
-    data: users || [],
+    data: users,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
