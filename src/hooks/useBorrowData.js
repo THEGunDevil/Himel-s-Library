@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "@/contexts/authContext";
 
-export function useBorrowData() {
+export function useBorrowData({ page = 1, limit = 10}) {
   // ---------- global borrows ----------
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
