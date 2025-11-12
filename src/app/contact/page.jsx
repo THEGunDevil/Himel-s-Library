@@ -49,10 +49,10 @@ export default function Contact() {
     }
   };
   useEffect(() => {
-    if (userEmail) {
-      setValue("user_email", userEmail);
+    if (user.email) {
+      setValue("user_email", user.email);
     }
-  }, [userEmail, setValue]);
+  }, [user.email, setValue]);
   return (
     <section className="md:pt-36 pt-32 min-h-screen flex flex-col items-center justify-center px-6 py-20 text-gray-800">
       <div className="max-w-3xl w-full text-center space-y-10">
@@ -113,7 +113,7 @@ export default function Contact() {
               readOnly={true}
               type="email"
               placeholder="Your Email"
-              defaultValue={userEmail}
+              defaultValue={user.email}
               {...register("user_email", {
                 required: "email is required",
                 pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
@@ -139,9 +139,9 @@ export default function Contact() {
               </p>
             )}
 
-            {!emailError ? (
+            {!error ? (
               <button
-                disabled={!userEmail || emailLoading || sending} // ← Changed: disabled when NO email
+                disabled={!user.email || loading || sending} // ← Changed: disabled when NO email
                 type="submit"
                 className="mt-2 group flex items-center gap-1.5 hover:text-blue-500 w-fit mx-auto cursor-pointer py-1 px-4 font-semibold border-b-3 border-b-black transition-colors duration-300 hover:border-b-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -153,7 +153,7 @@ export default function Contact() {
               </button>
             ) : (
               <button
-                disabled
+                disabled = {error}
                 type="button"
                 className="mt-2 group flex items-center gap-1.5 w-fit mx-auto cursor-not-allowed py-1 px-4 font-semibold border-b-3 border-b-red-500"
               >

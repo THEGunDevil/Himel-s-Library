@@ -16,6 +16,7 @@ import Link from "next/link";
 import DownloadOptions from "./downloadOptions";
 import { handleBan, handleUnban } from "../../utils/userActions";
 import { ConvertStringToDate } from "../../utils/utils";
+import { useUserData } from "@/hooks/useUserData";
 
 const columnHelper = createColumnHelper();
 
