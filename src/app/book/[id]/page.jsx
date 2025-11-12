@@ -13,6 +13,7 @@ import {
   handleCancelReserve,
   handleReserve,
 } from "../../../../utils/userActions";
+import { useBorrowData } from "@/hooks/useBorrowData";
 export default function Book() {
   const { accessToken, userID, isAdmin } = useAuth();
   const { id } = useParams();
@@ -23,6 +24,13 @@ export default function Book() {
   const [error, setError] = useState(null);
   const [dueDate, setDueDate] = useState("");
   const [localReserves, setLocalReserves] = useState(null);
+  const {
+    fetchBorrowsByBookIDAndUserID,
+    borrow,
+    setBorrow,
+    borrowLoading,
+    borrowError,
+  } = useBorrowData({ bookID: id, userID });
 
   const {
     loadingCreate,
@@ -53,7 +61,6 @@ export default function Book() {
       setLocalReserves(null);
     }
   }, [reservationsByBookIDAndUserID]);
-
   // Fetch user's reservation for this book
   useEffect(() => {
     if (!bookData?.id || !userID || !accessToken) return;
@@ -64,6 +71,20 @@ export default function Book() {
     };
     fetchUserReservation();
   }, [bookData?.id, userID, accessToken, refetchByBookIDAndUserID]);
+  useEffect(() => {
+    const fetchBorrow = async () => {
+      if (!bookData?.id || !id || !accessToken) return;
+
+      try {
+        const resp = await fetchBorrowsByBookIDAndUserID(id);
+        setBorrow(resp);
+      } catch (err) {
+        console.error("Failed to fetch borrows for book:", err);
+      }
+    };
+
+    fetchBorrow();
+  }, [id, bookData?.id, accessToken, fetchBorrowsByBookIDAndUserID]);
 
   const handleBorrow = async () => {
     if (!accessToken) {
@@ -120,6 +141,7 @@ export default function Book() {
   if (bookLoading || !book) return <div className="p-6">Loading book...</div>;
   if (bookError)
     return <div className="p-6 text-red-500">Failed to load book.</div>;
+
   return (
     <section className="flex flex-col w-full lg:flex-row md:pt-36 pt-32 justify-between gap-5 items-start xl:px-60 lg:px-30 px-4 mb-10">
       {/* Book Info */}
@@ -140,6 +162,11 @@ export default function Book() {
           {borrowed && (
             <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
               Borrowed
+            </span>
+          )}
+          {borrow?.[0]?.returned_at === null && (
+            <span className="absolute top-3 flex left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+              Already Borrowed
             </span>
           )}
         </div>
@@ -207,7 +234,8 @@ export default function Book() {
                   : "bg-blue-500 hover:bg-blue-600"
               }`}
             >
-              {loading ? "Sending Request..." : "Request to Borrow"}
+              {loading ? "Borrowing.." : "Borrow"}
+              {/* {loading ? "Sending Request..." : "Request to Borrow"} */}
             </button>
           </div>
         )}
@@ -252,10 +280,14 @@ export default function Book() {
         )}
         {/* Errors */}
         {createError && (
-          <p className="mt-2 text-red-500 text-sm text-center">{createError}</p>
+          <p className="mt-2 font-semibold text-red-500 text-sm text-center">
+            {createError}
+          </p>
         )}
         {error && (
-          <p className="mt-2 text-red-500 text-sm text-center">{error}</p>
+          <p className="mt-2 font-semibold text-red-500 text-sm text-center">
+            {error}
+          </p>
         )}
       </div>
 

@@ -165,7 +165,7 @@ export default function BookReviewSection({ bookId }) {
       </header>
 
       {!accessToken && (
-        <div className="w-full bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+        <div className="w-full bg-blue-50 border border-blue-200 rounded-xl py-4 px-2 mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm text-blue-800 font-medium">
               Want to join the conversation?
@@ -176,7 +176,7 @@ export default function BookReviewSection({ bookId }) {
           </div>
           <button
             onClick={() => router.push("/auth/log-in")}
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg shadow-sm"
+            className="px-4 py-2 whitespace-nowrap bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg shadow-sm"
           >
             Log In
           </button>

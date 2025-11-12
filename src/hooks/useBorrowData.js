@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "@/contexts/authContext";
 
-export function useBorrowData({ page = 1, limit = 10}) {
+export function useBorrowData({ page = 1, limit = 10, userID, bookID } = {}) {
   // ---------- global borrows ----------
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,6 +15,14 @@ export function useBorrowData({ page = 1, limit = 10}) {
   const [borrowsByUser, setBorrowsByUser] = useState([]);
   const [borrowsByUserLoading, setBorrowsByUserLoading] = useState(false);
   const [borrowsByUserError, setBorrowsByUserError] = useState(null);
+  // ---------- borrows by book ----------
+  const [borrowsByBook, setBorrowsByBook] = useState([]);
+  const [borrowsByBookLoading, setBorrowsByBookLoading] = useState(false);
+  const [borrowsByBookError, setBorrowsByBookError] = useState(null);
+  // ---------- borrows by book and user ----------
+  const [borrow, setBorrow] = useState([]);
+  const [borrowLoading, setBorrowLoading] = useState(false);
+  const [borrowError, setBorrowError] = useState(null);
 
   const { accessToken, isAdmin } = useAuth();
 
@@ -24,8 +32,9 @@ export function useBorrowData({ page = 1, limit = 10}) {
     setLoading(true);
     setError(null);
     try {
+      const params = new URLSearchParams({ page, limit });
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/borrows/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/borrows/?${params}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
@@ -38,20 +47,20 @@ export function useBorrowData({ page = 1, limit = 10}) {
     } finally {
       setLoading(false);
     }
-  }, [accessToken,isAdmin]);
+  }, [accessToken, isAdmin]);
 
   useEffect(() => {
     if (accessToken) fetchAllBorrows();
   }, [accessToken, fetchAllBorrows]);
 
-  const fetchBorrowsByUserID = async (userId) => {
+  const fetchBorrowsByUserID = async (userID) => {
     if (!accessToken) return;
 
     setBorrowsByUserLoading(true);
     setBorrowsByUserError(null);
     try {
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/borrows/${userId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/borrows/user/${userID}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
@@ -64,10 +73,64 @@ export function useBorrowData({ page = 1, limit = 10}) {
       setBorrowsByUserLoading(false);
     }
   };
+  const fetchBorrowsByBookID = useCallback(
+    async (id = bookID) => {
+      if (!id || !accessToken) return;
+
+      setBorrowsByBookLoading(true);
+      setBorrowsByBookError(null);
+
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/borrows/book/${bookID}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+
+        setBorrowsByBook(response.data || []);
+        return response.data;
+      } catch (error) {
+        setBorrowsByBookError(
+          error.response?.data?.message || "Failed to fetch borrows"
+        );
+      } finally {
+        setBorrowsByBookLoading(false);
+      }
+    },
+    [accessToken, bookID, page, limit]
+  );
+const fetchBorrowsByBookIDAndUserID = useCallback(
+  async (idParam) => { // use a proper param
+    const idToUse = idParam || bookID;
+    if (!idToUse || !accessToken) return;
+
+    setBorrowLoading(true);
+    setBorrowError(null);
+
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/borrows/borrow/book/${idToUse}`, // use param!
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+
+      setBorrow(response.data || []);
+      return response.data;
+    } catch (error) {
+      setBorrowError(
+        error.response?.data?.message || "Failed to fetch borrows"
+      );
+    } finally {
+      setBorrowLoading(false);
+    }
+  },
+  [accessToken, bookID]
+);
+
 
   const refetch = () => fetchAllBorrows();
-  console.log(data);
-
   return {
     data,
     loading,
@@ -79,5 +142,16 @@ export function useBorrowData({ page = 1, limit = 10}) {
     borrowsByUserLoading,
     borrowsByUserError,
     fetchBorrowsByUserID,
+
+    borrowsByBook,
+    borrowsByBookLoading,
+    borrowsByBookError,
+    fetchBorrowsByBookID,
+
+    borrow,
+    setBorrow,
+    borrowLoading,
+    borrowError,
+    fetchBorrowsByBookIDAndUserID,
   };
 }

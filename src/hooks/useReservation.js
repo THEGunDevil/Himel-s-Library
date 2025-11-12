@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/authContext";
 
-export function useReservations() {
+export function useReservations(bookID) {
   const [reservations, setReservations] = useState([]);
   const [reservationsByBookID, setReservationsByBookID] = useState([]);
   const [reservationsByBookIDAndUserID, setReservationsByBookIDAndUserID] =
@@ -301,7 +301,7 @@ export function useReservations() {
     updateError,
 
     // Actions
-    refetch: fetchReservations,
+    fetchReservations,
     refetchByBookID: fetchReservationsByBookID,
     refetchByBookIDAndUserID: fetchReservationsByBookIDAndUserID,
     refetchByReservationID: fetchReservationsByReservationID,
