@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/authContext";
 import { ConvertStringToDate } from "../../../utlis/utils";
 
 export default function BannedComponent({
@@ -11,8 +9,7 @@ export default function BannedComponent({
   isPermanent = false,
   reason = null,
 }) {
-  const router = useRouter();
-  const { logout } = useAuth();
+
   const [timeLeft, setTimeLeft] = useState("");
 
   // Calculate time remaining for temporary bans
@@ -40,10 +37,6 @@ export default function BannedComponent({
     return () => clearInterval(interval);
   }, [bannedUntil, isPermanent]);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/");
-  };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -98,14 +91,6 @@ export default function BannedComponent({
             )}
           </div>
         )}
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="w-full px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors duration-200"
-        >
-          Logout
-        </button>
 
         <p className="text-xs text-gray-500 mt-6">
           If you believe this is a mistake, please contact support.
