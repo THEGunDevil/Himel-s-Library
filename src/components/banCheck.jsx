@@ -7,21 +7,27 @@ import BannedComponent from "@/app/banned/page";
 export default function BanCheck({ children }) {
   const { user, loading } = useAuth();
 
-  if (loading) return <Loader />;
+  // Show loader while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
 
-  // If banned, render banned page only
+  // If banned, show ONLY the banned page (no header/footer/children)
   if (user?.is_banned) {
-
     return (
       <BannedComponent
-        isBanned={user?.is_banned}
-        isPermanent={user?.is_permanent_ban}
-        reason={user?.ban_reason}
-        bannedUntil={user?.ban_until}
+        isBanned={user.is_banned}
+        isPermanent={user.is_permanent_ban}
+        reason={user.ban_reason}
+        bannedUntil={user.ban_until}
       />
     );
   }
 
-  // Normal users see the app
-  return children;
+  // Normal users see the app with header/footer
+  return <>{children}</>;
 }

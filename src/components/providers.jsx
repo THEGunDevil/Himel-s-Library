@@ -3,7 +3,7 @@
 import { AuthProvider } from "@/contexts/authContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Header from "./header";
-import BanCheck from "./banCheck"; // our guard
+import BanCheck from "./banCheck";
 import ToastProvider from "./toastProvider";
 import Footer from "./footer";
 import { useState } from "react";
@@ -24,12 +24,13 @@ export default function Providers({ children }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Header />
         <BanCheck>
+          {/* Header and Footer only show for non-banned users */}
+          <Header />
           <main className="min-h-screen">{children}</main>
+          <Footer />
         </BanCheck>
         <ToastProvider />
-        <Footer />
       </AuthProvider>
     </QueryClientProvider>
   );
