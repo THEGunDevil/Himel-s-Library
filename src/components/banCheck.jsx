@@ -1,34 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/authContext";
-import BannedComponent from "@/app/banned/page";
 import Loader from "./loader";
+import BannedComponent from "@/app/banned/page";
 
-export default function BanCheck() {
-  const router = useRouter();
-  const { user = {}, loading } = useAuth();
-  const pathname = usePathname();
+export default function BanCheck({ children }) {
+  const { user, loading } = useAuth();
 
-  // Wait for loading to finish
-  useEffect(() => {
-    if (loading) return;
-    if (!user) return;
-    if (pathname !== "/banned" && user?.is_banned) {
-      router.push("/banned");
-    }
-  }, [user, loading, pathname, router]);
+  if (loading) return <Loader />;
 
-  if (loading) return <Loader />; // or a spinner
-
+  // If banned, render banned page only
   if (user?.is_banned) {
+
     return (
       <BannedComponent
+        isBanned={user?.is_banned}
+        isPermanent={user?.is_permanent_ban}
         reason={user?.ban_reason}
-        isPermanent={user?.is_permanent}
+        bannedUntil={user?.ban_until}
       />
     );
   }
-  return null;
+
+  // Normal users see the app
+  return children;
 }
