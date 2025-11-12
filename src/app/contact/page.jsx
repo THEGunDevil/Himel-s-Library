@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 export default function Contact() {
-  const { accessToken, userEmail, emailLoading, emailError } = useAuth();
+  const { accessToken, user, loading, error } = useAuth();
   const {
     register,
     handleSubmit,

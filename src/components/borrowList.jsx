@@ -7,7 +7,7 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { ConvertStringToDate } from "../../utlis/utils";
+import { ConvertStringToDate } from "../../utils/utils";
 import { useBorrowData } from "@/hooks/useBorrowData";
 import { useAuth } from "@/contexts/authContext";
 import axios from "axios";
@@ -50,7 +50,12 @@ export default function BorrowList() {
       await axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL}/borrows/borrow/${borrowId}/return`,
         { book_id: bookId },
-        { headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" } }
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       toast.success("Book returned!", { autoClose: 1500 });
       refetch();
@@ -67,7 +72,9 @@ export default function BorrowList() {
 
   // ---- Helper to check returned status ----
   const isNotReturned = (returned_at) =>
-    !returned_at || returned_at.includes("0001-01-01") || returned_at.trim() === "";
+    !returned_at ||
+    returned_at.includes("0001-01-01") ||
+    returned_at.trim() === "";
 
   // ---- Table columns ----
   const columns = [
@@ -119,7 +126,11 @@ export default function BorrowList() {
   // ---- Render ----
   if (loading) return <Loader />;
   if (error)
-    return <div className="p-6 text-red-500">Error: {error.message || "Unknown error"}</div>;
+    return (
+      <div className="p-6 text-red-500">
+        Error: {error.message || "Unknown error"}
+      </div>
+    );
   if (!optimisticBorrows.length)
     return <div className="p-6 text-gray-600">No borrow records found.</div>;
 
@@ -146,7 +157,10 @@ export default function BorrowList() {
                       key={header.id}
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -155,10 +169,19 @@ export default function BorrowList() {
 
             <tbody className="bg-white divide-y divide-gray-200">
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50 transition-colors duration-150">
+                <tr
+                  key={row.id}
+                  className="hover:bg-gray-50 transition-colors duration-150"
+                >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    <td
+                      key={cell.id}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </td>
                   ))}
                 </tr>

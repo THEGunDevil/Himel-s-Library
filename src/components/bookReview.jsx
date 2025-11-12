@@ -6,7 +6,7 @@ import {
   ConvertStringToDate,
   StarDisplay,
   StarRating,
-} from "../../utlis/utils";
+} from "../../utils/utils";
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";

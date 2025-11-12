@@ -6,13 +6,13 @@ import { useAuth } from "@/contexts/authContext";
 import { useParams } from "next/navigation";
 import { useSingleBookData } from "@/hooks/useSingleBookData";
 import BookReviewSection from "@/components/bookReview";
-import { getDueDate } from "../../../../utlis/utils";
+import { getDueDate } from "../../../../utils/utils";
 import { useReservations } from "@/hooks/useReservation";
 import { toast } from "react-toastify";
 import {
   handleCancelReserve,
   handleReserve,
-} from "../../../../utlis/userActions";
+} from "../../../../utils/userActions";
 export default function Book() {
   const { accessToken, userID, isAdmin } = useAuth();
   const { id } = useParams();

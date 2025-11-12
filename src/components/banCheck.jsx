@@ -5,7 +5,7 @@ import Loader from "./loader";
 import BannedComponent from "@/app/banned/page";
 
 export default function BanCheck({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading,accessToken } = useAuth();
 
   // Show loader while checking auth
   if (loading) {
@@ -24,6 +24,9 @@ export default function BanCheck({ children }) {
         isPermanent={user.is_permanent_ban}
         reason={user.ban_reason}
         bannedUntil={user.ban_until}
+        accessToken={accessToken}
+        userEmail={user.email}
+
       />
     );
   }

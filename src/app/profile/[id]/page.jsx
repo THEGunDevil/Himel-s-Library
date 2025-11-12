@@ -7,7 +7,7 @@ import {
   Avatar,
   ConvertStringToDate,
   StarRating,
-} from "../../../../utlis/utils";
+} from "../../../../utils/utils";
 import { useAuth } from "@/contexts/authContext";
 import { useBookReviews } from "@/hooks/useBookReviews";
 import Loader from "@/components/loader";
@@ -16,7 +16,7 @@ import {
   handleUnban,
   handleEditSubmit,
   handleDelete,
-} from "../../../../utlis/userActions";
+} from "../../../../utils/userActions";
 import { useForm } from "react-hook-form";
 import Options from "@/components/options";
 import axios from "axios";

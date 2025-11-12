@@ -14,8 +14,8 @@ import { useForm } from "react-hook-form";
 import { ArrowLeftIcon, ArrowRightIcon, User } from "lucide-react";
 import Link from "next/link";
 import DownloadOptions from "./downloadOptions";
-import { handleBan, handleUnban } from "../../utlis/userActions";
-import { ConvertStringToDate } from "../../utlis/utils";
+import { handleBan, handleUnban } from "../../utils/userActions";
+import { ConvertStringToDate } from "../../utils/utils";
 
 const columnHelper = createColumnHelper();
 
