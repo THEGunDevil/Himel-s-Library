@@ -1,113 +1,189 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-
+import axios from "axios";
 import Loader from "./loader";
 import { useAuth } from "@/contexts/authContext";
-import { useForm } from "react-hook-form";
-import { ArrowLeftIcon, ArrowRightIcon, User } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, Search, X, User } from "lucide-react";
 import Link from "next/link";
 import DownloadOptions from "./downloadOptions";
 import { handleBan, handleUnban } from "../../utils/userActions";
 import { ConvertStringToDate } from "../../utils/utils";
 import { useUserData } from "@/hooks/useUserData";
+import { useRouter } from "next/navigation";
 
 const columnHelper = createColumnHelper();
 
 export default function UserList() {
   const [page, setPage] = useState(1);
-  const [userBanID, setUserBanID] = useState(null);
-  const [userUnBanID, setUserUnBanID] = useState(null);
+  const [userToBan, setUserToBan] = useState(null);
+  const [userToUnban, setUserToUnban] = useState(null);
+  const router = useRouter();
   const { isAdmin, accessToken } = useAuth();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const [filteredLoading, setFilteredLoading] = useState(false);
+  const [filteredUsers, setFilteredUsers] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [local, setLocal] = useState("");
+  // 🧠 Normal user data (paginated)
   const {
     data: users,
     loading,
     error,
-    totalPages = 1,
+    totalPages: baseTotalPages,
     refetch,
   } = useUserData({ page });
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch((local || "").trim());
+    }, 300);
 
+    return () => clearTimeout(t);
+  }, [local]);
+  // 🔍 Search query
+  const fetchFilteredUsers = useCallback(async () => {
+    const trimmed = debouncedSearch;
+
+    if (!trimmed) {
+      setFilteredUsers([]);
+      setTotalPages(baseTotalPages || 1);
+      return;
+    }
+
+    try {
+      setFilteredLoading(true);
+
+      const params = {
+        email: trimmed,
+        page,
+        limit: 10,
+      };
+
+const res = await axios.get(
+  `${process.env.NEXT_PUBLIC_API_URL}/users/user/email`,
+  {
+    params,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  }
+);
+
+
+      setFilteredUsers(res.data.users || []);
+      setTotalPages(res.data.total_pages || 1);
+    } catch (err) {
+      console.error(err);
+      setFilteredUsers([]);
+      setTotalPages(1);
+    } finally {
+      setFilteredLoading(false);
+    }
+  }, [debouncedSearch, page, baseTotalPages]);
+
+  useEffect(() => {
+    fetchFilteredUsers();
+  }, [debouncedSearch, page]);
   const handleNext = () => page < totalPages && setPage((prev) => prev + 1);
   const handlePrev = () => page > 1 && setPage((prev) => prev - 1);
 
+  // 🧭 Choose which data to show
+  const tableData = debouncedSearch ? filteredUsers : users || [];
+
+  // Handle ban
+  const handleBanConfirm = async () => {
+    if (!userToBan) return;
+    if (!isAdmin || !accessToken) {
+      toast.error("You are not authorized to ban users.");
+      return;
+    }
+    try {
+      await handleBan(userToBan, accessToken);
+      toast.success("User banned successfully!");
+      setUserToBan(null);
+      refetch();
+    } catch (err) {
+      console.error("Ban error:", err);
+      toast.error("Failed to ban user.");
+    }
+  };
+
+  // Handle unban
+  const handleUnbanConfirm = async () => {
+    if (!userToUnban) return;
+    if (!isAdmin || !accessToken) {
+      toast.error("You are not authorized to unban users.");
+      return;
+    }
+    try {
+      await handleUnban(userToUnban, accessToken);
+      toast.success("User unbanned successfully!");
+      setUserToUnban(null);
+      refetch();
+    } catch (err) {
+      console.error("Unban error:", err);
+      toast.error("Failed to unban user.");
+    }
+  };
+
+  // Copy handler
+  const handleCopy = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied to clipboard!", { autoClose: 1000 });
+    } catch {
+      toast.error("Failed to copy.");
+    }
+  };
+
+  // Initialize table
   const columns = [
+    columnHelper.accessor("id", {
+      header: "ID",
+      cell: ({ getValue }) => {
+        const id = getValue();
+        const shortId = id ? id.slice(0, 8) + "..." : "N/A";
+        return (
+          <div className="flex items-center gap-2 group">
+            <span className="font-mono">{shortId}</span>
+            <button
+              onClick={() => handleCopy(id)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-500"
+              title="Copy ID"
+            >
+              📋
+            </button>
+          </div>
+        );
+      },
+    }),
     columnHelper.accessor((row) => `${row.first_name} ${row.last_name}`, {
       id: "fullName",
       header: "User",
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("email", {
-      header: "Email",
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("phone_number", {
-      header: "Phone Number",
-      cell: (info) => info.getValue() || "-",
-    }),
+    columnHelper.accessor("email", { header: "Email" }),
+    columnHelper.accessor("phone_number", { header: "Phone" }),
     columnHelper.accessor("created_at", {
-      header: "Joined At",
-      cell: (info) => {
-        const rawDate = info.getValue();
-        if (!rawDate) return "-";
-        const date = ConvertStringToDate(rawDate);
-        return date.toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      },
+      header: "Joined",
+      cell: (info) => ConvertStringToDate(info.getValue()),
     }),
-    columnHelper.accessor("role", {
-      header: "Role",
-      cell: (info) => {
-        const role = info.getValue();
-        return (
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
-              role === "admin"
-                ? "bg-blue-100 text-blue-800"
-                : role === "member"
-                ? "bg-gray-100 text-gray-800 border border-gray-300"
-                : "bg-gray-50 text-gray-500"
-            }`}
-          >
-            {role === "admin" ? "Admin" : role === "member" ? "Member" : "-"}
-          </span>
-        );
-      },
-    }),
+    columnHelper.accessor("role", { header: "Role" }),
     columnHelper.accessor("is_banned", {
       header: "Status",
-      cell: (info) => (
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-medium ${
-            info.getValue()
-              ? "bg-red-100 text-red-700"
-              : "bg-green-100 text-green-700"
-          }`}
-        >
-          {info.getValue() ? "Banned" : "Active"}
-        </span>
-      ),
+      cell: (info) =>
+        info.getValue() ? (
+          <span className="text-red-500 font-medium">Banned</span>
+        ) : (
+          <span className="text-green-500 font-medium">Active</span>
+        ),
     }),
-    columnHelper.accessor("active_borrows_count", {
-      header: "Borrowed Books",
-      cell: (info) => info.getValue() ?? 0,
-    }),
-
     columnHelper.display({
       id: "actions",
       header: "Actions",
@@ -117,22 +193,29 @@ export default function UserList() {
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             {user.is_banned ? (
               <button
-                onClick={() => setUserUnBanID(user.id)}
-                className="px-3 py-1 cursor-pointer bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setUserToUnban(user.id);
+                }}
+                className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
               >
                 Unban
               </button>
             ) : (
               <button
-                onClick={() => setUserBanID(user.id)}
-                className="px-3 py-1 cursor-pointer bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setUserToBan(user.id);
+                }}
+                className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
               >
                 Ban
               </button>
             )}
             <Link
               href={`/profile/${user.id}`}
-              className="p-1 cursor-pointer bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors duration-200"
+              onClick={(e) => e.stopPropagation()}
+              className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
             >
               <User size={20} />
             </Link>
@@ -143,87 +226,107 @@ export default function UserList() {
   ];
 
   const table = useReactTable({
-    data: users,
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // ---- Ban/Unban Handlers ----
-  const onBanSubmit = async (formData) => {
-    await handleBan({
-      userId: userBanID,
-      formData,
-      isAdmin,
-      accessToken,
-      refetch,
-      resetBanID: () => setUserBanID(null),
-    });
-  };
-
-  const onUnbanClick = async (userId) => {
-    await handleUnban({
-      userId,
-      isAdmin,
-      accessToken,
-      refetch,
-      resetUnBanID: () => setUserUnBanID(null),
-    });
-  };
-
   // ---- Loading/Error States ----
-  if (loading) return <Loader />;
-  if (error)
-    return (
-      <div className="p-6 text-center text-red-500">
-        Error: {error.message || "Failed to load users"}
-      </div>
-    );
-  if (!users || users.length === 0)
-    return <div className="p-6 text-center text-gray-500">No users found.</div>;
+  // if (error)
+  //   return (
+  //     <div className="p-6 text-center text-red-500 bg-red-50 rounded-lg shadow-md">
+  //       Error: {error.message || "Failed to load users"}
+  //     </div>
+  //   );
+  // if (!tableData?.length)
+  //   return (
+  //     <div className="p-6 text-gray-600 bg-gray-50 rounded-lg shadow-md">
+  //       No user records found.
+  //     </div>
+  //   );
 
   return (
-    <>
-      <div className="w-full mx-auto mt-1">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold mb-3 text-blue-400">User List</h1>
-          <DownloadOptions
-            endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
-            page={page}
-            limit={20}
-            token={accessToken}
+    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      {/* Search Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+          User List
+        </h1>
+        <div className="flex items-center w-full sm:w-auto gap-2">
+          <input
+            type="search"
+            value={local}
+            className="px-4 py-2 border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm"
+            onChange={(e) => setLocal(e.target.value)}
+            placeholder="Search user..."
           />
+
+          {local && (
+            <button
+              type="button"
+              onClick={() => {
+                setLocal("");
+                setPage(1);
+              }}
+              className="p-2 text-red-500 cursor-pointer hover:text-red-600 transition-colors duration-200"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
-        <div className="overflow-x-auto border border-gray-200">
-          <div className="max-h-96 overflow-y-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 sticky top-0 z-10">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
+        <DownloadOptions
+          endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
+          page={page}
+          limit={10}
+          token={accessToken}
+        />
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+        <div className="max-h-[60vh] overflow-y-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-100 sticky top-0 z-10">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            {filteredLoading || loading ? (
+              <tbody>
+                <tr>
+                  <td
+                    colSpan={table.getAllColumns().length}
+                    className="py-20 text-center"
+                  >
+                    <Loader />
+                  </td>
+                </tr>
+              </tbody>
+            ) : (
               <tbody className="bg-white divide-y divide-gray-200">
                 {table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="group hover:bg-gray-50 transition-colors duration-150"
+                    className="group hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                    onClick={() => router.push(`/book/${row.original.id}`)}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -234,111 +337,80 @@ export default function UserList() {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+            )}
+          </table>
+        </div>
 
-          <div className="flex justify-center items-center my-5 gap-4">
-            <button
-              onClick={handlePrev}
-              disabled={page === 1}
-              className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
-            >
-              <ArrowLeftIcon className="h-4" />
-              Previous
-            </button>
-            <span className="text-gray-700">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={handleNext}
-              disabled={page === totalPages}
-              className="px-4 py-2 flex items-center cursor-pointer bg-blue-400 text-white disabled:opacity-50"
-            >
-              Next <ArrowRightIcon className="h-4" />
-            </button>
-          </div>
+        <div className="flex justify-center items-center py-4 gap-4 bg-gray-50 border-t border-gray-200">
+          <button
+            onClick={handlePrev}
+            disabled={page === 1}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Previous
+          </button>
+          <span className="text-gray-700 text-sm font-medium">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={handleNext}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
+          >
+            Next
+            <ArrowRightIcon className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
-      {/* Ban Modal */}
-      {userBanID && (
+      {userToBan && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <form
-            onSubmit={handleSubmit(onBanSubmit)}
-            className="bg-white rounded-lg p-6 w-80 shadow-lg text-center"
-          >
-            <h2 className="text-lg font-bold mb-4">Confirm Ban</h2>
-            <p className="mb-4 text-gray-700">
-              Provide details for banning this user.
+          <div className="bg-white rounded-lg p-6 w-80 shadow-xl text-center">
+            <h2 className="text-lg font-bold mb-4 text-gray-800">
+              Confirm Ban
+            </h2>
+            <p className="mb-6 text-gray-600">
+              Are you sure you want to ban this user?
             </p>
-
-            <div className="mb-4 text-left">
-              <label className="block text-sm font-medium mb-1">
-                Ban Reason
-              </label>
-              <input
-                type="text"
-                {...register("ban_reason", {
-                  required: "Reason is required",
-                  minLength: { value: 3, message: "Too short" },
-                })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter reason..."
-              />
-              {errors.ban_reason && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.ban_reason.message}
-                </p>
-              )}
-            </div>
-
-            <div className="mb-6 text-left">
-              <label className="block text-sm font-medium mb-1">
-                Ban Until (leave empty for permanent ban)
-              </label>
-              <input
-                type="date"
-                {...register("ban_until")}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
             <div className="flex justify-center gap-4">
               <button
-                type="submit"
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200"
+                onClick={handleBanConfirm}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
               >
-                Confirm Ban
+                Yes, Ban
               </button>
               <button
-                type="button"
-                onClick={() => setUserBanID(null)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors duration-200"
+                onClick={() => setUserToBan(null)}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-200 text-sm font-medium"
               >
                 Cancel
               </button>
             </div>
-          </form>
+          </div>
         </div>
       )}
 
       {/* Unban Modal */}
-      {userUnBanID && (
+      {userToUnban && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white rounded-lg p-6 w-80 shadow-lg text-center">
-            <h2 className="text-lg font-bold mb-4">Confirm Unban</h2>
-            <p className="mb-6">Are you sure you want to unban this user?</p>
-
+          <div className="bg-white rounded-lg p-6 w-80 shadow-xl text-center">
+            <h2 className="text-lg font-bold mb-4 text-gray-800">
+              Confirm Unban
+            </h2>
+            <p className="mb-6 text-gray-600">
+              Are you sure you want to unban this user?
+            </p>
             <div className="flex justify-center gap-4">
               <button
-                onClick={() => onUnbanClick(userUnBanID)}
-                className="px-4 py-2 cursor-pointer bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={handleUnbanConfirm}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
               >
                 Yes, Unban
               </button>
               <button
-                onClick={() => setUserUnBanID(null)}
-                className="px-4 py-2 cursor-pointer bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setUserToUnban(null)}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors duration-200 text-sm font-medium"
               >
                 Cancel
               </button>
@@ -346,6 +418,6 @@ export default function UserList() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

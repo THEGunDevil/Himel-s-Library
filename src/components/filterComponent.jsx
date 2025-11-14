@@ -1,67 +1,88 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
 export default function FilterComponent({
-  options,
+  options, // [{ label, value }]
   selectedStatus,
   setSelectedStatus,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const handleSelect = (option) => {
-    setSelectedStatus(option === selectedStatus ? "" : option);
+  const handleSelect = (value) => {
+    // toggle off if same value clicked
+    setSelectedStatus(value === selectedStatus ? "" : value);
     setIsOpen(false);
+    console.log(value);
+    
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isOpen]);
+
+  // Helper: find label by value for button display
+  const getLabel = (value) => {
+    if (!value) return "All Statuses";
+    const found = options.find((opt) => opt.value === value);
+    return found ? found.label : "Unknown";
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors duration-200"
+        className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
       >
-        <span className="text-sm font-medium">
-          {selectedStatus || "Filter by Status"}
-        </span>
-        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <span className="text-sm font-medium">{getLabel(selectedStatus)}</span>
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
-          
-          {/* Dropdown */}
-          <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
-            <div className="py-1">
+        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+          <div className="py-1 max-h-48 overflow-y-auto">
+            {/* "All" option */}
+            <button
+              onClick={() => handleSelect("")}
+              className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                !selectedStatus
+                  ? "bg-blue-50 text-blue-600 font-medium"
+                  : "text-gray-700"
+              }`}
+            >
+              All Statuses
+            </button>
+
+            {options.map((option) => (
               <button
-                onClick={() => handleSelect("")}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
-                  !selectedStatus ? "bg-blue-50 text-blue-600 font-medium" : "text-gray-700"
+                key={option.value}
+                onClick={() => handleSelect(option.value)}
+                className={`w-full whitespace-nowrap text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                  selectedStatus === option.value
+                    ? "bg-blue-50 text-blue-600 font-medium"
+                    : "text-gray-700"
                 }`}
               >
-                All Statuses
+                {option.label}
               </button>
-              {options.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => handleSelect(option)}
-                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
-                    selectedStatus === option
-                      ? "bg-blue-50 text-blue-600 font-medium"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

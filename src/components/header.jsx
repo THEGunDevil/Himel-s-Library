@@ -148,7 +148,7 @@ export default function Header() {
   });
   return (
     <>
-      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-30 xl:px-60 h-20 sm:h-32">
+      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-20 xl:px-20 h-20 sm:h-32">
         {/* Logo */}
         <Link href="/" className="hidden md:flex items-center">
           <Logo width={112} />

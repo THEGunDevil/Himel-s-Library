@@ -211,7 +211,7 @@ export default function Profile() {
   const borrowsByUser = profile.borrows || [];
 
   return (
-    <div className="w-full md:pt-36 pt-32 mx-auto p-4 space-y-6 xl:px-60 lg:px-30 px-4">
+    <div className="w-full md:pt-36 pt-32 mx-auto p-4 space-y-6 xl:px-20 lg:px-20 px-4">
       <div className="bg-white rounded-lg sm:p-6 p-3 mb-8 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 w-full">

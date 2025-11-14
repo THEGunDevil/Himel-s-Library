@@ -42,5 +42,5 @@ export function useBookData({ page = 1, limit = 10, genre = "" } = {}) {
     fetchBooks();
   }, [fetchBooks]);
 
-  return { data, loading, error, totalPages, refetch: fetchBooks };
+  return { data, loading, error, totalPages,fetchBooks, refetch: fetchBooks };
 }

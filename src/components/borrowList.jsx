@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -13,18 +13,121 @@ import { useAuth } from "@/contexts/authContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Loader from "./loader";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
+import { useQuery } from "@tanstack/react-query";
+import FilterComponent from "./filterComponent";
 
 const columnHelper = createColumnHelper();
 
 export default function BorrowList() {
   const [page, setPage] = useState(1);
-  const { data, loading, error, totalPages, refetch } = useBorrowData({ page });
-  const { accessToken } = useAuth();
-
-  // Extract borrows safely
+  const [local, setLocal] = useState("");
+  const [searchedBorrows, setSearchedBorrows] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [option, setOption] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState(""); // Filter state
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const {
+    data,
+    loading,
+    error,
+    totalPages: baseTotalPages,
+    refetch,
+  } = useBorrowData({ page });
+  const [totalPages, setTotalPages] = useState(1);
+  const { accessToken, isAdmin } = useAuth();
   const borrows = data?.borrows || [];
+  const inputRef = useRef(null);
+  // ---- Debounced search effect ----
+  useEffect(() => {
+    if (option === "all") {
+      setDebouncedSearch(""); // clear search if option is "all"
+      setSearchedBorrows([]);
+      setTotalPages(baseTotalPages || 1);
+      return;
+    }
+
+    const t = setTimeout(() => {
+      setDebouncedSearch((local || "").trim());
+    }, 300);
+
+    return () => clearTimeout(t);
+  }, [local, option]);
+  const {
+    data: filteredData,
+    isLoading: isFilteredLoading,
+    error: filteredError,
+    refetch: refetchFiltered,
+  } = useQuery({
+    queryKey: ["filteredBorrows", selectedStatus, page],
+    queryFn: async () => {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/list/data-paginated`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          params: {
+            page,
+            limit: 20,
+            status: selectedStatus.toLowerCase(),
+          },
+        }
+      );
+      return res.data;
+    },
+    enabled: !!selectedStatus && !!accessToken,
+    retry: 1,
+  });
+
+  const fetchFilteredBorrows = useCallback(async () => {
+    // Only search if a valid option is selected
+    if (option !== "user_name" && option !== "book_title") return;
+
+    const trimmed = debouncedSearch;
+    if (!trimmed) {
+      setSearchedBorrows([]);
+      setTotalPages(baseTotalPages || 1);
+      return;
+    }
+
+    try {
+      setSearching(true);
+
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/list/data-paginated`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          params: {
+            query: trimmed,
+            status: option, // ← Changed from "option" to "status" for consistency with backend
+            page,
+            limit: 10,
+          },
+        }
+      );
+
+      setSearchedBorrows(res.data.borrows || []);
+      setTotalPages(res.data.total_pages || 1);
+    } catch (err) {
+      console.error(err);
+      setSearchedBorrows([]);
+      setTotalPages(1);
+    } finally {
+      setSearching(false);
+    }
+  }, [debouncedSearch, page, accessToken, option, baseTotalPages]);
+
+  useEffect(() => {
+    fetchFilteredBorrows();
+  }, [debouncedSearch, page, option]);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, option]);
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus(); // put cursor back in input
+    }
+  }, [debouncedSearch, page]); // trigger on events that reload data
 
   // ---- Optimistic UI ----
   const [optimisticBorrows, setOptimisticBorrows] = useState(borrows);
@@ -58,11 +161,19 @@ export default function BorrowList() {
         }
       );
       toast.success("Book returned!", { autoClose: 1500 });
-      refetch();
+      if (selectedStatus) {
+        refetchFiltered();
+      } else {
+        refetch();
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to return book.");
-      refetch(); // revert optimistic change
+      if (selectedStatus) {
+        refetchFiltered(); // revert optimistic change
+      } else {
+        refetch(); // revert optimistic change
+      }
     }
   };
 
@@ -104,7 +215,7 @@ export default function BorrowList() {
         return isNotReturned(borrow.returned_at) ? (
           <button
             onClick={() => handleReturn(borrow.id, borrow.book_id)}
-            className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
             Return
@@ -115,47 +226,142 @@ export default function BorrowList() {
       },
     }),
   ];
+  // Determine which data to use
+  // const tableData = selectedStatus
+  //   ? filteredData?.borrows || []
+  //   ? optimisticBorrows || [] ? searchedBorrows || [] :[];
+
+  const tableData = selectedStatus
+    ? filteredData?.borrows || []
+    : debouncedSearch
+    ? searchedBorrows || []
+    : optimisticBorrows || [];
 
   // ---- Table instance ----
   const table = useReactTable({
-    data: optimisticBorrows,
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
   // ---- Render ----
-  if (loading) return <Loader />;
-  if (error)
+  const isLoading = loading || isFilteredLoading || searching;
+  const hasError = error || filteredError;
+  const errorMessage =
+    hasError?.message ||
+    hasError?.response?.data?.error ||
+    JSON.stringify(hasError);
+  // if (loading || isFilteredLoading) return <Loader />;
+  if (hasError) {
     return (
-      <div className="p-6 text-red-500">
-        Error: {error.message || "Unknown error"}
+      <div className="p-6 text-center w-full">
+        <p className="text-red-500 font-medium">Error loading borrows</p>
+        <p className="text-gray-600 text-sm mt-2">{errorMessage}</p>
+        <button
+          onClick={() => {
+            if (selectedStatus) {
+              refetchFiltered();
+            } else {
+              refetch(page);
+            }
+          }}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+        >
+          Retry
+        </button>
       </div>
     );
-  if (!optimisticBorrows.length)
-    return <div className="p-6 text-gray-600">No borrow records found.</div>;
+  }
 
   return (
-    <div className="w-full mx-auto my-1">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold mb-3 text-blue-400">Borrow List</h1>
-        <DownloadOptions
-          endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/borrows`}
-          page={page}
-          limit={20}
-          token={accessToken}
-        />
+    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            Borrow List
+          </h1>
+
+          {selectedStatus && (
+            <span className="text-sm text-gray-600">
+              (Filtered by:{" "}
+              <span className="font-semibold">{selectedStatus}</span>)
+            </span>
+          )}
+        </div>
+        <div className="flex items-center w-full sm:w-auto gap-2">
+          <select
+            className="px-4 py-2 h-10 w-20 border border-gray-300 rounded-md focus:outline-none shadow-sm text-sm hidden sm:block"
+            value={option}
+            onChange={(e) => setOption(e.target.value)}
+          >
+            <option value="all">All</option>
+            <option value="user_name">User</option>
+            <option value="book_title">Book</option>
+          </select>
+
+          <input
+            type="search"
+            value={local}
+            ref={inputRef}
+            className={`px-4 py-2 border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm ${
+              option === "all" ? "bg-gray-100 cursor-not-allowed" : ""
+            }`}
+            onChange={(e) => setLocal(e.target.value)}
+            placeholder={
+              option !== "user_name" && option !== "book_title"
+                ? "Select search type first"
+                : "Search borrows..."
+            }
+            disabled={option !== "user_name" && option !== "book_title"}
+          />
+
+          {local && (
+            <button
+              type="button"
+              onClick={() => {
+                setLocal("");
+                setPage(1);
+                inputRef.current.focus(); // keep cursor focused
+              }}
+              className="p-2 text-red-500 cursor-pointer hover:text-red-600 transition-colors duration-200"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          {isAdmin && tableData.length > 0 && (
+            <FilterComponent
+              options={[
+                { label: "Borrowed At", value: "borrowed_at" },
+                { label: "Returned At", value: "returned_at" },
+                { label: "Not Returned", value: "not_returned" },
+              ]}
+              selectedStatus={selectedStatus}
+              setSelectedStatus={setSelectedStatus}
+            />
+          )}
+          {isAdmin && (
+            <DownloadOptions
+              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/borrows`}
+              page={page}
+              limit={20}
+              token={accessToken}
+            />
+          )}
+        </div>
       </div>
 
-      <div className="overflow-x-auto border border-gray-200">
-        <div className="max-h-3/4 overflow-y-auto">
+      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+        <div className="max-h-[60vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 sticky top-0 z-10">
+            <thead className="bg-gray-100 sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -166,47 +372,59 @@ export default function BorrowList() {
                 </tr>
               ))}
             </thead>
-
-            <tbody className="bg-white divide-y divide-gray-200">
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
+            {isLoading ? (
+              <tbody>
+                <tr>
+                  <td
+                    colSpan={table.getAllColumns().length}
+                    className="py-20 text-center"
+                  >
+                    <Loader />
+                  </td>
                 </tr>
-              ))}
-            </tbody>
+              </tbody>
+            ) : (
+              <tbody className="bg-white divide-y divide-gray-200">
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            )}
           </table>
         </div>
 
-        <div className="flex justify-center items-center my-5 gap-4">
+        <div className="flex justify-center items-center py-4 gap-4 bg-gray-50 border-t border-gray-200">
           <button
             onClick={handlePrev}
             disabled={page === 1}
-            className="px-4 py-2 flex items-center bg-blue-400 text-white disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
           >
-            <ArrowLeftIcon className="h-4" /> Previous
+            <ArrowLeftIcon className="h-4 w-4" /> Previous
           </button>
-          <span className="text-gray-700">
+          <span className="text-gray-700 text-sm font-medium">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={handleNext}
             disabled={page === totalPages}
-            className="px-4 py-2 flex items-center bg-blue-400 text-white disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
           >
-            Next <ArrowRightIcon className="h-4" />
+            Next <ArrowRightIcon className="h-4 w-4" />
           </button>
         </div>
       </div>

@@ -143,7 +143,7 @@ export default function Book() {
     return <div className="p-6 text-red-500">Failed to load book.</div>;
 
   return (
-    <section className="flex flex-col w-full lg:flex-row md:pt-36 pt-32 justify-between gap-5 items-start xl:px-60 lg:px-30 px-4 mb-10">
+    <section className="flex flex-col w-full lg:flex-row md:pt-36 pt-32 justify-between gap-5 items-start xl:px-20 lg:px-20 px-4 mb-10">
       {/* Book Info */}
       <div className="bg-white w-full lg:w-1/2 shadow-lg p-6 flex flex-col items-center hover:shadow-xl transition-shadow duration-300 h-auto lg:h-[700px] xl:h-[720px]">
         {/* Book Cover */}
