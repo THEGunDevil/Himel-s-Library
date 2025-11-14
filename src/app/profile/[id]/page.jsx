@@ -420,7 +420,7 @@ export default function Profile() {
                 key={r.id}
                 className="p-3 flex justify-between items-start group relative"
               >
-                <div className="flex-1">
+                <div onClick={()=>router.push(`/book/${r.book_id}`)} className="flex-1">
                   <p className="font-medium">{r.book_title}</p>
                   <p className="text-sm text-yellow-500">
                     {"★".repeat(r.rating)}

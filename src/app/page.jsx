@@ -62,15 +62,23 @@ export default function Home() {
 
       {/* Classic */}
       <div className="mt-5">
-        <h1 className="uppercase font-bold text-2xl text-blue-400">Classic</h1>
+        <div className="flex justify-between items-center text-blue-400">
+          <h1 className="uppercase font-bold text-2xl text-blue-400">
+            Classic
+          </h1>
+          {classicBooks && <ArrowRightIcon size={30} />}
+        </div>
         <BookSliderByGenre books={classicBooks} />
       </div>
 
       {/* Classic Romance */}
       <div className="mt-10">
-        <h1 className="uppercase font-bold text-2xl text-blue-400">
-          Classic Romance
-        </h1>
+        <div className="flex justify-between items-center text-blue-400">
+          <h1 className="uppercase font-bold text-2xl text-blue-400">
+            Classic Romance
+          </h1>
+          {classicRomanceBooks && <ArrowRightIcon size={30} />}
+        </div>
         <BookSliderByGenre books={classicRomanceBooks} />
       </div>
 

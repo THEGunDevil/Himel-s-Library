@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "@/contexts/authContext";
 
-export function useBorrowData({ page = 1, limit = 10, userID, bookID } = {}) {
+export function useBorrowData({ page = 1, limit = 10, bookID } = {}) {
   // ---------- global borrows ----------
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -101,33 +101,36 @@ export function useBorrowData({ page = 1, limit = 10, userID, bookID } = {}) {
     [accessToken, bookID, page, limit]
   );
 const fetchBorrowsByBookIDAndUserID = useCallback(
-  async (idParam) => { // use a proper param
-    const idToUse = idParam || bookID;
-    if (!idToUse || !accessToken) return;
+  async () => {
+    if (!bookID || !accessToken) return [];
 
     setBorrowLoading(true);
     setBorrowError(null);
 
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/borrows/borrow/book/${idToUse}`, // use param!
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
+        `${process.env.NEXT_PUBLIC_API_URL}/borrows/borrow/book/${bookID}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
       setBorrow(response.data || []);
-      return response.data;
-    } catch (error) {
-      setBorrowError(
-        error.response?.data?.message || "Failed to fetch borrows"
-      );
+      return response.data || [];
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setBorrow([]);
+        return [];
+      }
+      // Other errors
+      setBorrowError(err.response?.data?.error || "Failed to fetch borrows");
+      console.error(err.response?.data?.error || err.message);
+      return [];
     } finally {
       setBorrowLoading(false);
     }
   },
   [accessToken, bookID]
 );
+
 
 
   const refetch = () => fetchAllBorrows();

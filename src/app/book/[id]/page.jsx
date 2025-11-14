@@ -30,7 +30,7 @@ export default function Book() {
     setBorrow,
     borrowLoading,
     borrowError,
-  } = useBorrowData({ bookID: id, userID });
+  } = useBorrowData({ bookID: id });
 
   const {
     loadingCreate,
@@ -73,18 +73,27 @@ export default function Book() {
   }, [bookData?.id, userID, accessToken, refetchByBookIDAndUserID]);
   useEffect(() => {
     const fetchBorrow = async () => {
-      if (!bookData?.id || !id || !accessToken) return;
+      if (!id || !accessToken) return;
 
       try {
         const resp = await fetchBorrowsByBookIDAndUserID(id);
-        setBorrow(resp);
+        // If resp is null or empty, mark as not borrowed
+        if (!resp || resp.length === 0) {
+          setBorrow([]);
+          setBorrowed(false);
+        } else {
+          setBorrow(resp);
+          setBorrowed(resp[0]?.returned_at === null);
+        }        
       } catch (err) {
-        console.error("Failed to fetch borrows for book:", err);
+        console.warn("No borrow record found for this user/book", err);
+        setBorrow([]);
+        setBorrowed(false);
       }
     };
 
     fetchBorrow();
-  }, [id, bookData?.id, accessToken, fetchBorrowsByBookIDAndUserID]);
+  }, [id, accessToken, fetchBorrowsByBookIDAndUserID]);
 
   const handleBorrow = async () => {
     if (!accessToken) {
@@ -141,7 +150,8 @@ export default function Book() {
   if (bookLoading || !book) return <div className="p-6">Loading book...</div>;
   if (bookError)
     return <div className="p-6 text-red-500">Failed to load book.</div>;
-
+  console.log(borrow);
+  
   return (
     <section className="flex flex-col w-full lg:flex-row md:pt-36 pt-32 justify-between gap-5 items-start xl:px-20 lg:px-20 px-4 mb-10">
       {/* Book Info */}
@@ -270,7 +280,7 @@ export default function Book() {
             )}
           </div>
         )}
-        {localReserves?.status === "fulfilled" && (
+        {localReserves?.status === "fulfilled" && !borrow?.[0]?.returned_at && (
           <p className="w-full text-center mt-3 text-lg font-medium text-green-500">
             Good news! Your reserved book is ready. You can pick it up from the
             library starting from{" "}

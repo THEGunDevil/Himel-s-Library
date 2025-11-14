@@ -240,6 +240,36 @@ export default function ReservationList() {
       header: "Cancelled At",
       cell: (info) => ConvertStringToDate(info.getValue()) || "-",
     }),
+    columnHelper.accessor("picked_up", {
+      header: "Picked Up",
+      cell: ({ row }) => {
+        const pickedUp = row.original.picked_up;
+        const reservationId = row.original.id;
+
+        const handleMarkPickedUp = async () => {
+          try {
+            await updateReservationStatus(reservationId, "picked_up");
+            toast.success("Marked as picked up!");
+            // refetch data if needed
+            fetchReservations();
+          } catch (err) {
+            toast.error("Failed to mark picked up");
+          }
+        };
+
+        return pickedUp ? (
+          <span className="text-green-600 font-medium">Yes</span>
+        ) : (
+          <button
+            className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+            onClick={handleMarkPickedUp}
+          >
+            Mark Picked Up
+          </button>
+        );
+      },
+    }),
+
     columnHelper.display({
       id: "actions",
       header: "Actions",

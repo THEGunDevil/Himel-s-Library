@@ -84,6 +84,7 @@ export function useBookReviews(bookId) {
       setData((prev) =>
         prev.map((r) => (r.id === reviewId ? { ...r, ...updatedReview } : r))
       );
+      
     } catch (err) {
       console.error("❌ Failed to update review:", err);
       setUpdateError(err);

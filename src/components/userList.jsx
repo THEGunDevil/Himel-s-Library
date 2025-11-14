@@ -65,16 +65,15 @@ export default function UserList() {
         limit: 10,
       };
 
-const res = await axios.get(
-  `${process.env.NEXT_PUBLIC_API_URL}/users/user/email`,
-  {
-    params,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  }
-);
-
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/user/email`,
+        {
+          params,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       setFilteredUsers(res.data.users || []);
       setTotalPages(res.data.total_pages || 1);
@@ -212,13 +211,13 @@ const res = await axios.get(
                 Ban
               </button>
             )}
-            <Link
+            {/* <Link
               href={`/profile/${user.id}`}
               onClick={(e) => e.stopPropagation()}
               className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
             >
               <User size={20} />
-            </Link>
+            </Link> */}
           </div>
         );
       },
@@ -252,35 +251,36 @@ const res = await axios.get(
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
           User List
         </h1>
-        <div className="flex items-center w-full sm:w-auto gap-2">
-          <input
-            type="search"
-            value={local}
-            className="px-4 py-2 border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm"
-            onChange={(e) => setLocal(e.target.value)}
-            placeholder="Search user..."
+        <div className="flex items-center gap-3 justify-center">
+          <div className="flex items-center w-full sm:w-auto gap-2">
+            <input
+              type="search"
+              value={local}
+              className="px-4 py-2 border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm"
+              onChange={(e) => setLocal(e.target.value)}
+              placeholder="Search user..."
+            />
+
+            {local && (
+              <button
+                type="button"
+                onClick={() => {
+                  setLocal("");
+                  setPage(1);
+                }}
+                className="p-2 text-red-500 cursor-pointer hover:text-red-600 transition-colors duration-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+          <DownloadOptions
+            endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
+            page={page}
+            limit={10}
+            token={accessToken}
           />
-
-          {local && (
-            <button
-              type="button"
-              onClick={() => {
-                setLocal("");
-                setPage(1);
-              }}
-              className="p-2 text-red-500 cursor-pointer hover:text-red-600 transition-colors duration-200"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
         </div>
-
-        <DownloadOptions
-          endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
-          page={page}
-          limit={10}
-          token={accessToken}
-        />
       </div>
 
       {/* Table */}
@@ -321,7 +321,7 @@ const res = await axios.get(
                   <tr
                     key={row.id}
                     className="group hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
-                    onClick={() => router.push(`/book/${row.original.id}`)}
+                    onClick={() => router.push(`/profile/${row.original.id}`)}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
