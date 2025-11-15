@@ -251,27 +251,6 @@ export default function BorrowList() {
     hasError?.message ||
     hasError?.response?.data?.error ||
     JSON.stringify(hasError);
-  // if (loading || isFilteredLoading) return <Loader />;
-  if (hasError) {
-    return (
-      <div className="p-6 text-center w-full">
-        <p className="text-red-500 font-medium">Error loading borrows</p>
-        <p className="text-gray-600 text-sm mt-2">{errorMessage}</p>
-        <button
-          onClick={() => {
-            if (selectedStatus) {
-              refetchFiltered();
-            } else {
-              refetch(page);
-            }
-          }}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
@@ -372,23 +351,43 @@ export default function BorrowList() {
                 </tr>
               ))}
             </thead>
-            {isLoading ? (
-              <tbody>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {isLoading ? (
                 <tr>
-                  <td
-                    colSpan={table.getAllColumns().length}
-                    className="py-20 text-center"
-                  >
+                  <td colSpan={columns.length} className="py-20 text-center">
                     <Loader />
                   </td>
                 </tr>
-              </tbody>
-            ) : (
-              <tbody className="bg-white divide-y divide-gray-200">
-                {table.getRowModel().rows.map((row) => (
+              ) : hasError ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="py-20 text-center text-red-500"
+                  >
+                    <p>Error loading borrows</p>
+                    <p className="text-gray-600 text-sm mt-2">{errorMessage}</p>
+                    <button
+                      onClick={() => refetch()}
+                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+                    >
+                      Retry
+                    </button>
+                  </td>
+                </tr>
+              ) : tableData.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="py-20 text-center text-gray-500"
+                  >
+                    No borrows found.
+                  </td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-gray-50 transition-colors duration-200"
+                    className="hover:bg-gray-50 transition-colors duration-200 group"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
@@ -402,9 +401,9 @@ export default function BorrowList() {
                       </td>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            )}
+                ))
+              )}
+            </tbody>
           </table>
         </div>
 

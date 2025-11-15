@@ -79,12 +79,12 @@ export function useBookReviews(bookId) {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      const updatedReview = res.data.review; // ✅ extract correct object
-
+      const updatedReview = res.data.review || {};
       setData((prev) =>
-        prev.map((r) => (r.id === reviewId ? { ...r, ...updatedReview } : r))
+        (prev || []).map((r) =>
+          r.id === reviewId ? { ...r, ...updatedReview } : r
+        )
       );
-      
     } catch (err) {
       console.error("❌ Failed to update review:", err);
       setUpdateError(err);

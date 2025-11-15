@@ -10,13 +10,11 @@ import {
 import axios from "axios";
 import Loader from "./loader";
 import { useAuth } from "@/contexts/authContext";
-import { ArrowLeftIcon, ArrowRightIcon, Search, X, User } from "lucide-react";
-import Link from "next/link";
+import { ArrowLeftIcon, ArrowRightIcon, X  } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
 import { handleBan, handleUnban } from "../../utils/userActions";
 import { ConvertStringToDate } from "../../utils/utils";
 import { useUserData } from "@/hooks/useUserData";
-import { useRouter } from "next/navigation";
 
 const columnHelper = createColumnHelper();
 
@@ -24,10 +22,9 @@ export default function UserList() {
   const [page, setPage] = useState(1);
   const [userToBan, setUserToBan] = useState(null);
   const [userToUnban, setUserToUnban] = useState(null);
-  const router = useRouter();
   const { isAdmin, accessToken } = useAuth();
   const [filteredLoading, setFilteredLoading] = useState(false);
-  const [filteredUsers, setFilteredUsers] = useState(false);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [local, setLocal] = useState("");
@@ -87,8 +84,14 @@ export default function UserList() {
   }, [debouncedSearch, page, baseTotalPages]);
 
   useEffect(() => {
-    fetchFilteredUsers();
-  }, [debouncedSearch, page]);
+    if (!debouncedSearch) {
+      setFilteredUsers([]);
+      setTotalPages(baseTotalPages || 1); // sync with normal paginated data
+    } else {
+      fetchFilteredUsers();
+    }
+  }, [debouncedSearch, page, baseTotalPages, fetchFilteredUsers]);
+
   const handleNext = () => page < totalPages && setPage((prev) => prev + 1);
   const handlePrev = () => page > 1 && setPage((prev) => prev - 1);
 
@@ -211,13 +214,6 @@ export default function UserList() {
                 Ban
               </button>
             )}
-            {/* <Link
-              href={`/profile/${user.id}`}
-              onClick={(e) => e.stopPropagation()}
-              className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
-            >
-              <User size={20} />
-            </Link> */}
           </div>
         );
       },
@@ -229,20 +225,12 @@ export default function UserList() {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-
-  // ---- Loading/Error States ----
-  // if (error)
-  //   return (
-  //     <div className="p-6 text-center text-red-500 bg-red-50 rounded-lg shadow-md">
-  //       Error: {error.message || "Failed to load users"}
-  //     </div>
-  //   );
-  // if (!tableData?.length)
-  //   return (
-  //     <div className="p-6 text-gray-600 bg-gray-50 rounded-lg shadow-md">
-  //       No user records found.
-  //     </div>
-  //   );
+  const isLoading = filteredLoading || loading;
+  const hasError = error ;
+  const errorMessage =
+    hasError?.message ||
+    hasError?.response?.data?.error ||
+    JSON.stringify(hasError);
 
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
@@ -304,24 +292,43 @@ export default function UserList() {
                 </tr>
               ))}
             </thead>
-            {filteredLoading || loading ? (
-              <tbody>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {isLoading ? (
                 <tr>
-                  <td
-                    colSpan={table.getAllColumns().length}
-                    className="py-20 text-center"
-                  >
+                  <td colSpan={columns.length} className="py-20 text-center">
                     <Loader />
                   </td>
                 </tr>
-              </tbody>
-            ) : (
-              <tbody className="bg-white divide-y divide-gray-200">
-                {table.getRowModel().rows.map((row) => (
+              ) : hasError ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="py-20 text-center text-red-500"
+                  >
+                    <p>Error loading users</p>
+                    <p className="text-gray-600 text-sm mt-2">{errorMessage}</p>
+                    <button
+                      onClick={() => refetch()}
+                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+                    >
+                      Retry
+                    </button>
+                  </td>
+                </tr>
+              ) : tableData.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="py-20 text-center text-gray-500"
+                  >
+                    No users found.
+                  </td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="group hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
-                    onClick={() => router.push(`/profile/${row.original.id}`)}
+                    className="hover:bg-gray-50 transition-colors duration-200"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
@@ -335,9 +342,9 @@ export default function UserList() {
                       </td>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            )}
+                ))
+              )}
+            </tbody>
           </table>
         </div>
 

@@ -17,7 +17,6 @@ import { useAuth } from "@/contexts/authContext";
 import { useReservations } from "@/hooks/useReservation";
 import { ConvertStringToDate } from "../../utils/utils";
 import { fulfillReservation, cancelReservation } from "../../utils/userActions";
-import { useRouter } from "next/navigation";
 import FilterComponent from "./filterComponent";
 
 const columnHelper = createColumnHelper();
@@ -25,7 +24,6 @@ const columnHelper = createColumnHelper();
 export default function ReservationList() {
   const [page, setPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState(""); // Filter state
-  const router = useRouter();
   const { isAdmin, accessToken } = useAuth();
 
   // Fetch unfiltered reservations
@@ -61,16 +59,13 @@ export default function ReservationList() {
         );
         return res.data;
       } catch (error) {
-        // Transform error to string
         const errorMsg =
-          error?.response?.data?.error ||
-          error?.message ||
-          "Failed to fetch data";
+          error?.response?.data?.error || error?.message || "Failed to fetch data";
         throw new Error(errorMsg);
       }
     },
     enabled: !!selectedStatus && !!accessToken,
-    retry: 1, // Only retry once
+    retry: 1,
   });
 
   const [localReservations, setLocalReservations] = useState({});
@@ -81,8 +76,8 @@ export default function ReservationList() {
     : reservations || [];
 
   const currentTotalPages = selectedStatus
-    ? Math.ceil((filteredData?.total_count || 0) / 20)
-    : totalPages;
+    ? Math.ceil((filteredData?.total_count || 0) / 20) || 1
+    : totalPages || 1;
 
   // Handlers for pagination
   const handleNext = useCallback(() => {
@@ -136,7 +131,6 @@ export default function ReservationList() {
           const { [reservation.id]: _, ...rest } = prev;
           return rest;
         });
-        // Refetch based on current filter
         if (selectedStatus) {
           refetchFiltered();
         } else {
@@ -144,14 +138,7 @@ export default function ReservationList() {
         }
       }
     },
-    [
-      updateStatus,
-      selectedStatus,
-      page,
-      refetchFiltered,
-      fetchReservations,
-      setLocalReservation,
-    ]
+    [updateStatus, selectedStatus, page, refetchFiltered, fetchReservations, setLocalReservation]
   );
 
   // Handle cancel action
@@ -169,7 +156,6 @@ export default function ReservationList() {
           const { [reservation.id]: _, ...rest } = prev;
           return rest;
         });
-        // Refetch based on current filter
         if (selectedStatus) {
           refetchFiltered();
         } else {
@@ -177,14 +163,7 @@ export default function ReservationList() {
         }
       }
     },
-    [
-      updateStatus,
-      selectedStatus,
-      page,
-      refetchFiltered,
-      fetchReservations,
-      setLocalReservation,
-    ]
+    [updateStatus, selectedStatus, page, refetchFiltered, fetchReservations, setLocalReservation]
   );
 
   // Status badge helper
@@ -195,22 +174,15 @@ export default function ReservationList() {
       fulfilled: { bg: "bg-green-100", text: "text-green-800" },
       cancelled: { bg: "bg-red-100", text: "text-red-800" },
     };
-
-    const config = statusConfig[status] || {
-      bg: "bg-gray-100",
-      text: "text-gray-800",
-    };
-
+    const config = statusConfig[status] || { bg: "bg-gray-100", text: "text-gray-800" };
     return (
-      <span
-        className={`px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
-      >
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
         {status}
       </span>
     );
   };
 
-  // Table columns definition
+  // Table columns
   const columns = [
     columnHelper.accessor("user_name", {
       header: "User Name",
@@ -243,16 +215,15 @@ export default function ReservationList() {
     columnHelper.accessor("picked_up", {
       header: "Picked Up",
       cell: ({ row }) => {
-        const pickedUp = row.original.picked_up;
-        const reservationId = row.original.id;
+        const reservation = getReservation(row.original.id);
+        const pickedUp = reservation.picked_up;
 
         const handleMarkPickedUp = async () => {
           try {
-            await updateReservationStatus(reservationId, "picked_up");
+            await updateStatus(reservation.id, "picked_up");
             toast.success("Marked as picked up!");
-            // refetch data if needed
-            fetchReservations();
-          } catch (err) {
+            fetchReservations(page);
+          } catch {
             toast.error("Failed to mark picked up");
           }
         };
@@ -269,21 +240,18 @@ export default function ReservationList() {
         );
       },
     }),
-
     columnHelper.display({
       id: "actions",
       header: "Actions",
       cell: ({ row }) => {
         const reservation = getReservation(row.original.id);
-        const isPending = reservation.status === "pending";
-        const isFulfilled = reservation.status === "fulfilled";
-        const isCancelled = reservation.status === "cancelled";
+        const { status } = reservation;
 
-        if (isCancelled) return <span className="text-gray-400">-</span>;
+        if (status === "cancelled") return <span className="text-gray-400">-</span>;
 
         return (
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {isPending && (
+            {status === "pending" && (
               <>
                 <button
                   onClick={(e) => {
@@ -307,7 +275,7 @@ export default function ReservationList() {
                 </button>
               </>
             )}
-            {isFulfilled && (
+            {status === "fulfilled" && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -330,67 +298,24 @@ export default function ReservationList() {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-  const isLoading = loadingFetch || isFilteredLoading;
+
+  const isLoading = loadingFetch || isFilteredLoading || Object.keys(localReservations).length > 0;
   const hasError = fetchError || filteredError;
   const errorMessage =
     hasError?.message ||
     hasError?.response?.data?.error ||
     JSON.stringify(hasError);
-  // if (isLoading) return <Loader />;
-  if (hasError) {
-    return (
-      <div className="p-6 text-center w-full">
-        <p className="text-red-500 font-medium">Error loading borrows</p>
-        <p className="text-gray-600 text-sm mt-2">{errorMessage}</p>
-        <button
-          onClick={() => {
-            if (selectedStatus) {
-              refetchFiltered();
-            } else {
-              refetch(page);
-            }
-          }}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
 
-  // if (!tableData || tableData.length === 0) {
-  //   return (
-  //     <div className="p-6 text-center text-gray-500 w-full">
-  //       <p className="text-lg font-medium">No borrows found</p>
-  //       <p className="text-sm mt-2">
-  //         {selectedStatus
-  //           ? `No ${selectedStatus.toLowerCase()} borrows to display.`
-  //           : "There are currently no borrows to display."}
-  //       </p>
-  //       {selectedStatus && (
-  //         <button
-  //           onClick={() => setSelectedStatus("")}
-  //           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
-  //         >
-  //           Clear Filter
-  //         </button>
-  //       )}
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Reservation List
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Reservation List</h1>
           {selectedStatus && (
             <span className="text-sm text-gray-600">
-              (Filtered by:{" "}
-              <span className="font-semibold">{selectedStatus}</span>)
+              (Filtered by: <span className="font-semibold">{selectedStatus}</span>)
             </span>
           )}
         </div>
@@ -429,49 +354,39 @@ export default function ReservationList() {
                     <th
                       key={header.id}
                       className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                      scope="col"
                     >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
                 </tr>
               ))}
             </thead>
-            {isLoading ? (
-              <tbody>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {isLoading ? (
                 <tr>
-                  <td
-                    colSpan={table.getAllColumns().length}
-                    className="py-20 text-center"
-                  >
+                  <td colSpan={columns.length} className="py-20 text-center">
                     <Loader />
                   </td>
                 </tr>
-              </tbody>
-            ) : (
-              <tbody className="bg-white divide-y divide-gray-200">
-                {table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="hover:bg-gray-50 transition-colors duration-200"
-                  >
+              ) : tableData.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length} className="py-20 text-center text-gray-500">
+                    No reservations found.
+                  </td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr key={row.id} className="hover:bg-gray-50 transition-colors duration-200 group">
                     {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
+                      <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            )}
+                ))
+              )}
+            </tbody>
           </table>
         </div>
 
@@ -481,10 +396,8 @@ export default function ReservationList() {
             onClick={handlePrev}
             disabled={page === 1}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
-            aria-label="Previous page"
           >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Previous
+            <ArrowLeftIcon className="h-4 w-4" /> Previous
           </button>
           <span className="text-gray-700 text-sm font-medium">
             Page {page} of {currentTotalPages}
@@ -493,10 +406,8 @@ export default function ReservationList() {
             onClick={handleNext}
             disabled={page === currentTotalPages}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
-            aria-label="Next page"
           >
-            Next
-            <ArrowRightIcon className="h-4 w-4" />
+            Next <ArrowRightIcon className="h-4 w-4" />
           </button>
         </div>
       </div>

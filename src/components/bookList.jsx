@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 
 const columnHelper = createColumnHelper();
 
-export default function BookList({setSelectedIndex,setUpdateBookID}) {
+export default function BookList({ setSelectedIndex, setUpdateBookID }) {
   const [page, setPage] = useState(1);
   const [genre, setGenre] = useState("all");
   const [genres, setGenres] = useState([]);
@@ -26,7 +26,6 @@ export default function BookList({setSelectedIndex,setUpdateBookID}) {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
-  const router = useRouter();
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [local, setLocal] = useState("");
 
@@ -100,7 +99,7 @@ export default function BookList({setSelectedIndex,setUpdateBookID}) {
 
   useEffect(() => {
     fetchFilteredBooks();
-  }, [debouncedSearch, page, genre]);
+  }, [debouncedSearch, page, genre, fetchFilteredBooks]);
 
   const handleNext = () => page < totalPages && setPage((p) => p + 1);
   const handlePrev = () => page > 1 && setPage((p) => p - 1);
@@ -126,65 +125,65 @@ export default function BookList({setSelectedIndex,setUpdateBookID}) {
       toast.error("Failed to delete book.");
     }
   };
-
+  const columns = [
+    columnHelper.accessor("id", {
+      header: "ID",
+      cell: ({ getValue }) => {
+        const id = getValue();
+        const shortId = id ? id.slice(0, 8) + "..." : "N/A";
+        return (
+          <div className="flex items-center gap-2 group">
+            <span className="font-mono">{shortId}</span>
+            <button
+              onClick={() => navigator.clipboard.writeText(id)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-500"
+              title="Copy ID"
+            >
+              📋
+            </button>
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor("title", { header: "Book Title" }),
+    columnHelper.accessor("author", { header: "Author" }),
+    columnHelper.accessor("available_copies", { header: "Available Copies" }),
+    columnHelper.accessor("total_copies", { header: "Total Copies" }),
+    columnHelper.display({
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const book = row.original;
+        return (
+          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedIndex(5);
+                setUpdateBookID(book.id);
+              }}
+              className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+            >
+              Update
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setBookToDelete(book.id);
+              }}
+              className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
+            >
+              Delete
+            </button>
+          </div>
+        );
+      },
+    }),
+  ];
   const tableData = debouncedSearch ? filteredBooks : books || [];
   const table = useReactTable({
     data: tableData,
-    columns: [
-      columnHelper.accessor("id", {
-        header: "ID",
-        cell: ({ getValue }) => {
-          const id = getValue();
-          const shortId = id ? id.slice(0, 8) + "..." : "N/A";
-          return (
-            <div className="flex items-center gap-2 group">
-              <span className="font-mono">{shortId}</span>
-              <button
-                onClick={() => navigator.clipboard.writeText(id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-500"
-                title="Copy ID"
-              >
-                📋
-              </button>
-            </div>
-          );
-        },
-      }),
-      columnHelper.accessor("title", { header: "Book Title" }),
-      columnHelper.accessor("author", { header: "Author" }),
-      columnHelper.accessor("available_copies", { header: "Available Copies" }),
-      columnHelper.accessor("total_copies", { header: "Total Copies" }),
-      columnHelper.display({
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }) => {
-          const book = row.original;
-          return (
-            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedIndex(5)
-                  setUpdateBookID(book.id)
-                }}
-                className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
-              >
-                Update
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setBookToDelete(book.id);
-                }}
-                className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
-              >
-                Delete
-              </button>
-            </div>
-          );
-        },
-      }),
-    ],
+    columns, 
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -196,15 +195,12 @@ export default function BookList({setSelectedIndex,setUpdateBookID}) {
       inputRef.current.focus(); // put cursor back in input
     }
   }, [debouncedSearch, page, genre]); // trigger on events that reload data
-
-  // if (baseLoading || loading) return <Loader />;
-  if (error)
-    return (
-      <div className="p-6 text-red-500 bg-red-50 rounded-lg shadow-md">
-        {error.message}
-      </div>
-    );
-
+  const isLoading = baseLoading || loading;
+  const hasError = error;
+  const errorMessage =
+    hasError?.message ||
+    hasError?.response?.data?.error ||
+    JSON.stringify(hasError);
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
       {/* Search Bar */}
@@ -279,31 +275,59 @@ export default function BookList({setSelectedIndex,setUpdateBookID}) {
                 </tr>
               ))}
             </thead>
-      {baseLoading || loading ? (
-        <tbody>
-          <tr>
-            <td colSpan={table.getAllColumns().length} className="py-20 text-center">
-              <Loader />
-            </td>
-          </tr>
-        </tbody>
-      ) : (
-        <tbody className="bg-white divide-y divide-gray-200">
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className="group hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
-              onClick={() => router.push(`/book/${row.original.id}`)}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      )}
+            <tbody className="bg-white divide-y divide-gray-200">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={columns.length} className="py-20 text-center">
+                    <Loader />
+                  </td>
+                </tr>
+              ) : hasError ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="py-20 text-center text-red-500"
+                  >
+                    <p>Error loading books</p>
+                    <p className="text-gray-600 text-sm mt-2">{errorMessage}</p>
+                    <button
+                      onClick={() => refetch()}
+                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+                    >
+                      Retry
+                    </button>
+                  </td>
+                </tr>
+              ) : tableData.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="py-20 text-center text-gray-500"
+                  >
+                    No books found.
+                  </td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
 

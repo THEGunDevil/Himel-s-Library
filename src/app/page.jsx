@@ -87,7 +87,7 @@ export default function Home() {
         <h1 className="uppercase font-bold text-2xl text-blue-400">
           All Books
         </h1>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mt-5 place-items-center">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6 mt-5 place-items-center">
           {Array.isArray(books) &&
             books.map((book) => <BookCard key={book.id} book={book} />)}
         </div>
