@@ -9,6 +9,9 @@ const inter = Inter({
 export const metadata = {
   title: "Himel's Library",
   description: "Your online book library management system",
+  icons: {
+    icon: "/logo.svg", // this sets the tab icon
+  },
 };
 
 export default function RootLayout({ children }) {
