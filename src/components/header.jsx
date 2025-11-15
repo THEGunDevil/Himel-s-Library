@@ -29,8 +29,13 @@ export default function Header() {
     { title: "Contact us", path: "/contact" },
     ...(accessToken ? [{ title: "Profile", path: `/profile/${userID}` }] : []),
     ...(isAdmin
-      ? [{ title: "Dashboard", path: "/dashboard", hiddenOnMobile: true }]
+      ? [
+          { title: "Dashboard", path: "/dashboard", hiddenOnMobile: true }, // hide on phones
+          { title: "Add Book", path: "/add-book", hiddenOnMobile: false }, // ONLY show on phones
+          { title: "Update Book", path: "/update-book", hiddenOnMobile: false }, // ONLY show on phones
+        ]
       : []),
+
     ...(!accessToken
       ? [
           { title: "Log In", path: "/auth/log-in" },
@@ -159,7 +164,7 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <ul className="hidden md:flex gap-8 ml-10 uppercase font-medium text-gray-700">
-          {navigation.map((nav) => (
+          {navigation.filter(nav => nav.hiddenOnMobile !== false).map((nav) => (
             <li key={nav.path}>
               <Link
                 href={nav.path}
@@ -195,17 +200,9 @@ export default function Header() {
             {navigation.map((nav) => (
               <li
                 key={nav.path}
-                className={nav.hiddenOnMobile ? "hidden sm:block" : ""}
+                className={nav.hiddenOnMobile ? "hidden sm:block" : "sm:hidden block"}
                 onClick={() => setSidebarOpen(false)}
               >
-                {nav.title === "Log Out" ? (
-                  <button
-                    onClick={handleLogoutClick}
-                    className="hover:text-blue-400 text-gray-700 uppercase font-medium"
-                  >
-                    Log Out
-                  </button>
-                ) : (
                   <Link
                     href={nav.path}
                     className={`hover:text-blue-400 ${
@@ -216,7 +213,7 @@ export default function Header() {
                   >
                     {nav.title}
                   </Link>
-                )}
+                
               </li>
             ))}
           </ul>

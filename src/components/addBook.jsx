@@ -1,3 +1,4 @@
+"use client"
 import { useAuth } from "@/contexts/authContext";
 import axios from "axios";
 import { useState, useEffect } from "react";
