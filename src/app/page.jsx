@@ -52,6 +52,7 @@ export default function Home() {
   const handlePrev = () => {
     if (page > 1) setPage((prev) => prev - 1);
   };
+console.log(classicRomanceBooks.length);
 
   return (
     <main className="md:pt-32 pt-24 xl:px-20 lg:px-20 px-4 min-h-screen">
@@ -66,7 +67,7 @@ export default function Home() {
           <h1 className="uppercase font-bold text-2xl text-blue-400">
             Classic
           </h1>
-          {classicBooks && <ArrowRightIcon size={30} />}
+          {classicBooks.length > 5 && <ArrowRightIcon size={25} />}
         </div>
         <BookSliderByGenre books={classicBooks} />
       </div>
@@ -77,7 +78,7 @@ export default function Home() {
           <h1 className="uppercase font-bold text-2xl text-blue-400">
             Classic Romance
           </h1>
-          {classicRomanceBooks && <ArrowRightIcon size={30} />}
+          {classicRomanceBooks.length > 5 && <ArrowRightIcon size={25} />}
         </div>
         <BookSliderByGenre books={classicRomanceBooks} />
       </div>
