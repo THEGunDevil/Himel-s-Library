@@ -10,7 +10,7 @@ import {
 import axios from "axios";
 import Loader from "./loader";
 import { useAuth } from "@/contexts/authContext";
-import { ArrowLeftIcon, ArrowRightIcon, X  } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
 import { handleBan, handleUnban } from "../../utils/userActions";
 import { ConvertStringToDate } from "../../utils/utils";
@@ -226,7 +226,7 @@ export default function UserList() {
     getCoreRowModel: getCoreRowModel(),
   });
   const isLoading = filteredLoading || loading;
-  const hasError = error ;
+  const hasError = error;
   const errorMessage =
     hasError?.message ||
     hasError?.response?.data?.error ||
@@ -328,7 +328,7 @@ export default function UserList() {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-gray-50 transition-colors duration-200"
+                    className="group hover:bg-gray-50 transition-colors duration-200"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td

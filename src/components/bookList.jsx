@@ -183,7 +183,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
   const tableData = debouncedSearch ? filteredBooks : books || [];
   const table = useReactTable({
     data: tableData,
-    columns, 
+    columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -311,7 +311,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-gray-50 transition-colors duration-200"
+                    className="group hover:bg-gray-50 transition-colors duration-200"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td

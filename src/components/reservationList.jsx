@@ -60,7 +60,9 @@ export default function ReservationList() {
         return res.data;
       } catch (error) {
         const errorMsg =
-          error?.response?.data?.error || error?.message || "Failed to fetch data";
+          error?.response?.data?.error ||
+          error?.message ||
+          "Failed to fetch data";
         throw new Error(errorMsg);
       }
     },
@@ -138,7 +140,14 @@ export default function ReservationList() {
         }
       }
     },
-    [updateStatus, selectedStatus, page, refetchFiltered, fetchReservations, setLocalReservation]
+    [
+      updateStatus,
+      selectedStatus,
+      page,
+      refetchFiltered,
+      fetchReservations,
+      setLocalReservation,
+    ]
   );
 
   // Handle cancel action
@@ -163,7 +172,14 @@ export default function ReservationList() {
         }
       }
     },
-    [updateStatus, selectedStatus, page, refetchFiltered, fetchReservations, setLocalReservation]
+    [
+      updateStatus,
+      selectedStatus,
+      page,
+      refetchFiltered,
+      fetchReservations,
+      setLocalReservation,
+    ]
   );
 
   // Status badge helper
@@ -174,9 +190,14 @@ export default function ReservationList() {
       fulfilled: { bg: "bg-green-100", text: "text-green-800" },
       cancelled: { bg: "bg-red-100", text: "text-red-800" },
     };
-    const config = statusConfig[status] || { bg: "bg-gray-100", text: "text-gray-800" };
+    const config = statusConfig[status] || {
+      bg: "bg-gray-100",
+      text: "text-gray-800",
+    };
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
+      >
         {status}
       </span>
     );
@@ -247,7 +268,8 @@ export default function ReservationList() {
         const reservation = getReservation(row.original.id);
         const { status } = reservation;
 
-        if (status === "cancelled") return <span className="text-gray-400">-</span>;
+        if (status === "cancelled")
+          return <span className="text-gray-400">-</span>;
 
         return (
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -299,23 +321,28 @@ export default function ReservationList() {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const isLoading = loadingFetch || isFilteredLoading || Object.keys(localReservations).length > 0;
+  const isLoading =
+    loadingFetch ||
+    isFilteredLoading ||
+    Object.keys(localReservations).length > 0;
   const hasError = fetchError || filteredError;
   const errorMessage =
     hasError?.message ||
     hasError?.response?.data?.error ||
     JSON.stringify(hasError);
 
-
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Reservation List</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            Reservation List
+          </h1>
           {selectedStatus && (
             <span className="text-sm text-gray-600">
-              (Filtered by: <span className="font-semibold">{selectedStatus}</span>)
+              (Filtered by:{" "}
+              <span className="font-semibold">{selectedStatus}</span>)
             </span>
           )}
         </div>
@@ -356,7 +383,10 @@ export default function ReservationList() {
                       className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                       scope="col"
                     >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -369,18 +399,33 @@ export default function ReservationList() {
                     <Loader />
                   </td>
                 </tr>
-              ) : tableData.length === 0 ? (
+              ) : tableData.length === 0 || hasError ? (
                 <tr>
-                  <td colSpan={columns.length} className="py-20 text-center text-gray-500">
-                    No reservations found.
+                  <td
+                    colSpan={columns.length}
+                    className="py-20 text-center text-gray-500"
+                  >
+                    <p>No reservation found</p>
+                    <p className="text-gray-600 text-sm mt-2">
+                      {errorMessage}
+                    </p>{" "}
                   </td>
                 </tr>
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50 transition-colors duration-200 group">
+                  <tr
+                    key={row.id}
+                    className="group hover:bg-gray-50 transition-colors duration-200"
+                  >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      <td
+                        key={cell.id}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </td>
                     ))}
                   </tr>

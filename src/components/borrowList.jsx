@@ -387,7 +387,7 @@ export default function BorrowList() {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-gray-50 transition-colors duration-200 group"
+                    className="group hover:bg-gray-50 transition-colors duration-200"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
