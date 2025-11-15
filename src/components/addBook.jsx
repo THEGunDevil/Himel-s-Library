@@ -10,7 +10,7 @@ function AddBook() {
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const { accessToken } = useAuth();
-
+  const [added,setAdded] = useState(false)
   const imageRegister = register("image", { required: "Book cover is required" });
 
   useEffect(() => {
@@ -50,7 +50,7 @@ function AddBook() {
         formData.append("image", data.image[0]);
       }
 
-       await axios.post(
+       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/books/`,
         formData,
         {
@@ -60,9 +60,16 @@ function AddBook() {
           },
         }
       );
+      if (res) {
+        setAdded(true)
+      }
+      else setAdded(false)
+      console.log(res);
+      
       toast.success("Adding successful")
     } catch (error) {
       console.error("❌ Adding failed:", error.response?.data || error.message);
+      toast.error("Adding failed")
     } finally {
       setLoading(false);
     }
@@ -108,7 +115,7 @@ function AddBook() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">Published Year</label>
               <input
                 type="number"
-                min={1900}
+                min={1800}
                 max={2099}
                 {...register("published_year", { required: "Published year is required" })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
