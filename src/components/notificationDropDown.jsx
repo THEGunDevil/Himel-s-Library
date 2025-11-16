@@ -62,7 +62,7 @@ const NotificationDropdown = forwardRef(
               <li
                 key={n.id}
                 className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition ${
-                  n.is_read ? "" : "bg-blue-50"
+                  n.is_read ? "" : "bg-blue-200"
                 }`}
               >
                 <div className="flex-1">
