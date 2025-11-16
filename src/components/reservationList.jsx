@@ -365,6 +365,7 @@ export default function ReservationList() {
               page={page}
               limit={20}
               token={accessToken}
+              filters={{ status: selectedStatus }} // passes current filter for CSV/XLSX export
             />
           )}
         </div>

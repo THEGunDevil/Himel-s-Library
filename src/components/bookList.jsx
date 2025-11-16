@@ -14,7 +14,6 @@ import Loader from "./loader";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
-import { useRouter } from "next/navigation";
 
 const columnHelper = createColumnHelper();
 
@@ -246,12 +245,17 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
           )}
         </div>
 
-        <DownloadOptions
-          endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
-          page={page}
-          limit={10}
-          token={accessToken}
-        />
+<DownloadOptions
+  endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
+  page={page}
+  limit={10}
+  token={accessToken}
+  filters={{
+    search: debouncedSearch || undefined,
+    genre: genre !== "all" ? genre : undefined,
+  }}
+/>
+
       </div>
 
       {/* Table */}

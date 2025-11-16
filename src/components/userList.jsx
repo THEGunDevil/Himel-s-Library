@@ -267,6 +267,7 @@ export default function UserList() {
             page={page}
             limit={10}
             token={accessToken}
+            filters={{ search: debouncedSearch }} // use debounced search term
           />
         </div>
       </div>

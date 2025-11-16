@@ -326,6 +326,13 @@ export default function BorrowList() {
               page={page}
               limit={20}
               token={accessToken}
+              filters={{
+                column: option !== "all" ? option : undefined,
+                search: debouncedSearch || undefined,
+                status: selectedStatus || undefined, // borrowed_at / returned_at / not_returned
+                limit: 20,
+                offset: (page - 1) * 20,
+              }}
             />
           )}
         </div>
