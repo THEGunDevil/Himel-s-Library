@@ -158,7 +158,6 @@ export default function Header() {
   };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
-
   return (
     <>
       <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-20 h-20 sm:h-32">

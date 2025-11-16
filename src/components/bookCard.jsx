@@ -26,6 +26,7 @@ export default function BookCard({ book }) {
           src={book.image_url}
           alt={book.title}
           fill
+          sizes="(max-width: 768px) 100vw, 33vw"
           className="object-contain brightness-75"
           priority
         />

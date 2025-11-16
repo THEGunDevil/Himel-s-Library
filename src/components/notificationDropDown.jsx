@@ -53,26 +53,26 @@ const NotificationDropdown = forwardRef(
       {/* Notifications List */}
       {!loadingNotification && !notificationError && (
         <ul className="max-h-60 overflow-y-auto">
-          {notifications.filter((n) => !n.is_read).length === 0 ? (
+          {notifications.length === 0 ? (
             <li className="px-4 py-3 text-gray-500 text-sm text-center">
               No notifications
             </li>
           ) : (
-            notifications
-              .filter((n) => !n.is_read)
-              .map((n) => (
-                <li
-                  key={n.id}
-                  className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
-                >
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-800">{n.message}</p>
-                    <span className="text-xs text-gray-400">
-                      {ConvertStringToDate(n.created_at)}
-                    </span>
-                  </div>
-                </li>
-              ))
+            notifications.map((n) => (
+              <li
+                key={n.id}
+                className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition ${
+                  n.is_read ? "" : "bg-blue-50"
+                }`}
+              >
+                <div className="flex-1">
+                  <p className="text-sm text-gray-800">{n.message}</p>
+                  <span className="text-xs text-gray-400">
+                    {ConvertStringToDate(n.created_at)}
+                  </span>
+                </div>
+              </li>
+            ))
           )}
         </ul>
       )}
