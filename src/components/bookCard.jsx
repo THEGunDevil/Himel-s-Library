@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -21,10 +22,12 @@ export default function BookCard({ book }) {
     >
       {/* Image Section */}
       <div className="relative bg-blue-50 flex justify-center items-center h-56 sm:h-52 md:h-60 lg:h-64">
-        <img
-          src={book.image_url || "/placeholder-book.jpg"}
+        <Image
+          src={book.image_url}
           alt={book.title}
-          className="max-h-full max-w-[90%] object-contain rounded-md transition-transform duration-300 hover:scale-105"
+          fill
+          className="object-contain brightness-75"
+          priority
         />
 
         {book.isBorrowed && (
@@ -36,14 +39,20 @@ export default function BookCard({ book }) {
 
       {/* Info Section */}
       <div className="p-3 sm:p-4">
-        <h2 className="text-base sm:text-lg font-bold line-clamp-1">{book.title}</h2>
-        <p className="text-xs sm:text-sm text-gray-600 line-clamp-1">{book.author}</p>
+        <h2 className="text-base sm:text-lg font-bold line-clamp-1">
+          {book.title}
+        </h2>
+        <p className="text-xs sm:text-sm text-gray-600 line-clamp-1">
+          {book.author}
+        </p>
 
         <div className="flex justify-between items-center mt-3 sm:mt-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <span
               className={`${
-                book.available_copies > 0 ? "text-gray-800" : "text-red-500 font-semibold"
+                book.available_copies > 0
+                  ? "text-gray-800"
+                  : "text-red-500 font-semibold"
               } text-sm`}
             >
               {book.available_copies === 0 ? "Not Available" : "Available"}
@@ -56,9 +65,7 @@ export default function BookCard({ book }) {
             )}
           </div>
 
-          <button
-            className="text-blue-600 hover:text-blue-800 text-sm sm:text-base font-medium flex items-center gap-1"
-          >
+          <button className="text-blue-600 hover:text-blue-800 text-sm sm:text-base font-medium flex items-center gap-1">
             📖 View
           </button>
         </div>

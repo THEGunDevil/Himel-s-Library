@@ -318,19 +318,26 @@ export const handleMarkRead = async (
   setNotificationOpen
 ) => {
   if (!accessToken) return;
+  setNotificationOpen(false);
 
   try {
-    await axios.patch(
+    const res = await axios.patch(
       `${process.env.NEXT_PUBLIC_API_URL}/notifications/mark-read`,
       {},
       {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       }
     );
+
+    console.log("Mark read response:", res.data);
+    // 🟩 Clear notifications after success
     setNotifications([]);
-    setNotificationOpen(false);
   } catch (error) {
     console.error("Failed to mark notifications as read:", error);
+  } finally {
+    setNotificationOpen(true);
   }
 };
 

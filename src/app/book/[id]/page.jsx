@@ -14,6 +14,7 @@ import {
   handleReserve,
 } from "../../../../utils/userActions";
 import { useBorrowData } from "@/hooks/useBorrowData";
+import Image from "next/image";
 export default function Book() {
   const { accessToken, userID, isAdmin } = useAuth();
   const { id } = useParams();
@@ -159,11 +160,13 @@ export default function Book() {
         {/* Book Cover */}
         <div className="relative w-full flex justify-center items-center h-60 bg-gray-50 rounded-lg overflow-hidden">
           {book.image_url ? (
-            <img
-              src={book.image_url}
-              alt={book.title}
-              className="h-full object-contain transition-transform duration-300 hover:scale-105"
-            />
+        <Image
+          src={book.image_url}
+          alt={book.title}
+          fill
+          className="object-contain brightness-75"
+          priority
+        />
           ) : (
             <div className="h-full w-full bg-gray-200 flex items-center justify-center text-gray-500 font-medium">
               No Cover

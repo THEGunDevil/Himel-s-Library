@@ -9,8 +9,8 @@ import { useAuth } from "@/contexts/authContext";
 import SearchBar from "./searchBar";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { ConvertStringToDate } from "../../utils/utils";
 import { handleMarkRead } from "../../utils/userActions";
+import NotificationDropdown from "./notificationDropDown";
 
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
@@ -31,6 +31,8 @@ export default function Header() {
   const bellBtnDesktopRef = useRef(null);
   const searchBtnMobileRef = useRef(null);
   const bellBtnMobileRef = useRef(null);
+  const notificationMobileRef = useRef(null); // Separate ref for mobile
+  const notificationDesktopRef = useRef(null); // Separate ref for desktop
 
   const navigation = [
     { title: "Home", path: "/" },
@@ -116,10 +118,14 @@ export default function Header() {
       ) {
         setSearchOpen(false);
       }
+
+      // Notification
       if (
         notificationOpen &&
         !bellBtnDesktopRef.current?.contains(e.target) &&
-        !bellBtnMobileRef.current?.contains(e.target)
+        !bellBtnMobileRef.current?.contains(e.target) &&
+        !notificationMobileRef.current?.contains(e.target) &&
+        !notificationDesktopRef.current?.contains(e.target)
       ) {
         setNotificationOpen(false);
       }
@@ -152,64 +158,6 @@ export default function Header() {
   };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
-
-  const NotificationDropdown = ({ isMobile }) => (
-    <div
-      className={`absolute ${
-        isMobile ? "md:hidden" : "hidden md:block"
-      } right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in`}
-    >
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
-        <h3 className="text-sm font-semibold text-gray-700">Notifications</h3>
-        <button
-          onClick={() =>
-            handleMarkRead(accessToken, setNotifications, setNotificationOpen)
-          }
-          className="text-xs text-blue-500 cursor-pointer hover:underline"
-        >
-          Mark all as read
-        </button>
-      </div>
-
-      {loadingNotification && (
-        <div className="px-4 py-3 text-center text-sm text-gray-500">
-          Loading...
-        </div>
-      )}
-
-      {notificationError && !loadingNotification && (
-        <div className="px-4 py-3 text-center text-sm text-red-500">
-          Failed to load notifications
-        </div>
-      )}
-
-      {!loadingNotification && !notificationError && (
-        <ul className="max-h-60 overflow-y-auto">
-          {notifications.filter((n) => !n.is_read).length === 0 ? (
-            <li className="px-4 py-3 text-gray-500 text-sm text-center">
-              No notifications
-            </li>
-          ) : (
-            notifications
-              .filter((n) => !n.is_read)
-              .map((n) => (
-                <li
-                  key={n.id}
-                  className="flex items-start gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition"
-                >
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-800">{n.message}</p>
-                    <span className="text-xs text-gray-400">
-                      {ConvertStringToDate(n.created_at)}
-                    </span>
-                  </div>
-                </li>
-              ))
-          )}
-        </ul>
-      )}
-    </div>
-  );
 
   return (
     <>
@@ -318,7 +266,19 @@ export default function Header() {
                 </span>
               )}
 
-              {notificationOpen && <NotificationDropdown isMobile={true} />}
+              {notificationOpen && (
+                <NotificationDropdown
+                  ref={notificationMobileRef}
+                  isMobile={true}
+                  notifications={notifications}
+                  loadingNotification={loadingNotification}
+                  notificationError={notificationError}
+                  accessToken={accessToken}
+                  setNotifications={setNotifications}
+                  setNotificationOpen={setNotificationOpen}
+                  handleMarkRead={handleMarkRead}
+                />
+              )}
             </div>
 
             {/* Sidebar Toggle Button */}
@@ -343,7 +303,19 @@ export default function Header() {
               </span>
             )}
 
-            {notificationOpen && <NotificationDropdown isMobile={false} />}
+            {notificationOpen && (
+              <NotificationDropdown
+                ref={notificationDesktopRef}
+                isMobile={false}
+                notifications={notifications}
+                loadingNotification={loadingNotification}
+                notificationError={notificationError}
+                accessToken={accessToken}
+                setNotifications={setNotifications}
+                setNotificationOpen={setNotificationOpen}
+                handleMarkRead={handleMarkRead}
+              />
+            )}
           </div>
 
           {/* SearchBar */}

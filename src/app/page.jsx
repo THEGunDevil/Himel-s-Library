@@ -52,7 +52,6 @@ export default function Home() {
   const handlePrev = () => {
     if (page > 1) setPage((prev) => prev - 1);
   };
-console.log(classicRomanceBooks.length);
 
   return (
     <main className="md:pt-32 pt-24 xl:px-20 lg:px-20 px-4 min-h-screen">

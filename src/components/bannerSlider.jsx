@@ -7,12 +7,13 @@ import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 import "swiper/css/autoplay";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function BannerSlider({ bannerBooks = [] }) {
-  // Slice once and reuse
   const books = bannerBooks.slice(0, 5);
+  if (books.length === 0) return null;
+
   const hasMultipleSlides = books.length > 1;
-  if (!books || books.length === 0) return null;
 
   return (
     <section className="relative w-full h-[40vh] sm:h-[60vh] overflow-hidden">
@@ -21,45 +22,49 @@ export default function BannerSlider({ bannerBooks = [] }) {
         slidesPerView={1}
         loop={hasMultipleSlides}
         effect="fade"
-        fadeEffect={{ crossFade: true }}
         speed={1000}
+        fadeEffect={{ crossFade: true }}
         autoplay={
           hasMultipleSlides
             ? {
                 delay: 4000,
                 disableOnInteraction: false,
-                pauseOnMouseEnter: true,
               }
-            : undefined
+            : false
         }
         pagination={{ clickable: true }}
         allowTouchMove={hasMultipleSlides}
         className="h-full"
       >
-        {books?.map((b) => (
-          <SwiperSlide key={b.id} className="relative">
-            {/* Background image */}
-            <img
+        {books.map((b) => (
+          <SwiperSlide key={b.id} className="relative h-full">
+            {/* Background image — FIXED */}
+
+            <Image
               src={b.image_url}
               alt={b.title}
-              className="absolute inset-0 h-full mx-auto brightness-75"
+              fill
+              className="object-contain brightness-75"
+              priority
             />
 
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/50 to-transparent" />
+            {/* Gradient overlay — FIXED */}
+            <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/40 to-transparent"></div>
 
             {/* Content */}
-            <div className="relative z-10 h-full flex items-end px-6 md:px-16 pb-8 sm:pb-10">
-              <div className="max-w-3xl text-white space-y-2 sm:space-y-4 animate-fade-in">
-                <h1 className="sm:text-3xl text-xl md:text-4xl lg:text-5xl font-bold leading-tight">
+            <div className="relative z-10 h-full flex items-end px-6 md:px-16 pb-8 md:pb-10">
+              <div className="text-white max-w-3xl space-y-2 md:space-y-3 animate-fade-in">
+                <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
                   {b.title}
                 </h1>
-                <p className="text-sm md:text-lg lg:text-xl font-medium opacity-90 pb-2">
+
+                <p className="text-sm md:text-lg lg:text-xl opacity-90">
                   by {b.author}
                 </p>
+
                 <Link
                   href={`/book/${b.id}`}
-                  className="sm:mt-6 mt-2 cursor-pointer bg-white text-black sm:px-6 px-3 sm:py-3 py-2 font-semibold hover:bg-gray-100 transition-all duration-300"
+                  className="inline-block mt-4 bg-white text-black px-2 sm:px-6 py-1.5 sm:py-3 font-semibold rounded hover:bg-gray-100 transition"
                 >
                   Read More
                 </Link>
@@ -69,7 +74,7 @@ export default function BannerSlider({ bannerBooks = [] }) {
         ))}
       </Swiper>
 
-      {/* Styles */}
+      {/* Internal styles */}
       <style jsx>{`
         @keyframes fadeIn {
           from {
@@ -81,15 +86,18 @@ export default function BannerSlider({ bannerBooks = [] }) {
             transform: translateY(0);
           }
         }
+
         .animate-fade-in {
           animation: fadeIn 1s ease-out forwards;
         }
+
         :global(.swiper-pagination-bullet) {
-          background: white;
-          opacity: 0.7;
+          background: white !important;
+          opacity: 0.6;
         }
+
         :global(.swiper-pagination-bullet-active) {
-          background: white;
+          background: white !important;
           opacity: 1;
         }
       `}</style>
