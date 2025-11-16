@@ -63,7 +63,7 @@ export default function MobileSidebar({ navigation, pathname, setSidebarOpen }) 
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="flex flex-col gap-2 mt-2 ml-4 overflow-hidden"
+                className="flex flex-col gap-3 mt-4 ml-4 overflow-hidden"
               >
                 {dashBoardNavigations.map((nav) => (
                   <li key={nav.path} onClick={() => setSidebarOpen(false)}>
