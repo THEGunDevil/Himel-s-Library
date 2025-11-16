@@ -253,13 +253,29 @@ export default function BorrowList() {
     JSON.stringify(hasError);
 
   return (
-    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div className="w-full mx-auto mt-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
+        <div className="flex w-full items-center gap-4 justify-between">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
             Borrow List
           </h1>
-
+          {isAdmin && (
+            <div className="sm:hidden block">
+              <DownloadOptions
+                endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/borrows`}
+                page={page}
+                limit={20}
+                token={accessToken}
+                filters={{
+                  column: option !== "all" ? option : undefined,
+                  search: debouncedSearch || undefined,
+                  status: selectedStatus || undefined, // borrowed_at / returned_at / not_returned
+                  limit: 20,
+                  offset: (page - 1) * 20,
+                }}
+              />
+            </div>
+          )}
           {selectedStatus && (
             <span className="text-sm text-gray-600">
               (Filtered by:{" "}
@@ -321,19 +337,21 @@ export default function BorrowList() {
             />
           )}
           {isAdmin && (
-            <DownloadOptions
-              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/borrows`}
-              page={page}
-              limit={20}
-              token={accessToken}
-              filters={{
-                column: option !== "all" ? option : undefined,
-                search: debouncedSearch || undefined,
-                status: selectedStatus || undefined, // borrowed_at / returned_at / not_returned
-                limit: 20,
-                offset: (page - 1) * 20,
-              }}
-            />
+            <div className="hidden sm:block">
+              <DownloadOptions
+                endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/borrows`}
+                page={page}
+                limit={20}
+                token={accessToken}
+                filters={{
+                  column: option !== "all" ? option : undefined,
+                  search: debouncedSearch || undefined,
+                  status: selectedStatus || undefined, // borrowed_at / returned_at / not_returned
+                  limit: 20,
+                  offset: (page - 1) * 20,
+                }}
+              />
+            </div>
           )}
         </div>
       </div>

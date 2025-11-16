@@ -332,13 +332,24 @@ export default function ReservationList() {
     JSON.stringify(hasError);
 
   return (
-    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div className="w-full mx-auto mt-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Reservation List
-          </h1>
+        <div className="flex w-full items-center gap-4">
+          <div className="flex w-full items-center justify-between">
+            <h1 className="text-2xl whitespace-nowrap sm:text-3xl font-bold text-gray-800">
+              Reservation List
+            </h1>
+            <div className="sm:hidden block">
+              <DownloadOptions
+                endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/reservations`}
+                page={page}
+                limit={20}
+                token={accessToken}
+                filters={{ status: selectedStatus }} // passes current filter for CSV/XLSX export
+              />
+            </div>
+          </div>
           {selectedStatus && (
             <span className="text-sm text-gray-600">
               (Filtered by:{" "}
@@ -347,7 +358,7 @@ export default function ReservationList() {
           )}
         </div>
         <div className="flex gap-2">
-          {isAdmin && tableData.length > 0 && (
+          {isAdmin && tableData === 0 && (
             <FilterComponent
               options={[
                 { label: "Pending", value: "pending" },
@@ -360,13 +371,15 @@ export default function ReservationList() {
             />
           )}
           {isAdmin && (
-            <DownloadOptions
-              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/reservations`}
-              page={page}
-              limit={20}
-              token={accessToken}
-              filters={{ status: selectedStatus }} // passes current filter for CSV/XLSX export
-            />
+            <div className="hidden sm:block">
+              <DownloadOptions
+                endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/reservations`}
+                page={page}
+                limit={20}
+                token={accessToken}
+                filters={{ status: selectedStatus }} // passes current filter for CSV/XLSX export
+              />
+            </div>
           )}
         </div>
       </div>
@@ -408,8 +421,8 @@ export default function ReservationList() {
                   >
                     <p>No reservation found</p>
                     <p className="text-gray-600 text-sm mt-2">
-                      {errorMessage}
-                    </p>{" "}
+                      {errorMessage === "null" ? "" : errorMessage}
+                    </p>
                   </td>
                 </tr>
               ) : (

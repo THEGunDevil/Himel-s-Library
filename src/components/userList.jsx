@@ -176,7 +176,19 @@ export default function UserList() {
       header: "Joined",
       cell: (info) => ConvertStringToDate(info.getValue()),
     }),
-    columnHelper.accessor("role", { header: "Role" }),
+    columnHelper.accessor("role", {
+      header: "Role",
+      cell: (info) =>
+        info.getValue() ? (
+          <span className="p-1 text-yellow-500 border border-yellow-500 rounded font-medium">
+            Admin
+          </span>
+        ) : (
+          <span className="p-1 text-gray-500 border border-gray-500 rounded font-medium">
+            Member
+          </span>
+        ),
+    }),
     columnHelper.accessor("is_banned", {
       header: "Status",
       cell: (info) =>
@@ -192,7 +204,7 @@ export default function UserList() {
       cell: ({ row }) => {
         const user = row.original;
         return (
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="flex gap-2 sm:opacity-0 opacity-100 sm:group-hover:opacity-100 transition-opacity duration-200">
             {user.is_banned ? (
               <button
                 onClick={(e) => {
@@ -233,12 +245,23 @@ export default function UserList() {
     JSON.stringify(hasError);
 
   return (
-    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div className="w-full mx-auto mt-6">
       {/* Search Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-          User List
-        </h1>
+        <div className="flex w-full items-center justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            User List
+          </h1>
+          <div className="sm:hidden flex gap-x-1.5">
+            <DownloadOptions
+              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
+              page={page}
+              limit={10}
+              token={accessToken}
+              filters={{ search: debouncedSearch }}
+            />
+          </div>
+        </div>
         <div className="flex items-center gap-3 justify-center">
           <div className="flex items-center w-full sm:w-auto gap-2">
             <input
@@ -262,13 +285,15 @@ export default function UserList() {
               </button>
             )}
           </div>
-          <DownloadOptions
-            endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
-            page={page}
-            limit={10}
-            token={accessToken}
-            filters={{ search: debouncedSearch }} // use debounced search term
-          />
+          <div className="hidden sm:block">
+            <DownloadOptions
+              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
+              page={page}
+              limit={10}
+              token={accessToken}
+              filters={{ search: debouncedSearch }}
+            />
+          </div>
         </div>
       </div>
 

@@ -1,9 +1,22 @@
 "use client";
-
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Logo from "./logo";
 import { usePathname } from "next/navigation";
-import { BellIcon, Search, SidebarIcon, X } from "lucide-react";
+import {
+  BellIcon,
+  ChevronDown,
+  Home,
+  InfoIcon,
+  LayoutDashboard,
+  LogIn,
+  Menu,
+  PhoneCall,
+  Search,
+  UserPlus2,
+  UserSquareIcon,
+  X,
+} from "lucide-react";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/authContext";
 import SearchBar from "./searchBar";
@@ -11,11 +24,11 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { handleMarkRead } from "../../utils/userActions";
 import NotificationDropdown from "./notificationDropDown";
+import MobileSidebar from "./mobileSideBar";
 
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
   const pathname = usePathname();
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -23,7 +36,6 @@ export default function Header() {
   const [notifications, setNotifications] = useState([]);
   const [loadingNotification, setLoadingNotification] = useState(false);
   const [notificationError, setNotificationError] = useState(null);
-
   const sidebarRef = useRef(null);
   const sidebarBtnRef = useRef(null);
   const searchRef = useRef(null);
@@ -33,23 +45,27 @@ export default function Header() {
   const bellBtnMobileRef = useRef(null);
   const notificationMobileRef = useRef(null); // Separate ref for mobile
   const notificationDesktopRef = useRef(null); // Separate ref for desktop
-
   const navigation = [
-    { title: "Home", path: "/" },
-    { title: "About us", path: "/about" },
-    { title: "Contact us", path: "/contact" },
-    ...(accessToken ? [{ title: "Profile", path: `/profile/${userID}` }] : []),
-    ...(isAdmin
+    { title: "Home", path: "/", icon: <Home size={17} /> },
+    { title: "About us", path: "/about", icon: <InfoIcon size={17} /> },
+    { title: "Contact us", path: "/contact", icon: <PhoneCall size={17} /> },
+    ...(accessToken
       ? [
-          { title: "Dashboard", path: "/dashboard", hiddenOnMobile: true },
-          { title: "Add Book", path: "/add-book", hiddenOnMobile: false },
-          { title: "Update Book", path: "/update-book", hiddenOnMobile: false },
+          {
+            title: "Profile",
+            path: `/profile/${userID}`,
+            icon: <UserSquareIcon size={17} />,
+          },
         ]
       : []),
     ...(!accessToken
       ? [
-          { title: "Log In", path: "/auth/log-in" },
-          { title: "Sign Up", path: "/auth/sign-up" },
+          { title: "Log In", path: "/auth/log-in", icon: <LogIn size={17} /> },
+          {
+            title: "Sign Up",
+            path: "/auth/sign-up",
+            icon: <UserPlus2 size={17} />,
+          },
         ]
       : []),
   ];
@@ -177,11 +193,12 @@ export default function Header() {
               <li key={nav.path}>
                 <Link
                   href={nav.path}
-                  className={`hover:text-blue-400 ${
+                  className={`hover:text-blue-400 flex items-center whitespace-nowrap gap-0.5 ${
                     pathname === nav.path ? "text-blue-400 font-bold" : ""
                   }`}
                 >
-                  {nav.title}
+                  <span>{nav.icon}</span>
+                  <span>{nav.title}</span>
                 </Link>
               </li>
             ))}
@@ -194,37 +211,13 @@ export default function Header() {
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div
-            onClick={() => setSidebarOpen(false)}
-            className="absolute text-blue-600 right-5 top-5 cursor-pointer"
-          >
-            <X size={28} />
-          </div>
-
-          <Logo width={82} />
-
-          <ul className="flex flex-col gap-6 uppercase font-medium text-lg mt-8">
-            {navigation.map((nav) => (
-              <li
-                key={nav.path}
-                className={
-                  nav.hiddenOnMobile ? "hidden sm:block" : "sm:hidden block"
-                }
-                onClick={() => setSidebarOpen(false)}
-              >
-                <Link
-                  href={nav.path}
-                  className={`hover:text-blue-400 ${
-                    pathname === nav.path
-                      ? "text-blue-400 font-bold"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {nav.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {/* Sidebar (Mobile) */}
+          <MobileSidebar
+            navigation={navigation}
+            pathname={pathname}
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+          />
         </nav>
 
         {/* Search & Notification */}
@@ -282,7 +275,7 @@ export default function Header() {
 
             {/* Sidebar Toggle Button */}
             <button ref={sidebarBtnRef} onClick={handleSidebarToggle}>
-              <SidebarIcon className="h-7 w-7 text-blue-400" />
+              <Menu className="h-7 w-7 text-blue-400" />
             </button>
           </div>
 

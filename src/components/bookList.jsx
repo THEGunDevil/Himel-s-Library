@@ -14,6 +14,7 @@ import Loader from "./loader";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
+import { useRouter } from "next/navigation";
 
 const columnHelper = createColumnHelper();
 
@@ -27,7 +28,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
   const inputRef = useRef(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [local, setLocal] = useState("");
-
+  const router = useRouter();
   useEffect(() => {
     const t = setTimeout(() => {
       setDebouncedSearch((local || "").trim());
@@ -154,23 +155,33 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
       cell: ({ row }) => {
         const book = row.original;
         return (
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="flex gap-2 sm:opacity-0 opacity-100  sm:group-hover:opacity-100 transition-opacity duration-200">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedIndex(5);
                 setUpdateBookID(book.id);
               }}
-              className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
+              className="hidden sm:block px-3 py-1 bg-blue-400 text-white rounded-md hover:bg-blue-500 transition-colors duration-200 text-sm font-medium"
             >
               Update
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
+                router.push(`/update-book/${book.id}`);
+              }}
+              className="px-3 py-1 sm:hidden block bg-blue-400 text-white rounded-md hover:bg-blue-500 transition-colors duration-200 text-sm font-medium"
+            >
+              Update
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
                 setBookToDelete(book.id);
               }}
-              className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
+              className="px-3 py-1 bg-red-400 text-white rounded-md hover:bg-red-7500 transition-colors duration-200 text-sm font-medium"
             >
               Delete
             </button>
@@ -201,15 +212,36 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
     hasError?.response?.data?.error ||
     JSON.stringify(hasError);
   return (
-    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div className="w-full mx-auto mt-6">
       {/* Search Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-          Book List
-        </h1>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+        <div className="flex w-full items-center justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            Book List
+          </h1>
+          <div className="sm:hidden flex gap-x-1.5">
+            <button
+              onClick={() => router.push(`/add-book`)}
+              className="bg-blue-400 px-2 rounded text-white hover:bg-blue-500 transition-colors duration-300"
+            >
+              Add Book
+            </button>
+            <DownloadOptions
+              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
+              page={page}
+              limit={10}
+              token={accessToken}
+              filters={{
+                search: debouncedSearch || undefined,
+                genre: genre !== "all" ? genre : undefined,
+              }}
+            />
+          </div>
+        </div>
+
         <div className="flex items-center w-full sm:w-auto gap-2">
           <select
-            className="px-4 py-2 h-10 w-20 border border-gray-300 rounded-md focus:outline-none shadow-sm text-sm hidden sm:block"
+            className="px-4 py-2 text-gray-500 h-10 w-20 md:w-30 border border-gray-300 rounded-md focus:outline-none shadow-sm text-sm block"
             value={genre}
             onChange={(e) => setGenre(e.target.value)}
           >
@@ -244,18 +276,20 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
             </button>
           )}
         </div>
-
-<DownloadOptions
-  endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
-  page={page}
-  limit={10}
-  token={accessToken}
-  filters={{
-    search: debouncedSearch || undefined,
-    genre: genre !== "all" ? genre : undefined,
-  }}
-/>
-
+        {isAdmin && (
+          <div className="hidden sm:block">
+            <DownloadOptions
+              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
+              page={page}
+              limit={10}
+              token={accessToken}
+              filters={{
+                search: debouncedSearch || undefined,
+                genre: genre !== "all" ? genre : undefined,
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Table */}
