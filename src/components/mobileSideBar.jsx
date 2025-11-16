@@ -4,7 +4,6 @@ import { BookOpenIcon, ChevronDown, ClipboardCheck, LayoutDashboard, Library, Us
 import { useState } from "react";
 import Logo from "./logo";
 import Link from "next/link";
-
 const dashBoardNavigations = [
   { title: "Users", path: "/user-list", icon: <Users size={17} /> },
   { title: "Books", path: "/book-list", icon: <BookOpenIcon size={17} /> },
@@ -12,14 +11,13 @@ const dashBoardNavigations = [
   { title: "Borrows", path: "/borrow-list", icon: <Library size={17} /> },
 ];
 
-export default function MobileSidebar({ navigation, pathname, setSidebarOpen }) {
+export default function MobileSidebar({isAdmin, accessToken ,navigation, pathname, setSidebarOpen }) {
   const [dashboardOpen, setDashboardOpen] = useState(false);
-
   return (
     <div className="h-full flex flex-col relative">
       <div
         onClick={() => setSidebarOpen(false)}
-        className="absolute text-blue-600 right-5 top-5 cursor-pointer"
+        className="absolute text-blue-600 right-2 top-5 cursor-pointer"
       >
         <X size={28} />
       </div>
@@ -42,7 +40,7 @@ export default function MobileSidebar({ navigation, pathname, setSidebarOpen }) 
         ))}
 
         {/* Dashboard Dropdown */}
-        <li>
+        {isAdmin && accessToken && <li>
           <button
             onClick={() => setDashboardOpen((prev) => !prev)}
             className="w-full uppercase flex justify-between items-center text-gray-700 hover:text-blue-400 rounded-md"
@@ -81,7 +79,7 @@ export default function MobileSidebar({ navigation, pathname, setSidebarOpen }) 
               </motion.ul>
             )}
           </AnimatePresence>
-        </li>
+        </li>}
       </ul>
     </div>
   );

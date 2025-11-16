@@ -217,6 +217,8 @@ export default function Header() {
             pathname={pathname}
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
+            isAdmin={isAdmin}
+            accessToken={accessToken}
           />
         </nav>
 
@@ -232,14 +234,14 @@ export default function Header() {
           </button>
 
           {/* Mobile Controls */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden items-center gap-2.5">
             {/* Mobile Search Button */}
             <button
               ref={searchBtnMobileRef}
               onClick={handleSearchToggle}
               className="p-2 bg-white rounded-full"
             >
-              <Search className="text-blue-400" />
+              <Search size={20} className="text-blue-400" />
             </button>
 
             {/* Mobile Notification */}
@@ -249,7 +251,7 @@ export default function Header() {
                 onClick={() => setNotificationOpen((prev) => !prev)}
                 className="p-2 bg-white rounded-full"
               >
-                <BellIcon className="text-blue-400" />
+                <BellIcon size={20} className="text-blue-400" />
               </button>
 
               {unreadCount > 0 && (
@@ -275,7 +277,7 @@ export default function Header() {
 
             {/* Sidebar Toggle Button */}
             <button ref={sidebarBtnRef} onClick={handleSidebarToggle}>
-              <Menu className="h-7 w-7 text-blue-400" />
+              <Menu size={23} className="text-blue-400" />
             </button>
           </div>
 
