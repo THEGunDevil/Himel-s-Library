@@ -2,22 +2,10 @@
 
 import React from 'react';
 import { XCircle, ArrowLeft, HelpCircle } from 'lucide-react';
-
-// FOR NEXT.JS APP: Uncomment the line below and delete the react-router-dom import
-// import { useRouter } from 'next/navigation';
-import { useNavigate, BrowserRouter } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 const CancelledContent = () => {
-  // FOR NEXT.JS APP: Use this hook instead
-  // const router = useRouter();
-  
-  // FOR PREVIEW (React Router):
-  const navigate = useNavigate();
-
-  const handleNavigation = (path) => {
-    // FOR NEXT.JS APP: router.push(path);
-    navigate(path);
-  };
+const router = useRouter()
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -36,19 +24,19 @@ const CancelledContent = () => {
 
           <div className="space-y-3 w-full">
             <button 
-              onClick={() => handleNavigation('/')}
+              onClick={() => router.push('/')}
               className="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               Return to Home
             </button>
 
-            <button 
+            {/* <button 
               onClick={() => handleNavigation('/pricing')}
               className="w-full flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               View Plans Again
-            </button>
+            </button> */}
           </div>
 
           <div className="mt-8 flex items-center justify-center text-sm text-gray-500">

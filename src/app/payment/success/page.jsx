@@ -37,7 +37,7 @@ const SuccessContent = () => {
       try {
         attempts++;
         // Replace with your actual Backend URL
-        const API_URL = `https://book-library-api-production-2db5.up.railway.app/stripe/callback?tran_id=${tranId}`;
+        const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/stripe/callback?tran_id=${tranId}`;
         
         const response = await fetch(API_URL);
         const data = await response.json();
