@@ -156,8 +156,9 @@ export default function Header() {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside, true);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside, true);
   }, [sidebarOpen, searchOpen, notificationOpen]);
 
   useEffect(() => {
