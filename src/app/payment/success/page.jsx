@@ -3,11 +3,13 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CheckCircle, Loader2 } from "lucide-react";
+import axios from "axios";
+import { useAuth } from "@/contexts/authContext";
 
 const SuccessContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-
+  const { accessToken, userID } = useAuth();
   const tranId = searchParams.get("tran_id");
 
   const [status, setStatus] = useState("loading");
@@ -17,10 +19,14 @@ const SuccessContent = () => {
     const finalize = async () => {
       try {
         // Optional: refresh user data so dashboard shows the subscription instantly
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/me`, {
-          credentials: "include", // adjust if you use Bearer token instead
-        });
-
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/subscription/${userID}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+        console.log(res);
+        
         if (res.ok) {
           setStatus("success");
           setMessage("Payment successful! Your subscription is now active.");
