@@ -70,10 +70,10 @@ const SuccessContent = () => {
               </p>
             )}
             <button
-              onClick={() => handleNavigation("/profile")}
+              onClick={() => router.push("/")}
               className="mt-8 w-full bg-green-600 text-white font-semibold px-8 py-4 rounded-xl hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
             >
-              Go to Dashboard
+              Go to Home
             </button>
           </div>
         )}
