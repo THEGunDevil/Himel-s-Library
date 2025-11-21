@@ -19,7 +19,7 @@ const NotificationDropdown = forwardRef(
     <div
       ref={ref}
       className={`absolute ${
-        isMobile ? "md:hidden" : "hidden md:block"
+        isMobile ? "lg:hidden" : "hidden lg:block"
       } right-0 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-fade-in`}
     >
       {/* Header */}

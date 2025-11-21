@@ -5,7 +5,6 @@ import Logo from "./logo";
 import { usePathname } from "next/navigation";
 import {
   BellIcon,
-  ChevronDown,
   Home,
   InfoIcon,
   LayoutDashboard,
@@ -15,7 +14,6 @@ import {
   Search,
   UserPlus2,
   UserSquareIcon,
-  X,
 } from "lucide-react";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/authContext";
@@ -58,6 +56,17 @@ export default function Header() {
           },
         ]
       : []),
+    ...(isAdmin
+      ? [
+          {
+            title: "Dashboard",
+            path: "/dashboard",
+            icon: <LayoutDashboard size={17} />, // close the component properly
+            hiddenOnMobile: true, // boolean, not string
+          },
+        ]
+      : []),
+
     ...(!accessToken
       ? [
           { title: "Log In", path: "/auth/log-in", icon: <LogIn size={17} /> },
@@ -186,10 +195,9 @@ export default function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex gap-8 ml-10 uppercase font-medium text-gray-700">
-          {navigation
-            .filter((nav) => nav.hiddenOnMobile !== false)
-            .map((nav) => (
+        <nav>
+          <ul className="hidden lg:flex gap-8 lg:gap-5 uppercase font-medium text-gray-700">
+            {navigation.map((nav) => (
               <li key={nav.path}>
                 <Link
                   href={nav.path}
@@ -202,7 +210,8 @@ export default function Header() {
                 </Link>
               </li>
             ))}
-        </ul>
+          </ul>
+        </nav>
 
         {/* Sidebar (Mobile) */}
         <nav
@@ -228,13 +237,13 @@ export default function Header() {
           <button
             ref={searchBtnDesktopRef}
             onClick={handleSearchToggle}
-            className="hidden md:block p-2 bg-white rounded-full"
+            className="hidden lg:block p-2 bg-white rounded-full"
           >
             <Search className="text-blue-400" />
           </button>
 
           {/* Mobile Controls */}
-          <div className="flex md:hidden items-center gap-2.5">
+          <div className="flex lg:hidden items-center gap-2.5">
             {/* Mobile Search Button */}
             <button
               ref={searchBtnMobileRef}
@@ -282,7 +291,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Notification */}
-          <div className="relative hidden md:block ml-2">
+          <div className="relative hidden lg:block ml-2">
             <button
               onClick={() => setNotificationOpen((prev) => !prev)}
               ref={bellBtnDesktopRef}
