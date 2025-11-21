@@ -37,7 +37,8 @@ const SuccessContent = () => {
 
         const response = await fetch(API_URL);
         const data = await response.json();
-
+        console.log(data);
+        
         if (response.ok && data.status === "paid") {
           // Success case: Payment confirmed by backend webhook
           setStatus("success");
