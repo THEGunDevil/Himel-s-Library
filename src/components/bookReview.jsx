@@ -1,18 +1,31 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import axios from "axios";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/authContext";
+import { useBookReviews } from "@/hooks/useBookReviews";
 import {
   Avatar,
   ConvertStringToDate,
   StarDisplay,
   StarRating,
 } from "../../utils/utils";
-import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
-import { useBookReviews } from "@/hooks/useBookReviews";
-import axios from "axios";
 import Options from "./options";
 
 export default function BookReviewSection({ bookId }) {
@@ -29,45 +42,29 @@ export default function BookReviewSection({ bookId }) {
 
   const [localReviews, setLocalReviews] = useState([]);
   const [editingReviewId, setEditingReviewId] = useState(null);
-
-  useEffect(() => {
-    if (reviews) setLocalReviews(reviews);
-  }, [reviews]);
-
-  // New review form
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm({ defaultValues: { comment: "", rating: 0 } });
-
-  // Edit review form
-  const {
-    register: registerEdit,
-    handleSubmit: handleSubmitEdit,
-    reset: resetEdit,
-    setValue: setEditValue,
-    watch: watchEdit,
-    formState: { errors: editErrors },
-  } = useForm({ defaultValues: { comment: "", rating: 0 } });
-
-  const rating = watch("rating");
-  const editRating = watchEdit("rating");
-
   const [submitting, setSubmitting] = useState(false);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [editError, setEditError] = useState(null);
 
-  // Post new review
+  // New review form
+  const form = useForm({
+    defaultValues: { comment: "", rating: 0 },
+  });
+
+  // Edit review form
+  const editForm = useForm({
+    defaultValues: { comment: "", rating: 0 },
+  });
+
+  useEffect(() => {
+    if (reviews) setLocalReviews(reviews);
+  }, [reviews]);
+
   const onSubmit = async (data) => {
     if (!accessToken) return;
     setSubmitting(true);
     setError(null);
-
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/reviews/review`,
@@ -79,15 +76,13 @@ export default function BookReviewSection({ bookId }) {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      // Refetch all reviews for this book
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/reviews/book/${bookId}`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      setLocalReviews(res.data); // now includes user_name, created_at, etc.
-      toast.success("Review posted ✅");
-      reset();
+      setLocalReviews(res.data);
+      form.reset();
     } catch (err) {
       console.error(err);
       setError("Failed to post review.");
@@ -99,22 +94,20 @@ export default function BookReviewSection({ bookId }) {
 
   const startEditing = (review) => {
     setEditingReviewId(review.id);
-    setEditValue("comment", review.comment);
-    setEditValue("rating", review.rating);
+    editForm.setValue("comment", review.comment);
+    editForm.setValue("rating", review.rating);
     setEditError(null);
   };
 
   const cancelEditing = () => {
     setEditingReviewId(null);
-    resetEdit();
+    editForm.reset();
   };
 
   const onEditSubmit = async (data) => {
     if (!editingReviewId) return;
-
     setEditSubmitting(true);
     setEditError(null);
-
     try {
       await updateReview(editingReviewId, {
         comment: data.comment,
@@ -142,7 +135,6 @@ export default function BookReviewSection({ bookId }) {
 
   const handleDelete = async (reviewId) => {
     if (!accessToken) return;
-
     try {
       await deleteReview(reviewId, accessToken);
       setLocalReviews((prev) => prev.filter((r) => r.id !== reviewId));
@@ -154,109 +146,111 @@ export default function BookReviewSection({ bookId }) {
   };
 
   return (
-    <section className="bg-white w-full shadow-lg h-full p-6 flex flex-col mx-auto hover:shadow-xl transition-shadow duration-300">
+    <div className="flex h-full w-full flex-col bg-white p-6 shadow-lg hover:shadow-xl">
       <header className="mb-6 text-center">
         <h2 className="text-2xl font-semibold text-blue-500">
           Readers' Reviews
         </h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="mt-1 text-sm text-gray-500">
           Share your thoughts — be kind and specific.
         </p>
       </header>
 
       {!accessToken && (
-        <div className="w-full bg-blue-50 border border-blue-200 rounded-xl py-4 px-2 mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm text-blue-800 font-medium">
-              Want to join the conversation?
-            </p>
+        <Alert variant="default" className="mb-6">
+          <AlertTitle className="text-sm text-blue-800">
+            Want to join the conversation?
+          </AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
             <p className="text-xs text-blue-600">
               Sign in to share your thoughts and rate this book.
             </p>
-          </div>
-          <button
-            onClick={() => router.push("/auth/log-in")}
-            className="px-4 py-2 whitespace-nowrap bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg shadow-sm"
-          >
-            Log In
-          </button>
-        </div>
+            <Button
+              onClick={() => router.push("/auth/log-in")}
+              size="sm"
+              className="whitespace-nowrap"
+            >
+              Log In
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
 
       {accessToken && (
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="mb-8 w-full space-y-4"
-        >
-          <label className="flex flex-col">
-            <span className="text-sm font-medium text-gray-700">
-              Your review
-            </span>
-            <textarea
-              {...register("comment", { required: "Please write a comment." })}
-              placeholder="What did you like? Any scenes, characters, or lines that stood out?"
-              rows={3}
-              maxLength={1000}
-              className="mt-1 w-full p-3 border border-gray-300 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="mb-8 space-y-4">
+            <FormField
+              control={form.control}
+              name="comment"
+              rules={{ required: "Please write a comment." }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Your review</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="What did you like? Any scenes, characters, or lines that stood out?"
+                      rows={3}
+                      maxLength={1000}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.comment && (
-              <p className="text-sm text-red-600 mt-1">
-                {errors.comment.message}
-              </p>
-            )}
-          </label>
-
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <StarRating
-              rating={rating}
-              setRating={(val) => setValue("rating", val)}
-            />
-            <div className="flex items-center gap-3">
-              <p className="text-sm text-gray-500">
-                {localReviews.length} review
-                {localReviews.length !== 1 ? "s" : ""}
-              </p>
-              <button
-                type="submit"
-                disabled={submitting || editingReviewId}
-                className="px-5 py-2 bg-blue-500 text-white text-sm rounded-xl shadow-sm hover:bg-blue-600 disabled:opacity-50"
-              >
-                {submitting ? "Posting..." : "Post review"}
-              </button>
+            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+              <StarRating
+                rating={form.watch("rating")}
+                setRating={(val) => form.setValue("rating", val)}
+              />
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-gray-500">
+                  {localReviews.length} review
+                  {localReviews.length !== 1 ? "s" : ""}
+                </p>
+                <Button
+                  type="submit"
+                  disabled={submitting || editingReviewId}
+                  size="sm"
+                >
+                  {submitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Post review"
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
-          {error && (
-            <p className="text-sm text-red-500 mt-2 text-center">{error}</p>
-          )}
-        </form>
+            {error && (
+              <p className="mt-2 text-center text-sm text-red-500">{error}</p>
+            )}
+          </form>
+        </Form>
       )}
 
       {reviewsLoading && (
         <p className="text-center text-gray-500">Loading reviews...</p>
       )}
 
-      <div className="divide-y divide-gray-200 w-full max-h-96 overflow-y-auto scrollbar-hide">
+      <ScrollArea className="h-96 w-full">
         {localReviews.length === 0 && !reviewsLoading ? (
           reviewsError ? (
             <p className="text-center text-red-500">Failed to load reviews.</p>
           ) : (
-            <p className="text-sm text-gray-500 text-center py-4">
+            <p className="py-4 text-center text-sm text-gray-500">
               No reviews yet — be the first to comment!
             </p>
           )
         ) : (
           localReviews.map((r) => (
-            <article
-              key={r.id}
-              className="group relative py-6 bg-white shadow-sm transition-all duration-200"
-            >
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+            <article key={r.id} className="group py-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center">
                 <div className="w-full">
-                  <div className="relative flex flex-row sm:items-center justify-between gap-2 sm:gap-4">
+                  <div className="relative flex flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <Avatar name={r.user_name} />
                       <div className="flex flex-col">
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                        <h3 className="truncate text-base font-semibold text-gray-900 sm:text-lg">
                           {r.user_name}
                         </h3>
                         <span className="text-xs text-gray-500">
@@ -274,50 +268,61 @@ export default function BookReviewSection({ bookId }) {
                   </div>
 
                   {editingReviewId === r.id ? (
-                    <form
-                      onSubmit={handleSubmitEdit(onEditSubmit)}
-                      className="mt-4 space-y-4"
-                    >
-                      <textarea
-                        {...registerEdit("comment", {
-                          required: "Please write a comment.",
-                        })}
-                        rows={3}
-                        maxLength={1000}
-                        className="w-full p-3 border border-gray-200 rounded-md text-gray-800 focus:outline-none focus:border-blue-400 resize-none transition-colors duration-200"
-                        placeholder="Edit your review..."
-                      />
-                      {editErrors.comment && (
-                        <p className="text-sm text-red-600 mt-1">
-                          {editErrors.comment.message}
-                        </p>
-                      )}
-                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={cancelEditing}
-                            className="sm:px-4 px-2 sm:py-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200 text-sm"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="submit"
-                            disabled={editSubmitting}
-                            className="sm:px-4 px-2 sm:py-2 py-1 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm duration-200"
-                          >
-                            {editSubmitting ? "Saving..." : "Save Changes"}
-                          </button>
+                    <Form {...editForm}>
+                      <form
+                        onSubmit={editForm.handleSubmit(onEditSubmit)}
+                        className="mt-4 space-y-4"
+                      >
+                        <FormField
+                          control={editForm.control}
+                          name="comment"
+                          rules={{ required: "Please write a comment." }}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Edit your review..."
+                                  rows={3}
+                                  maxLength={1000}
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                          <div className="flex items-center gap-3">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              onClick={cancelEditing}
+                              size="sm"
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="submit"
+                              disabled={editSubmitting}
+                              size="sm"
+                            >
+                              {editSubmitting ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                "Save Changes"
+                              )}
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                      {editError && (
-                        <p className="text-sm text-red-500 mt-2 text-center">
-                          {editError}
-                        </p>
-                      )}
-                    </form>
+                        {editError && (
+                          <p className="mt-2 text-center text-sm text-red-500">
+                            {editError}
+                          </p>
+                        )}
+                      </form>
+                    </Form>
                   ) : (
-                    <p className="mt-3 text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
+                    <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-gray-600">
                       {r.comment}
                     </p>
                   )}
@@ -326,7 +331,7 @@ export default function BookReviewSection({ bookId }) {
             </article>
           ))
         )}
-      </div>
-    </section>
+      </ScrollArea>
+    </div>
   );
 }
