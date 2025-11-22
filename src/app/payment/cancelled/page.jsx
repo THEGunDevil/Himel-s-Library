@@ -53,9 +53,7 @@ const router = useRouter()
 // Wrapper for preview compatibility
 const PaymentCancelledPage = () => {
   return (
-    <BrowserRouter>
       <CancelledContent />
-    </BrowserRouter>
   );
 };
 
