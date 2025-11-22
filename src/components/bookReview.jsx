@@ -122,7 +122,6 @@ export default function BookReviewSection({ bookId }) {
         )
       );
 
-      toast.success("Review updated ✅");
       cancelEditing();
     } catch (err) {
       console.error(err);
@@ -178,7 +177,10 @@ export default function BookReviewSection({ bookId }) {
 
       {accessToken && (
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="mb-8 space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="mb-8 space-y-4"
+          >
             <FormField
               control={form.control}
               name="comment"
