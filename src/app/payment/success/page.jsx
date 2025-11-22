@@ -26,8 +26,8 @@ const SuccessContent = () => {
           }
         );
         console.log(res);
-        
-        if (res.ok) {
+
+        if (res.status === 200) {
           setStatus("success");
           setMessage("Payment successful! Your subscription is now active.");
         } else {
