@@ -14,9 +14,7 @@ export default function FilterComponent({
   const handleSelect = (value) => {
     // toggle off if same value clicked
     setSelectedStatus(value === selectedStatus ? "" : value);
-    setIsOpen(false);
-    console.log(value);
-    
+    setIsOpen(false);    
   };
 
   useEffect(() => {
@@ -27,8 +25,8 @@ export default function FilterComponent({
     };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside,true);
+      return () => document.removeEventListener("mousedown", handleClickOutside,true);
     }
   }, [isOpen]);
 
@@ -47,14 +45,14 @@ export default function FilterComponent({
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <span className="text-sm font-medium">{getLabel(selectedStatus)}</span>
+        <span className="text-sm whitespace-nowrap font-medium">{getLabel(selectedStatus)}</span>
         <ChevronDown
           className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+        <div className="absolute left-0 md:right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
           <div className="py-1 max-h-48 overflow-y-auto">
             {/* "All" option */}
             <button

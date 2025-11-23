@@ -69,7 +69,7 @@ export default function ReservationList() {
     enabled: !!selectedStatus && !!accessToken,
     retry: 1,
   });
-
+  console.log(reservations);
   const [localReservations, setLocalReservations] = useState({});
 
   // Determine which data to use
@@ -189,6 +189,7 @@ export default function ReservationList() {
       notified: { bg: "bg-blue-100", text: "text-blue-800" },
       fulfilled: { bg: "bg-green-100", text: "text-green-800" },
       cancelled: { bg: "bg-red-100", text: "text-red-800" },
+      picked_up: { bg: "bg-green-100", text: "text-green-800" },
     };
     const config = statusConfig[status] || {
       bg: "bg-gray-100",
@@ -253,10 +254,10 @@ export default function ReservationList() {
           <span className="text-green-600 font-medium">Yes</span>
         ) : (
           <button
-            className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+            className="md:opacity-0 opacity-100 md:group-hover:opacity-100 transition-opacity duration-200 px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
             onClick={handleMarkPickedUp}
           >
-            Mark Picked Up
+            Picked Up
           </button>
         );
       },
@@ -272,7 +273,7 @@ export default function ReservationList() {
           return <span className="text-gray-400">-</span>;
 
         return (
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="flex gap-2 md:opacity-0 opacity-100 md:group-hover:opacity-100 transition-opacity duration-200">
             {status === "pending" && (
               <>
                 <button
@@ -285,29 +286,19 @@ export default function ReservationList() {
                 >
                   Fulfill
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCancel(reservation);
-                  }}
-                  className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
-                  aria-label="Cancel reservation"
-                >
-                  Cancel
-                </button>
+                {status === "fulfilled" && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCancel(reservation);
+                    }}
+                    className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
+                    aria-label="Cancel fulfilled reservation"
+                  >
+                    Cancel
+                  </button>
+                )}
               </>
-            )}
-            {status === "fulfilled" && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCancel(reservation);
-                }}
-                className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
-                aria-label="Cancel fulfilled reservation"
-              >
-                Cancel
-              </button>
             )}
           </div>
         );
@@ -358,7 +349,7 @@ export default function ReservationList() {
           )}
         </div>
         <div className="flex gap-2">
-          {isAdmin && tableData === 0 && (
+          {isAdmin && tableData !== 0 && (
             <FilterComponent
               options={[
                 { label: "Pending", value: "pending" },

@@ -284,15 +284,15 @@ export default function BorrowList() {
           )}
         </div>
         <div className="flex items-center w-full sm:w-auto gap-2">
-          <select
-            className="px-4 py-2 h-10 w-20 border border-gray-300 rounded-md focus:outline-none shadow-sm text-sm hidden sm:block"
-            value={option}
-            onChange={(e) => setOption(e.target.value)}
-          >
-            <option value="all">All</option>
-            <option value="user_name">User</option>
-            <option value="book_title">Book</option>
-          </select>
+            <select
+              className="px-4 py-2 h-10 w-20 border border-gray-300 rounded-md focus:outline-none shadow-sm text-sm"
+              value={option}
+              onChange={(e) => setOption(e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="user_name">User</option>
+              <option value="book_title">Book</option>
+            </select>
 
           <input
             type="search"
@@ -324,7 +324,7 @@ export default function BorrowList() {
             </button>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center justify-end">
           {isAdmin && tableData.length > 0 && (
             <FilterComponent
               options={[
