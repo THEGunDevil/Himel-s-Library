@@ -314,13 +314,20 @@ export async function updateReservationStatus({
 }
 export const handleMarkRead = async (
   accessToken,
-  setNotifications,
+  notifications, // 1. Add notifications here
+  setNotifications, // Ensure this setState accepts a callback
   setNotificationOpen
 ) => {
   if (!accessToken) return;
-  setNotificationOpen(false);
+  const previousState = [...notifications];
+  // 1. Optimistic Update: Mark them as read in UI immediately (Don't clear them!)
+  // We assume setNotifications is the useState setter from the parent
+  setNotifications((prevNotifications) =>
+    prevNotifications.map((n) => ({ ...n, is_read: true }))
+  );
 
   try {
+    // 2. Call Backend
     const res = await axios.patch(
       `${process.env.NEXT_PUBLIC_API_URL}/notifications/mark-read`,
       {},
@@ -332,13 +339,17 @@ export const handleMarkRead = async (
     );
 
     console.log("Mark read response:", res.data);
-    // 🟩 Clear notifications after success
-    setNotifications([]);
+
+    // Note: We don't need to do anything here because we already
+    // updated the UI optimistically above.
   } catch (error) {
     console.error("Failed to mark notifications as read:", error);
+    setNotifications(previousState);
   } finally {
     setNotificationOpen(true);
   }
+  // optional: keep dropdown open or close it based on preference
+  // setNotificationOpen(false);
 };
 
 export async function cancelReservation(params) {
