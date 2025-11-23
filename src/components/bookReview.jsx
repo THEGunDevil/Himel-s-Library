@@ -191,7 +191,7 @@ export default function BookReviewSection({ bookId }) {
                   <FormControl>
                     <Textarea
                       placeholder="What did you like? Any scenes, characters, or lines that stood out?"
-                      rows={3}
+                      className="h-30 text-sm md:text-lg"
                       maxLength={1000}
                       {...field}
                     />

@@ -39,8 +39,9 @@ export default function MobileSidebar({
       >
         <X size={28} />
       </div>
-
-      <Logo width={82} />
+      <Link href={"/"}>
+        <Logo width={82} />
+      </Link>
 
       <ul className="flex flex-col gap-4 uppercase font-medium text-lg mt-8">
         {navigation

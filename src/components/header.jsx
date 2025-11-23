@@ -193,13 +193,13 @@ export default function Header() {
   const unreadCount = notifications.filter((n) => !n.is_read).length;
   return (
     <>
-      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-20 h-20 sm:h-32">
+      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-20 h-20 sm:h-28">
         {/* Logo */}
         <Link href="/" className="flex items-center md:hidden">
           <Logo width={70} />
         </Link>
         <Link href="/" className="hidden md:flex items-center">
-          <Logo width={112} />
+          <Logo width={100} />
         </Link>
 
         {/* Desktop Navigation */}
@@ -224,7 +224,7 @@ export default function Header() {
         {/* Sidebar (Mobile) */}
         <nav
           ref={sidebarRef}
-          className={`fixed lg:hidden top-0 left-0 h-screen w-64 p-4 bg-blue-200 transform transition-transform duration-300 ease-in-out ${
+          className={`fixed lg:hidden top-0 left-0 h-screen md:w-80 w-64 p-4 bg-blue-200 transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
