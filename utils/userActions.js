@@ -330,7 +330,6 @@ export const handleMarkRead = async (
     // 2. Call Backend
     const res = await axios.patch(
       `${process.env.NEXT_PUBLIC_API_URL}/notifications/mark-read`,
-      {},
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,

@@ -25,7 +25,6 @@ const NotificationDropdown = forwardRef(
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
         <h3 className="text-sm font-semibold text-gray-700">Notifications</h3>
-        // ... inside the JSX
         <button
           onClick={() => {
             handleMarkRead(
