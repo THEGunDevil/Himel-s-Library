@@ -106,9 +106,6 @@ const fetchNotificationsByUserID = useCallback(async () => {
         {
           headers: { 
             Authorization: `Bearer ${accessToken}`,
-            // Prevent browser caching which might return old "unread" data
-            "Cache-Control": "no-cache", 
-            "Pragma": "no-cache"
           },
         }
       );
