@@ -34,6 +34,7 @@ import {
   handleCancelReserve,
   handleReserve,
 } from "../../../../utils/userActions";
+import Loader from "@/components/loader";
 
 export default function Book() {
   const { accessToken, userID, user } = useAuth();
@@ -235,7 +236,7 @@ export default function Book() {
   if (bookLoading || !book) {
     return (
       <div className="flex h-screen items-center justify-center text-lg">
-        Loading book details...
+        <Loader />
       </div>
     );
   }

@@ -1,10 +1,27 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function BookCard({ book }) {
   const router = useRouter();
+  const imgRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Intersection Observer to detect visibility
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 } // 20% of card must be visible
+    );
+
+    if (imgRef.current) observer.observe(imgRef.current);
+  }, []);
 
   const handleViewBook = (id) => {
     router.push(`/book/${id}`);
@@ -12,6 +29,7 @@ export default function BookCard({ book }) {
 
   return (
     <div
+      ref={imgRef}
       onClick={(e) => {
         e.stopPropagation();
         handleViewBook(book.id);
@@ -22,19 +40,18 @@ export default function BookCard({ book }) {
     >
       {/* Image Section */}
       <div className="relative bg-blue-50 flex justify-center items-center h-56 sm:h-52 md:h-60 lg:h-64">
-        <Image
-          src={book.image_url}
-          alt={book.title}
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-contain brightness-75"
-          priority
-        />
-
-        {book.isBorrowed && (
-          <span className="absolute top-3 left-3 bg-red-500 text-white text-xs sm:text-[10px] font-semibold px-2 py-1 rounded-full">
-            Borrowed
-          </span>
+        {isVisible ? (
+          <Image
+            src={book.image_url}
+            alt={book.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-contain brightness-75"
+            // no priority → lazy loading enabled
+          />
+        ) : (
+          // Placeholder (small transparent image)
+          <div className="w-full h-full animate-pulse bg-gray-200" />
         )}
       </div>
 

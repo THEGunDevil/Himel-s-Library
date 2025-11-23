@@ -26,32 +26,30 @@ export default function BannerSlider({ bannerBooks = [] }) {
         fadeEffect={{ crossFade: true }}
         autoplay={
           hasMultipleSlides
-            ? {
-                delay: 4000,
-                disableOnInteraction: false,
-              }
+            ? { delay: 4000, disableOnInteraction: false }
             : false
         }
         pagination={{ clickable: true }}
         allowTouchMove={hasMultipleSlides}
         className="h-full"
       >
-        {books.map((b) => (
+        {books.map((b, index) => (
           <SwiperSlide key={b.id} className="relative h-full">
-            {/* Background image — FIXED */}
-
+            
+            {/* Optimized Image Lazy Load */}
             <Image
               src={b.image_url}
               alt={b.title}
               fill
               className="object-contain brightness-75"
-              priority
+              priority={index === 0}   // Only FIRST slide loads immediately
+              loading={index === 0 ? "eager" : "lazy"}   // Others lazy-load
             />
 
-            {/* Gradient overlay — FIXED */}
+            {/* Overlay */}
             <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/40 to-transparent"></div>
 
-            {/* Content */}
+            {/* Text */}
             <div className="relative z-10 h-full flex items-end px-6 md:px-16 pb-8 md:pb-10">
               <div className="text-white max-w-3xl space-y-2 md:space-y-3 animate-fade-in">
                 <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
@@ -74,7 +72,6 @@ export default function BannerSlider({ bannerBooks = [] }) {
         ))}
       </Swiper>
 
-      {/* Internal styles */}
       <style jsx>{`
         @keyframes fadeIn {
           from {
