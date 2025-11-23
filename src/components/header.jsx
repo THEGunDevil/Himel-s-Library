@@ -109,8 +109,6 @@ export default function Header() {
           },
         }
       );
-      console.log(response.data);
-
       const allData = Array.isArray(response.data) ? response.data : [];
 
       // ✅ FIX: Only keep items where is_read is FALSE

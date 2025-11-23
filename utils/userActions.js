@@ -332,7 +332,7 @@ export const handleMarkRead = async (
 
   try {
     // 2. Call Backend
-    const res = await axios.patch(
+await axios.patch(
       `${process.env.NEXT_PUBLIC_API_URL}/notifications/mark-read`,
 
       // 🟢 ARGUMENT 2: The request body (DATA). Mark-all-read usually doesn't need a body.
@@ -346,8 +346,6 @@ export const handleMarkRead = async (
         },
       }
     );
-
-    console.log("Mark read response:", res.data);
   } catch (error) {
     console.error("Failed to mark notifications as read:", error);
 

@@ -191,7 +191,7 @@ export default function Profile() {
 
   if (profileLoading) {
     return (
-      <div className="mt-40">
+      <div className="flex h-screen items-center justify-center text-lg">
         <Loader />
       </div>
     );
