@@ -95,7 +95,7 @@ export default function Header() {
     });
   };
 
-const fetchNotificationsByUserID = useCallback(async () => {
+  const fetchNotificationsByUserID = useCallback(async () => {
     if (!accessToken) return;
     setLoadingNotification(true);
     setNotificationError(null);
@@ -104,19 +104,19 @@ const fetchNotificationsByUserID = useCallback(async () => {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/notifications/get`,
         {
-          headers: { 
+          headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         }
       );
-      
-      const allData = Array.isArray(response.data) ? response.data : [];
-      
-      // ✅ FIX: Only keep items where is_read is FALSE
-      const unreadOnly = allData.filter((n) => n.is_read === false);
-      
-      setNotifications(unreadOnly);
+      console.log(response.data);
 
+      const allData = Array.isArray(response.data) ? response.data : [];
+
+      // ✅ FIX: Only keep items where is_read is FALSE
+      // const unreadOnly = allData.filter((n) => n.is_read === false);
+
+      setNotifications(allData);
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
       setNotificationError(err);

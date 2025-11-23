@@ -314,14 +314,18 @@ export async function updateReservationStatus({
 }
 export const handleMarkRead = async (
   accessToken,
-  notifications, // 1. Add notifications here
-  setNotifications, // Ensure this setState accepts a callback
+  notifications,
+  setNotifications,
   setNotificationOpen
 ) => {
-  if (!accessToken) return;
+  if (!accessToken) {
+    console.error("AccessToken missing. Cannot mark read.");
+    return;
+  }
+
   const previousState = [...notifications];
-  // 1. Optimistic Update: Mark them as read in UI immediately (Don't clear them!)
-  // We assume setNotifications is the useState setter from the parent
+
+  // 1. Optimistic Update: Mark them as read in UI immediately
   setNotifications((prevNotifications) =>
     prevNotifications.map((n) => ({ ...n, is_read: true }))
   );
@@ -330,6 +334,12 @@ export const handleMarkRead = async (
     // 2. Call Backend
     const res = await axios.patch(
       `${process.env.NEXT_PUBLIC_API_URL}/notifications/mark-read`,
+
+      // 🟢 ARGUMENT 2: The request body (DATA). Mark-all-read usually doesn't need a body.
+      // If your API expects an empty body, pass {} or null.
+      {},
+
+      // 🔴 ARGUMENT 3: The configuration object, which MUST contain headers.
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -338,17 +348,15 @@ export const handleMarkRead = async (
     );
 
     console.log("Mark read response:", res.data);
-
-    // Note: We don't need to do anything here because we already
-    // updated the UI optimistically above.
   } catch (error) {
     console.error("Failed to mark notifications as read:", error);
+
+    // Revert the optimistic UI update on failure
     setNotifications(previousState);
   } finally {
+    // Note: Setting to true here keeps it open after the action.
     setNotificationOpen(true);
   }
-  // optional: keep dropdown open or close it based on preference
-  // setNotificationOpen(false);
 };
 
 export async function cancelReservation(params) {

@@ -26,7 +26,7 @@ const NotificationDropdown = forwardRef(
       <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
         <h3 className="text-sm font-semibold text-gray-700">Notifications</h3>
         <button
-          onClick={() => {
+          onClick={() => {            
             handleMarkRead(
               accessToken,
               notifications, // <--- PASS THE DATA HERE
