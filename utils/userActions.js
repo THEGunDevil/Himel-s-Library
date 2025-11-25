@@ -213,7 +213,48 @@ export const handleEditSubmit = async ({
     }
   }
 };
-// utils/userActions.js
+export const handleProfileImageChange = async (
+  e,
+  userId,
+  accessToken,
+  setProfile
+) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("profile_img", file);
+
+  try {
+    const response = await axios.patch(
+      `${process.env.NEXT_PUBLIC_API_URL}/users/user/${userId}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    toast.success("Profile picture set successfully");
+
+    // refresh profile in UI
+    setProfile((prev) => ({
+      ...prev,
+      user: [
+        {
+          ...prev.user[0],
+          profile_img: response.data.profile_img,
+        },
+      ],
+    }));
+  } catch (error) {
+    console.error(error);
+    toast.error("❌ There was an error setting profile picture");
+  }
+};
+
 export const handleReserve = async ({
   userID,
   book,
@@ -332,7 +373,7 @@ export const handleMarkRead = async (
 
   try {
     // 2. Call Backend
-await axios.patch(
+    await axios.patch(
       `${process.env.NEXT_PUBLIC_API_URL}/notifications/mark-read`,
 
       // 🟢 ARGUMENT 2: The request body (DATA). Mark-all-read usually doesn't need a body.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { LogOut, BookOpen, Star, User, StarIcon } from "lucide-react";
 import {
@@ -16,6 +16,7 @@ import {
   handleUnban,
   handleEditSubmit,
   handleDelete,
+  handleProfileImageChange,
 } from "../../../../utils/userActions";
 import { useForm } from "react-hook-form";
 import Options from "@/components/options";
@@ -25,12 +26,13 @@ export default function Profile() {
   const { id: userID } = useParams();
   const { accessToken, isAdmin, logout, userID: uID } = useAuth();
   const router = useRouter();
-
+  const fileInputRef = useRef(null);
   const [profile, setProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editedProfileImg, setEditedProfileImg] = useState(null);
   const [editedComment, setEditedComment] = useState("");
   const [editedRating, setEditedRating] = useState(0);
   const [editingUserId, setEditingUserId] = useState(null);
@@ -97,7 +99,13 @@ export default function Profile() {
     setEditingUserId(null);
     setEditedBio("");
   };
+  const startEditingProfileImg = (user) => {
+    setEditedProfileImg(user.profile_img);
+  };
 
+  const cancelEditingProfileImg = () => {
+    setEditedProfileImg("");
+  };
   const startEditing = (review) => {
     setEditingReviewId(review.id);
     setEditedComment(review.comment);
@@ -215,8 +223,32 @@ export default function Profile() {
       <div className="bg-white rounded-lg sm:p-6 p-3 mb-8 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 w-full">
-            <div className="p-4 bg-indigo-100 rounded-full">
+            <div className="p-4 bg-indigo-100 rounded-full relative">
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                onChange={(e) =>
+                  handleProfileImageChange(e, user.id, accessToken, setProfile)
+                }
+              />
+
               <Avatar name={profile.user_name} className="h-12 w-12" />
+              <div className="absolute top-0 right-0 flex justify-center items-center">
+                <Options
+                  type="profile_img"
+                  onDelete={async () => {
+                    await handleDelete({
+                      type: "profile_img",
+                      userId: user.id,
+                      accessToken,
+                      setProfile,
+                    });
+                  }}
+                  onEdit={() => fileInputRef.current.click()}
+                />
+              </div>
             </div>
             <div className="flex justify-between items-center w-full">
               <div>
@@ -328,6 +360,7 @@ export default function Profile() {
             <User size={18} /> Bio
           </h2>
           <Options
+            type={profile?.user?.[0].bio ? "edit" : "bio"}
             onDelete={async () => {
               await handleDelete({
                 type: "bio",
@@ -386,7 +419,7 @@ export default function Profile() {
         {borrowsByUser.length === 0 ? (
           <p className="text-gray-500 text-sm">No borrowed books yet.</p>
         ) : (
-          <div className="divide-y divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
+          <div className="divide-y divide-gray-200 max-h-[50vh] overflow-scroll scrollbar-hide bg-gray-50 rounded-lg shadow-sm">
             {borrowsByUser.map((b) => (
               <div key={b.id} className="p-3 flex justify-between items-center">
                 <span>{b.book_title}</span>
@@ -414,7 +447,7 @@ export default function Profile() {
             You haven’t written any reviews yet.
           </p>
         ) : (
-          <div className="divide-y divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
+          <div className="divide-y max-h-[50vh] overflow-scroll scrollbar-hide divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
             {reviewsByUser.map((r) => (
               <div
                 key={r.id}

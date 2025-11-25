@@ -109,7 +109,11 @@ export default function Book() {
         }
       })
       .catch((err) => {
-        console.warn("No borrow record found", err);
+        if (err.status === 404) {
+          console.info("No borrow record found (handled 404)"); // Info, not an error
+        } else {
+          console.error("Severe server error:", err); // True error
+        }
         setBorrow([]);
         setBorrowed(false);
       });

@@ -1,4 +1,4 @@
-import { MoreVertical } from "lucide-react";
+import { Edit, MoreVertical, PlusCircle } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -8,23 +8,44 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-export default function Options({ onDelete, onEdit }) {
+export default function Options({ onDelete, onEdit, type = "edit" }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="h-8 w-8 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-        >
-          <span className="sr-only">Open menu</span>
-          <MoreVertical className="h-4 w-4" />
-        </Button>
+        {type === "edit" ? (
+          <Button
+            variant={"ghost"}
+            className="h-8 w-8 p-0 
+     opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+          >
+            <MoreVertical size={20} />
+          </Button>
+        ) : (
+          <button
+            className=" 
+     opacity-100 text-gray-600 cursor-pointer"
+          >
+            <Edit size={18} />
+          </button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
-        <DropdownMenuItem onClick={onDelete} className="text-destructive">
-          Delete
-        </DropdownMenuItem>
+        {(type === "bio" || type === "profile_img") && (
+          <>
+            <DropdownMenuItem onClick={onEdit} className="flex justify-between">
+              <span>Add {type === "bio" ? "Bio" : "Image"}</span>
+              <PlusCircle />
+            </DropdownMenuItem>
+          </>
+        )}
+        {type === "edit" && (
+          <>
+            <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
+            <DropdownMenuItem onClick={onDelete} className="text-destructive">
+              Delete
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
