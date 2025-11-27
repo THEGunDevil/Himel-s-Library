@@ -1,4 +1,4 @@
-import { Edit, MoreVertical, PlusCircle } from "lucide-react";
+import { Edit, Image, MoreVertical, PlusCircle } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -8,7 +8,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-export default function Options({ onDelete, onEdit, type = "edit" }) {
+export default function Options({
+  onDelete,
+  onEdit,
+  onView,
+  type = "edit",
+  data,
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -30,22 +36,43 @@ export default function Options({ onDelete, onEdit, type = "edit" }) {
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {(type === "bio" || type === "profile_img") && (
+        {type === "bio" && (
+          <DropdownMenuItem onClick={onEdit} className="flex justify-between">
+            <span>Add Bio</span>
+            <PlusCircle />
+          </DropdownMenuItem>
+        )}
+        {type === "profile_img" && (
           <>
-            <DropdownMenuItem onClick={onEdit} className="flex justify-between">
-              <span>Add {type === "bio" ? "Bio" : "Image"}</span>
-              <PlusCircle />
-            </DropdownMenuItem>
+            {!data ? (
+              <DropdownMenuItem
+                onClick={onEdit}
+                className="flex justify-between"
+              >
+                <span>Add Image</span>
+                <PlusCircle />
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem
+                onClick={onView} // different handler for viewing
+                className="flex justify-between"
+              >
+                <span>View Image</span>
+                <Image />
+              </DropdownMenuItem>
+            )}
           </>
         )}
-        {type === "edit" && (
-          <>
-            <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} className="text-destructive">
-              Delete
-            </DropdownMenuItem>
-          </>
-        )}
+
+        {type === "edit" ||
+          (data && (
+            <>
+              <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                Delete
+              </DropdownMenuItem>
+            </>
+          ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

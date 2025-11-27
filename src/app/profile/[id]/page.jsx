@@ -216,13 +216,17 @@ export default function Profile() {
 
   const user = profile.user[0];
   const borrowsByUser = profile.borrows || [];
-  const profileImg = profile?.user[0]?.profile_img
+  const profileImg = profile?.user[0]?.profile_img;
   return (
     <div className="w-full md:pt-36 pt-32 mx-auto p-4 space-y-6 xl:px-20 lg:px-20 px-4">
       <div className="bg-white rounded-lg sm:p-6 p-3 mb-8 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 w-full">
-            <div className={`${profileImg ? "" : "p-4 bg-indigo-100"} "rounded-full relative"`}>
+            <div
+              className={`${
+                profileImg ? "" : "p-4 bg-indigo-100"
+              } relative rounded-full group`}
+            >
               <input
                 type="file"
                 accept="image/*"
@@ -242,7 +246,8 @@ export default function Profile() {
 
               <div className="absolute top-0 right-0 flex justify-center items-center">
                 <Options
-                  type="profile_img"
+                  type={"profile_img"}
+                  data={profileImg}
                   onDelete={async () => {
                     await handleDelete({
                       type: "profile_img",
