@@ -1,6 +1,7 @@
 "use client";
 import { useAuth } from "@/contexts/authContext";
 import axios from "axios";
+import { LoaderCircleIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -265,6 +266,13 @@ function AddBook() {
             disabled={loading}
             className="w-full py-3 bg-indigo-600 text-white rounded-lg font-semibold text-lg hover:bg-indigo-700 transition duration-200 disabled:bg-indigo-400 disabled:cursor-not-allowed lg:col-span-2"
           >
+            {loading ? (
+              <div className="animate-spin">
+                <LoaderCircleIcon />
+              </div>
+            ) : (
+              ""
+            )}
             {loading ? "Adding..." : added ? "Book Added" : "Add Book"}
           </button>
         </form>

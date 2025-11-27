@@ -235,9 +235,8 @@ export const handleProfileImageChange = async (
         },
       }
     );
-
+    console.log(response.data);
     toast.success("Profile picture set successfully");
-
     // refresh profile in UI
     setProfile((prev) => ({
       ...prev,

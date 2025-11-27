@@ -224,7 +224,7 @@ export default function Header() {
         {/* Sidebar (Mobile) */}
         <nav
           ref={sidebarRef}
-          className={`fixed lg:hidden top-0 left-0 h-screen md:w-80 w-64 p-4 bg-blue-200 transform transition-transform duration-300 ease-in-out ${
+          className={`fixed lg:hidden top-0 left-0 h-screen md:w-80 border-r-8 border-blue-400 w-64 p-4 bg-blue-200 transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >

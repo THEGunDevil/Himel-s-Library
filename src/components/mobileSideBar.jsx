@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   LayoutDashboard,
   Library,
+  ReceiptText,
   Users,
   X,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const dashBoardNavigations = [
     icon: <ClipboardCheck size={17} />,
   },
   { title: "Borrows", path: "/borrow-list", icon: <Library size={17} /> },
+  { title: "Payments", path: "/payment-list", icon: <ReceiptText size={17} /> },
 ];
 
 export default function MobileSidebar({
@@ -32,16 +34,18 @@ export default function MobileSidebar({
 }) {
   const [dashboardOpen, setDashboardOpen] = useState(false);
   return (
-    <div className="h-full flex flex-col relative">
-      <div
-        onClick={() => setSidebarOpen(false)}
-        className="absolute text-blue-600 right-2 top-5 cursor-pointer"
-      >
-        <X size={28} />
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between relative">
+        <Link href={"/"}>
+          <Logo width={82} />
+        </Link>
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="text-blue-600 cursor-pointer"
+        >
+          <X size={28} />
+        </div>
       </div>
-      <Link href={"/"}>
-        <Logo width={82} />
-      </Link>
 
       <ul className="flex flex-col gap-4 uppercase font-medium text-lg mt-8">
         {navigation

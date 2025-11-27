@@ -12,14 +12,15 @@ export function ConvertStringToDate(dateStr) {
   return formatted === "0001-01-01" ? "-" : formatted;
 }
 
-
 export const getDueDate = (days) => {
   const date = new Date();
   date.setDate(date.getDate() + days);
   return date.toISOString().split("T")[0]; // format: YYYY-MM-DD
 };
 
-export function Avatar({ name }) {
+import Image from "next/image";
+
+export function Avatar({ name, profileImg, className = "", ...props }) {
   const initials = name
     ? name
         .split(" ")
@@ -28,12 +29,34 @@ export function Avatar({ name }) {
         .join("")
         .toUpperCase()
     : "?";
+
   return (
-    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-sm font-semibold">
-      {initials}
-    </div>
+    <>
+      {profileImg ? (
+        <div
+          {...props}
+          className={`relative rounded-full overflow-hidden bg-gray-100 cursor-pointer ${className}`}
+        >
+          <Image
+            src={profileImg}
+            alt={name || "Profile Image"}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      ) : (
+        <div
+          {...props}
+          className={`rounded-full bg-gray-100 flex items-center justify-center text-sm font-semibold cursor-pointer ${className}`}
+        >
+          {initials}
+        </div>
+      )}
+    </>
   );
 }
+
 
 export function StarDisplay({ rating }) {
   const stars = Array.from({ length: 5 }, (_, i) => i + 1);

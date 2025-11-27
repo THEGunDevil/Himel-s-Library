@@ -83,7 +83,6 @@ export default function Profile() {
 
     fetchProfile();
   }, [userID, accessToken]);
-
   // Fetch reviews separately
   useEffect(() => {
     if (!userID || !accessToken) return;
@@ -217,13 +216,13 @@ export default function Profile() {
 
   const user = profile.user[0];
   const borrowsByUser = profile.borrows || [];
-
+  const profileImg = profile?.user[0]?.profile_img
   return (
     <div className="w-full md:pt-36 pt-32 mx-auto p-4 space-y-6 xl:px-20 lg:px-20 px-4">
       <div className="bg-white rounded-lg sm:p-6 p-3 mb-8 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 w-full">
-            <div className="p-4 bg-indigo-100 rounded-full relative">
+            <div className={`${profileImg ? "" : "p-4 bg-indigo-100"} "rounded-full relative"`}>
               <input
                 type="file"
                 accept="image/*"
@@ -234,7 +233,13 @@ export default function Profile() {
                 }
               />
 
-              <Avatar name={profile.user_name} className="h-12 w-12" />
+              <Avatar
+                onClick={() => fileInputRef.current.click()}
+                name={profile.user_name}
+                profileImg={profileImg}
+                className="h-20 w-20 xl:h-16 xl:w-16"
+              />
+
               <div className="absolute top-0 right-0 flex justify-center items-center">
                 <Options
                   type="profile_img"
@@ -250,6 +255,7 @@ export default function Profile() {
                 />
               </div>
             </div>
+
             <div className="flex justify-between items-center w-full">
               <div>
                 <div className="flex md:flex-row flex-col md:items-center gap-2">

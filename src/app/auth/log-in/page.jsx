@@ -1,13 +1,18 @@
 "use client";
 import { useAuth } from "@/contexts/authContext";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
-import { EyeClosedIcon, EyeIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EyeIcon, EyeOffIcon, LoaderCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+
 export default function LogInForm() {
   const { login } = useAuth();
   const {
@@ -44,76 +49,89 @@ export default function LogInForm() {
       setLoading(false);
     }
   };
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
-      <div className="w-full max-w-md bg-white shadow-md p-6 mt-10">
-        <h2 className="text-2xl font-bold text-center mb-6">Log In</h2>
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">Log In</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Email */}
+            <div className="space-y-1">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="example@email.com"
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
+                })}
+              />
+              {errors.email && (
+                <p className="text-destructive text-xs">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              type="email"
-              {...register("email", {
-                required: "Email is required",
-                pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
-              })}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="example@email.com"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
+            {/* Password */}
+            <div className="space-y-1">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: { value: 6, message: "At least 6 characters" },
+                  })}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <EyeIcon className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+              {errors.password && (
+                <p className="text-destructive text-xs">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
 
-          {/* Password */}
-          <div>
-            <label className="text-sm font-medium mb-1 flex items-center justify-between">
-              Password{" "}
-              <span onClick={() => setShowPassword((prev) => !prev)}>
-                {showPassword ? (
-                  <EyeIcon size={17} />
-                ) : (
-                  <EyeClosedIcon size={17} />
-                )}
-              </span>
-            </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              {...register("password", {
-                required: "Password is required",
-                minLength: { value: 6, message: "At least 6 characters" },
-              })}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
-            />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
+            {/* Submit Button */}
+            <Button type="submit" disabled={loading} className="w-full flex items-center">
+              {loading ? (
+                <div className="animate-spin">
+                  <LoaderCircleIcon />
+                </div>
+              ) : (
+                ""
+              )}
+              {loading ? "Logging In.." : "Log In"}
+            </Button>
+          </form>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-          >
-            {loading ? "Logging In.." : "Log In"}
-          </button>
-        </form>
-
-        <p className="text-center text-sm mt-4">
-          Don't have an account?{" "}
-          <Link href="/auth/sign-up" className="text-blue-600 hover:underline">
-            Sign Up
-          </Link>
-        </p>
-      </div>
+          <p className="text-center text-sm mt-4">
+            Don't have an account?{" "}
+            <Link href="/auth/sign-up" className="text-primary hover:underline">
+              Sign Up
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

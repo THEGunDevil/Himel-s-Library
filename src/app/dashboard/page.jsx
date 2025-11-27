@@ -10,6 +10,7 @@ import UserList from "@/components/userList";
 import BorrowList from "@/components/borrowList";
 import BookList from "@/components/bookList";
 import ReservationList from "@/components/reservationList";
+import PaymentList from "@/components/paymentList";
 
 export default function Dashboard() {
   const tabNames = [
@@ -17,6 +18,7 @@ export default function Dashboard() {
     "Borrows",
     "Books",
     "Reservations",
+    "Payments",
     "Add Book",
     "Update Book",
   ];
@@ -68,6 +70,9 @@ export default function Dashboard() {
             </TabPanel>
             <TabPanel>
               <ReservationList />
+            </TabPanel>
+            <TabPanel>
+              <PaymentList />
             </TabPanel>
             <TabPanel>
               <AddBook />

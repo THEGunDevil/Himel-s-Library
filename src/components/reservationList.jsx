@@ -441,24 +441,29 @@ export default function ReservationList() {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center items-center py-4 gap-4 bg-gray-50 border-t border-gray-200">
-          <button
-            onClick={handlePrev}
-            disabled={page === 1}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
-          >
-            <ArrowLeftIcon className="h-4 w-4" /> Previous
-          </button>
-          <span className="text-gray-700 text-sm font-medium">
-            Page {page} of {currentTotalPages}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={page === currentTotalPages}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
-          >
-            Next <ArrowRightIcon className="h-4 w-4" />
-          </button>
+        <div className="flex flex-col sm:flex-row justify-between items-center px-6 py-5 bg-gray-50 border-t gap-4">
+          <div className="text-sm text-gray-600">
+            Showing page <span className="font-bold">{page}</span> of{" "}
+            <span className="font-bold">{totalPages}</span>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handlePrev}
+              disabled={page === 1}
+              className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              Previous
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={page === totalPages}
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              Next
+              <ArrowRightIcon className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
