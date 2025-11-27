@@ -79,7 +79,7 @@ export default function PaymentList() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken, isAdmin, page, debouncedSearch]);
+  }, [accessToken, isAdmin, page]);
 
   useEffect(() => {
     fetchPayments();
