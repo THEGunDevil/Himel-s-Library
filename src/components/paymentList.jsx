@@ -10,11 +10,12 @@ import {
 import axios from "axios";
 import Loader from "./loader";
 import { useAuth } from "@/contexts/authContext";
-import { ArrowLeftIcon, ArrowRightIcon, X, Copy } from "lucide-react";
+import { X, Copy } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
 import { ConvertStringToDate } from "../../utils/utils";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Pagination from "./pagination";
 
 const columnHelper = createColumnHelper();
 
@@ -25,7 +26,7 @@ export default function PaymentList() {
   const [error, setError] = useState(null);
   const [payments, setPayments] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [totalSales, setTotalSales] = useState(0);
   const [localSearch, setLocalSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -56,7 +57,7 @@ export default function PaymentList() {
       };
 
       const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/payments`,
+        `${process.env.NEXT_PUBLIC_API_URL}/payments/`,
         {
           params,
           headers: {
@@ -64,10 +65,14 @@ export default function PaymentList() {
           },
         }
       );
+
       const data = res.data;
-      console.log(data);
-      setPayments(data.payments || data || []);
-      setTotalPages(data.total_pages || data.totalPages || 1);
+      setPayments(data.payments || []);
+      const totalItems = data.metadata?.total || 0;
+      const totalSales = data.metadata?.totalSales || 0;
+      const limit = data.metadata?.limit || 10;
+      setTotalPages(Math.ceil(totalItems / limit));
+      setTotalSales(totalSales);
     } catch (err) {
       const message =
         err.response?.data?.message ||
@@ -200,8 +205,8 @@ export default function PaymentList() {
       header: "Refund",
       cell: ({ getValue }) => {
         const val = getValue();
-        if (!val || val === "none" || val === "") {
-          return <span className="text-gray-400 text-xs">-</span>;
+        if (!val || val === "") {
+          return <span className="text-black text-xs">-</span>;
         }
         return (
           <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">
@@ -228,13 +233,13 @@ export default function PaymentList() {
   return (
     <div className="w-full mx-auto mt-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4 md:mb-6">
         <div className="flex w-full items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900">
               Payments Dashboard
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 text-sm md:text-md">
               Manage and view all transactions
             </p>
           </div>
@@ -251,10 +256,21 @@ export default function PaymentList() {
 
         <div className="flex items-center gap-3 justify-center">
           <div className="flex items-center w-full sm:w-auto gap-2">
+            <div className="flex-col hidden md:flex">
+              <span className="text-gray-500 whitespace-nowrap text-sm">
+                Total Sales
+              </span>
+              <span className="text-md text-green-600">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(totalSales)}
+              </span>
+            </div>
             <input
               type="search"
               value={localSearch}
-              className="px-4 py-2 border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm"
+              className="px-4 py-2 hidden md:block border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm"
               onChange={(e) => setLocalSearch(e.target.value)}
               placeholder="Search user..."
             />
@@ -266,7 +282,7 @@ export default function PaymentList() {
                   setLocalSearch("");
                   setPage(1);
                 }}
-                className="p-2 text-red-500 cursor-pointer hover:text-red-600 transition-colors duration-200"
+                className="p-2 text-red-500 hidden md:block cursor-pointer hover:text-red-600 transition-colors duration-200"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -283,13 +299,47 @@ export default function PaymentList() {
           </div>
         </div>
       </div>
+      <div className="flex gap-3">
+        <div className="flex flex-col">
+          <span className="text-gray-500 whitespace-nowrap text-sm">
+            Total Sales
+          </span>
+          <span className="text-md text-green-600">
+            {new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+            }).format(totalSales)}
+          </span>
+        </div>
+        <div className="md:hidden border flex h-fit border-gray-300 rounded-md items-center">
+          <input
+            type="search"
+            value={localSearch}
+            className="px-4 py-2 h-8  focus:outline-none w-full sm:w-64 text-sm"
+            onChange={(e) => setLocalSearch(e.target.value)}
+            placeholder="Search user..."
+          />
+          {localSearch && (
+            <button
+              type="button"
+              onClick={() => {
+                setLocalSearch("");
+                setPage(1);
+              }}
+              className="p-2 h-8 text-red-500 cursor-pointer hover:text-red-600 transition-colors duration-200"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Table Card */}
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden mt-3">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             {/* Header */}
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+            <thead className="bg-linear-to-r from-gray-50 to-gray-100">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
@@ -402,35 +452,9 @@ export default function PaymentList() {
           </table>
         </div>
 
-        {/* Optional: Add a subtle footer summary if needed later */}
-        {/* <div className="px-6 py-4 bg-gray-50 border-t text-sm text-gray-600">
-    Total: {payments.length} payments shown
-  </div> */}
-
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row justify-between items-center px-6 py-5 bg-gray-50 border-t gap-4">
-          <div className="text-sm text-gray-600">
-            Showing page <span className="font-bold">{page}</span> of{" "}
-            <span className="font-bold">{totalPages}</span>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={handlePrev}
-              disabled={page === 1}
-              className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              <ArrowLeftIcon className="h-4 w-4" />
-              Previous
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={page === totalPages}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              Next
-              <ArrowRightIcon className="h-4 w-4" />
-            </button>
-          </div>
+        <div className="flex relative flex-col sm:flex-row justify-between items-center px-6 py-5 bg-gray-50 border-t gap-4">
+          <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext}/>
         </div>
       </div>
     </div>

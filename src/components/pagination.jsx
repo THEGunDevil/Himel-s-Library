@@ -4,7 +4,7 @@ import React from "react";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 export default function Pagination({ page, totalPages, onPrev, onNext }) {
-  if (totalPages <= 1) return null;
+  // if (totalPages <= 1) return null;
 
   return (
     <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 px-3 py-2 flex items-center justify-center gap-3 text-sm">

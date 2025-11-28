@@ -11,9 +11,10 @@ import BorrowList from "@/components/borrowList";
 import BookList from "@/components/bookList";
 import ReservationList from "@/components/reservationList";
 import PaymentList from "@/components/paymentList";
-
+import BookLibraryOverview from "@/components/overview";
 export default function Dashboard() {
   const tabNames = [
+    "OverView",
     "Users",
     "Borrows",
     "Books",
@@ -56,6 +57,9 @@ export default function Dashboard() {
 
           {/* Tab Panels */}
           <div className="bg-blue-50 shadow-inner px-4 py-1 min-h-[400px] transition-all duration-200 mt-4">
+            <TabPanel>
+              <BookLibraryOverview />
+            </TabPanel>
             <TabPanel>
               <UserList />
             </TabPanel>

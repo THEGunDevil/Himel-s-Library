@@ -1,6 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  BarChart,
   BookOpenIcon,
   ChevronDown,
   ClipboardCheck,
@@ -14,6 +15,7 @@ import { useState } from "react";
 import Logo from "./logo";
 import Link from "next/link";
 const dashBoardNavigations = [
+  { title: "OverView", path: "/overview", icon: <BarChart size={17} /> },
   { title: "Users", path: "/user-list", icon: <Users size={17} /> },
   { title: "Books", path: "/book-list", icon: <BookOpenIcon size={17} /> },
   {

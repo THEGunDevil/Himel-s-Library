@@ -5,6 +5,7 @@ import BookCard from "@/components/bookCard";
 import BannerSlider from "@/components/bannerSlider";
 import BookSliderByGenre from "@/components/bookSliderByGenre";
 import { useBookData } from "@/hooks/useBookData";
+import Pagination from "@/components/pagination";
 
 // --- 1. Create a "Skeleton" Component ---
 // This mimics the shape of your content while it loads
@@ -90,23 +91,9 @@ export default function Home() {
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-center items-center my-8 gap-4">
-              <button
-                onClick={handlePrev}
-                disabled={page === 1}
-                className="px-4 py-2 flex items-center bg-blue-400 text-white rounded disabled:opacity-50 hover:bg-blue-500 transition"
-              >
-                <ArrowLeftIcon className="h-4 mr-2" /> Previous
-              </button>
-              <span className="text-gray-700">Page {page} of {totalPages}</span>
-              <button
-                onClick={handleNext}
-                disabled={page === totalPages}
-                className="px-4 py-2 flex items-center bg-blue-400 text-white rounded disabled:opacity-50 hover:bg-blue-500 transition"
-              >
-                Next <ArrowRightIcon className="h-4 ml-2" />
-              </button>
-            </div>
+        <div className="flex relative flex-col sm:flex-row justify-between items-center px-6 py-5 bg-gray-50 border-t gap-4">
+          <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext}/>
+        </div>
           </>
         )}
       </section>
