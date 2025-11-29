@@ -35,7 +35,7 @@ export function Avatar({ name, profileImg, className = "", ...props }) {
       {profileImg ? (
         <div
           {...props}
-          className={`relative rounded-full overflow-hidden bg-gray-100 cursor-pointer ${className}`}
+          className={`relative rounded-xl border-gray-700 border overflow-hidden bg-gray-100 cursor-pointer ${className}`}
         >
           <Image
             src={profileImg}

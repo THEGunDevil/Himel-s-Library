@@ -21,6 +21,7 @@ import {
 import { useForm } from "react-hook-form";
 import Options from "@/components/options";
 import axios from "axios";
+import ProfileImageModal from "@/components/profileImageModal";
 
 export default function Profile() {
   const { id: userID } = useParams();
@@ -39,7 +40,7 @@ export default function Profile() {
   const [editedBio, setEditedBio] = useState("");
   const [userBanID, setUserBanID] = useState(null);
   const [userUnBanID, setUserUnBanID] = useState(null);
-
+  const [openProfileImg, setOpenProfileImg] = useState(false);
   const {
     register,
     handleSubmit,
@@ -216,7 +217,7 @@ export default function Profile() {
 
   const user = profile.user[0];
   const borrowsByUser = profile.borrows || [];
-  const profileImg = profile?.user[0]?.profile_img;  
+  const profileImg = profile?.user[0]?.profile_img;
   return (
     <div className="w-full md:pt-36 pt-32 mx-auto p-4 space-y-6 xl:px-20 lg:px-20 px-4">
       <div className="bg-white rounded-lg sm:p-6 p-3 mb-8 shadow-sm">
@@ -238,7 +239,13 @@ export default function Profile() {
               />
 
               <Avatar
-                onClick={() => fileInputRef.current.click()}
+                onClick={() => {
+                  if (profileImg) {
+                    setOpenProfileImg(true);
+                  } else {
+                    fileInputRef.current.click();
+                  }
+                }}
                 name={profile.user_name}
                 profileImg={profileImg}
                 className="h-20 w-20 xl:h-16 xl:w-16"
@@ -256,6 +263,7 @@ export default function Profile() {
                       setProfile,
                     });
                   }}
+                  onView={() => setOpenProfileImg((prev) => !prev)}
                   onEdit={() => fileInputRef.current.click()}
                 />
               </div>
@@ -416,7 +424,9 @@ export default function Profile() {
             </div>
           </div>
         ) : user.bio ? (
-          <p className="text-black text-sm leading-relaxed font-semibold italic">{user.bio}</p>
+          <p className="text-black text-sm leading-relaxed font-semibold italic">
+            {user.bio}
+          </p>
         ) : (
           <p className="text-gray-500 text-sm italic font-bold text">
             No bio available. Add a short introduction about yourself!
@@ -644,6 +654,11 @@ export default function Profile() {
           </form>
         </div>
       )}
+      <ProfileImageModal
+        imageSrc={profileImg}
+        openProfileImg={openProfileImg}
+        setOpenProfileImg={setOpenProfileImg}
+      />
     </div>
   );
 }

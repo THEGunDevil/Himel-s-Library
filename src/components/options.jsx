@@ -27,7 +27,7 @@ export default function Options({
             <MoreVertical size={20} />
           </Button>
         ) : (
-          <button className="opacity-100 text-gray-600 cursor-pointer">
+          <button className="opacity-100 text-gray-200 cursor-pointer">
             <Edit size={18} />
           </button>
         )}
@@ -51,19 +51,19 @@ export default function Options({
               </DropdownMenuItem>
             ) : (
               <>
-                <DropdownMenuItem
-                  onClick={onView} // different handler for viewing
-                  className="flex justify-between"
-                >
-                  <span>View Image</span>
-                  <Image />
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={onDelete}
                   className="text-destructive"
                 >
                   Delete
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={onView} // different handler for viewing
+                  className="flex justify-between"
+                >
+                  <span>View Image</span>
+                  <Image />
                 </DropdownMenuItem>
               </>
             )}
