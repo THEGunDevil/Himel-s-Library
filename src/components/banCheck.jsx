@@ -1,22 +1,10 @@
 "use client";
 
 import { useAuth } from "@/contexts/authContext";
-import Loader from "./loader";
 import BannedComponent from "@/app/banned/page";
 
 export default function BanCheck({ children }) {
-  const { user, loading,accessToken } = useAuth();
-
-  // // Show loader while checking auth
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <Loader />
-  //     </div>
-  //   );
-  // }
-
-  // // If banned, show ONLY the banned page (no header/footer/children)
+  const { user,accessToken } = useAuth();
   if (user?.is_banned) {
     return (
       <BannedComponent
