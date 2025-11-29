@@ -19,6 +19,7 @@ export default function LogInForm() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -52,9 +53,18 @@ export default function LogInForm() {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
+      <Card className="w-full -gap-0 max-w-md">
+        <CardHeader className={"space-y-7"}>
           <CardTitle className="text-2xl text-center">Log In</CardTitle>
+          <Button
+            className="ml-auto w-fit p-2 text-[12px]"
+            onClick={() => {
+              setValue("email", "admin66@gmail.com");
+              setValue("password", "123456");
+            }}
+          >
+            Admin Log In
+          </Button>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -112,7 +122,11 @@ export default function LogInForm() {
             </div>
 
             {/* Submit Button */}
-            <Button type="submit" disabled={loading} className="w-full flex items-center">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full flex items-center"
+            >
               {loading ? (
                 <div className="animate-spin">
                   <LoaderCircleIcon />

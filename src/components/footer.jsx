@@ -11,7 +11,13 @@ const Footer = () => {
             <div className="mb-6 md:mb-0">
               <Link
                 href="/"
-                className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
+                className="self-center md:hidden block text-2xl font-semibold whitespace-nowrap dark:text-white"
+              >
+                <Logo width={82} />
+              </Link>
+              <Link
+                href="/"
+                className="self-center hidden md:block text-2xl font-semibold whitespace-nowrap dark:text-white"
               >
                 <Logo width={112} />
               </Link>

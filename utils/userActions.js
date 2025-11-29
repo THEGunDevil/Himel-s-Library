@@ -86,59 +86,88 @@ export const handleDelete = async ({
   setReviewsByUser,
   deleteReview,
 }) => {
-  let originalReviews; // for rollback if review deletion fails
+  let originalReviews;
 
   try {
+    //
+    // DELETE BIO
+    //
     if (type === "bio") {
-      if (!userId) return;
-      if (!accessToken) {
-        toast.error("You are not authorized to delete bios.");
-        return;
-      }
+      if (!userId || !accessToken) return;
 
-      // Call API first
       await axios.patch(
         `${process.env.NEXT_PUBLIC_API_URL}/users/user/${userId}`,
         { bio: "" },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      // Update local state after successful API call
       if (setProfile) {
-        setProfile((prev) => {
-          const userData = Array.isArray(prev.user)
-            ? prev.user.map((u) => (u.id === userId ? { ...u, bio: null } : u))
-            : prev.user.id === userId
-            ? { ...prev.user, bio: null }
-            : prev.user;
-
-          return { ...prev, user: userData };
-        });
+        setProfile((prev) => ({
+          ...prev,
+          user: [
+            {
+              ...prev.user[0],
+              bio: null,
+            },
+          ],
+        }));
       }
 
       toast.success("Bio deleted successfully!");
-    } else if (type === "review") {
-      if (!reviewId || !reviewsByUser || !setReviewsByUser || !deleteReview)
-        return;
+      return;
+    }
 
-      // Backup original reviews for rollback
+    //
+    // DELETE REVIEW
+    //
+    if (type === "review") {
+      if (!reviewId || !accessToken) return;
+
       originalReviews = [...reviewsByUser];
 
-      // Optimistic UI update
+      // optimistic UI
       setReviewsByUser((prev) => prev.filter((r) => r.id !== reviewId));
 
-      // Delete review via API
+      // API delete
       await deleteReview(reviewId);
 
       toast.success("Review deleted successfully!");
-    } else {
-      throw new Error("Invalid type for deletion");
+      return;
     }
+
+    //
+    // DELETE PROFILE IMAGE
+    //
+    if (type === "delete_profile_img") {
+      if (!userId || !accessToken) return;
+
+      // DELETE request to backend
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/user/${userId}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      // Update state correctly (matches UserResponse shape)
+      if (setProfile) {
+        setProfile((prev) => ({
+          ...prev,
+          user: prev.user.map((u) =>
+            u.id === userId
+              ? { ...u, profile_img: null, profile_img_public_id: null }
+              : u
+          ),
+        }));
+      }
+
+      toast.success("Profile image deleted successfully!");
+      return;
+    }
+
+    throw new Error("Invalid type for deletion");
   } catch (err) {
     console.error("Delete error:", err.response?.data || err);
     toast.error("Failed to delete.");
 
-    // Rollback UI for review deletion
     if (type === "review" && originalReviews && setReviewsByUser) {
       setReviewsByUser(originalReviews);
     }
@@ -235,7 +264,6 @@ export const handleProfileImageChange = async (
         },
       }
     );
-    console.log(response.data);
     toast.success("Profile picture set successfully");
     // refresh profile in UI
     setProfile((prev) => ({

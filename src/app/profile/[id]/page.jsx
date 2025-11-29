@@ -216,7 +216,7 @@ export default function Profile() {
 
   const user = profile.user[0];
   const borrowsByUser = profile.borrows || [];
-  const profileImg = profile?.user[0]?.profile_img;
+  const profileImg = profile?.user[0]?.profile_img;  
   return (
     <div className="w-full md:pt-36 pt-32 mx-auto p-4 space-y-6 xl:px-20 lg:px-20 px-4">
       <div className="bg-white rounded-lg sm:p-6 p-3 mb-8 shadow-sm">
@@ -250,7 +250,7 @@ export default function Profile() {
                   data={profileImg}
                   onDelete={async () => {
                     await handleDelete({
-                      type: "profile_img",
+                      type: "delete_profile_img",
                       userId: user.id,
                       accessToken,
                       setProfile,
@@ -264,7 +264,7 @@ export default function Profile() {
             <div className="flex justify-between items-center w-full">
               <div>
                 <div className="flex md:flex-row flex-col md:items-center gap-2">
-                  <h1 className="text-2xl whitespace-nowrap font-semibold text-gray-800">
+                  <h1 className="text-2xl sm:whitespace-nowrap whitespace-normal font-semibold text-gray-800">
                     {profile.user_name}
                   </h1>
                   {user.role === "admin" ? (
@@ -372,6 +372,7 @@ export default function Profile() {
           </h2>
           <Options
             type={profile?.user?.[0].bio ? "edit" : "bio"}
+            data={user.bio}
             onDelete={async () => {
               await handleDelete({
                 type: "bio",

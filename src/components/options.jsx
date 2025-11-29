@@ -64,15 +64,14 @@ export default function Options({
           </>
         )}
 
-        {type === "edit" ||
-          (data && (
+        {type === "edit" && data && (
             <>
               <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
               <DropdownMenuItem onClick={onDelete} className="text-destructive">
                 Delete
               </DropdownMenuItem>
             </>
-          ))}
+          )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
