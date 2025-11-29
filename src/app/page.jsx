@@ -53,13 +53,13 @@ export default function Home() {
     <main className="md:pt-32 pt-24 xl:px-20 lg:px-20 px-4 min-h-screen pb-10">
       
       {/* 1. FEATURED SECTION */}
-      <section className="min-h-80 mb-8"> 
+      <section className="min-h-80 mb-5 sm:mb-8"> 
         <h1 className="uppercase font-bold text-2xl text-blue-400 my-3">Featured Books</h1>
         {booksLoading ? <SectionSkeleton height="h-80" /> : <BannerSlider bannerBooks={books} />}
       </section>
 
       {/* 2. CLASSIC SECTION */}
-      <section className="mb-8 min-h-[250px]">
+      <section className="mb-5 sm:mb-8 min-h-[250px]">
         <div className="flex justify-between items-center text-blue-400 mb-4">
           <h1 className="uppercase font-bold text-2xl text-blue-400">Classic</h1>
           {!classicLoading && classicBooks.length > 5 && <ArrowRightIcon size={25} />}
@@ -68,7 +68,7 @@ export default function Home() {
       </section>
 
       {/* 3. CLASSIC ROMANCE SECTION */}
-      <section className="mb-8 min-h-[250px]">
+      <section className="mb-5 sm:mb-8 min-h-[250px]">
         <div className="flex justify-between items-center text-blue-400 mb-4">
           <h1 className="uppercase font-bold text-2xl text-blue-400">Classic Romance</h1>
           {!classicRomanceLoading && classicRomanceBooks.length > 5 && <ArrowRightIcon size={25} />}

@@ -8,7 +8,7 @@ export default function BookSliderByGenre({ books = [] }) {
   if (!books || books.length === 0) return null;
 
   return (
-    <section className="relative w-full h-88 overflow-hidden mt-5 px-2">
+    <section className="relative w-full h-88 md:h-96 overflow-hidden mt-5 px-2">
       <Swiper
         slidesPerView={2} // default for smallest screens
         spaceBetween={20} // gap between cards
