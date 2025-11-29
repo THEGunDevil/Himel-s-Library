@@ -416,9 +416,9 @@ export default function Profile() {
             </div>
           </div>
         ) : user.bio ? (
-          <p className="text-gray-700 text-sm leading-relaxed">{user.bio}</p>
+          <p className="text-black text-sm leading-relaxed font-semibold italic">{user.bio}</p>
         ) : (
-          <p className="text-gray-500 text-sm italic">
+          <p className="text-gray-500 text-sm italic font-bold text">
             No bio available. Add a short introduction about yourself!
           </p>
         )}
