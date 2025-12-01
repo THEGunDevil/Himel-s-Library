@@ -1,11 +1,14 @@
 import { useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 import Image from "next/image";
-import Options from "./options";
+import { XCircleIcon } from "lucide-react";
 
-export default function ProfileImageModal({ imageSrc, openProfileImg, setOpenProfileImg }) {
+export default function ProfileImageModal({
+  imageSrc,
+  openProfileImg,
+  setOpenProfileImg,
+}) {
   const cardRef = useRef();
 
   // Close modal if clicked outside the card
@@ -31,16 +34,21 @@ export default function ProfileImageModal({ imageSrc, openProfileImg, setOpenPro
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <Card ref={cardRef} className="relative w-full max-w-md bg-slate-900 border-0">
+      <Card
+        ref={cardRef}
+        className="relative w-full max-w-md bg-slate-900 rounded-none border-0"
+      >
         <CardContent className="flex w-96 h-96 justify-center">
           <Image src={imageSrc} alt="Profile" fill className="object-contain" />
         </CardContent>
-        <Button
-          className="absolute top-2 right-2 border border-transparent hover:border-white transition-all duration-300 cursor-pointer"
+        <button
+          className="absolute top-2 right-2 border bg-transparent border-transparent 
+             hover:border-white transition-all duration-300 cursor-pointer
+             p-1 rounded-full hover:scale-110"
           onClick={() => setOpenProfileImg(false)}
         >
-          <X size={20} />
-        </Button>
+          <XCircleIcon size={22} className="text-slate-300" />
+        </button>
       </Card>
     </div>
   );

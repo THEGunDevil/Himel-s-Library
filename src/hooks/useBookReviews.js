@@ -56,7 +56,12 @@ export function useBookReviews(bookId) {
         `${process.env.NEXT_PUBLIC_API_URL}/reviews/review/${reviewId}`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-      setData((prev) => (prev ? prev.filter((r) => r.id !== reviewId) : []));
+      
+      // Update state
+      setReviewsByUser((prev) => 
+        prev.filter((r) => r.id !== reviewId)
+      );
+      
     } catch (err) {
       console.error("❌ Failed to delete review:", err);
       setDeleteError(err);

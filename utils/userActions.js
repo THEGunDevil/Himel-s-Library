@@ -79,12 +79,9 @@ export const handleUnban = async ({
 export const handleDelete = async ({
   type,
   userId,
-  reviewId,
   accessToken,
   setProfile,
-  reviewsByUser,
   setReviewsByUser,
-  deleteReview,
 }) => {
   let originalReviews;
 
@@ -114,24 +111,6 @@ export const handleDelete = async ({
       }
 
       toast.success("Bio deleted successfully!");
-      return;
-    }
-
-    //
-    // DELETE REVIEW
-    //
-    if (type === "review") {
-      if (!reviewId || !accessToken) return;
-
-      originalReviews = [...reviewsByUser];
-
-      // optimistic UI
-      setReviewsByUser((prev) => prev.filter((r) => r.id !== reviewId));
-
-      // API delete
-      await deleteReview(reviewId);
-
-      toast.success("Review deleted successfully!");
       return;
     }
 

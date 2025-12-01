@@ -1,31 +1,16 @@
 "use client";
 
 import { SearchIcon, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+
 import SearchedPreview from "./searchedPreview";
+import { useBookData } from "@/hooks/useBookData";
 function SearchBar({ open, setOpen }) {
   const [local, setLocal] = useState("");
   const [genre, setGenre] = useState("all");
-  const [genres, setGenres] = useState([]);
+  const {genres}=useBookData()
   const handleClearText = () => setLocal("");
 
-  // Fetch genres dynamically
-  useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/books/genres`
-        );
-        if (Array.isArray(res.data)) {
-          setGenres(res.data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch genres:", err);
-      }
-    };
-    fetchGenres();
-  }, []);
   return (
     <section
       className={`

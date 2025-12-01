@@ -3,44 +3,65 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
-export function useBookData({ page = 1, limit = 10, genre = "" } = {}) {
+export function useBookData({
+  page = 1,
+  limit = 10,
+  genre = "Adventure",
+} = {}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
-
-  const fetchBooks = useCallback(async () => {
+  const [genres, setGenres] = useState([]);
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      let url;
-
+      const params = new URLSearchParams({ page, limit });
+      let url = `${process.env.NEXT_PUBLIC_API_URL}/books`;
       if (genre) {
-        // Fetch books by genre
-        url = `${process.env.NEXT_PUBLIC_API_URL}/books/genre/${genre}`;
-      } else {
-        // Fetch paginated books
-        const params = new URLSearchParams({ page, limit });
-        url = `${process.env.NEXT_PUBLIC_API_URL}/books/?${params.toString()}`;
+        url += `/genre/${encodeURIComponent(genre)}`;
       }
-
+      url += `?${params.toString()}`;
       const response = await axios.get(url);
-
-      // Support both paginated and non-paginated responses
       setData(response.data?.books ?? response.data ?? []);
       setTotalPages(response.data?.total_pages ?? 1);
     } catch (err) {
-      console.error("❌ Failed to fetch books:", err);
+      console.error("❌ Error Message:", err);
       setError(err);
     } finally {
       setLoading(false);
     }
   }, [page, limit, genre]);
 
-  // Automatically fetch on mount and when deps change
-  useEffect(() => {
-    fetchBooks();
-  }, [fetchBooks]);
+  const fetchGenres = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/books/genres`
+      );
+      if (Array.isArray(res.data)) {
+        setGenres(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch genres:", err);
+    }
+  }, []);
 
-  return { data, loading, error, totalPages,fetchBooks, refetch: fetchBooks };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    fetchGenres();
+  }, []);
+
+  return {
+    data,
+    loading,
+    error,
+    totalPages,
+    genres,
+    refetch: fetchData,
+    refetchGenres: fetchGenres,
+  };
 }

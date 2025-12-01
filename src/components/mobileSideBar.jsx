@@ -14,6 +14,7 @@ import {
 import { useState } from "react";
 import Logo from "./logo";
 import Link from "next/link";
+import HimelsLibraryLogoEmblem from "./logo";
 const dashBoardNavigations = [
   { title: "OverView", path: "/overview", icon: <BarChart size={17} /> },
   { title: "Users", path: "/user-list", icon: <Users size={17} /> },
@@ -39,7 +40,7 @@ export default function MobileSidebar({
     <div className="h-full flex flex-col ">
       <div className="flex justify-between relative">
         <Link href={"/"}>
-          <Logo width={82} />
+          <HimelsLibraryLogoEmblem width={82} />
         </Link>
         <div
           onClick={() => setSidebarOpen(false)}

@@ -1,7 +1,5 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import Logo from "./logo";
 import { usePathname } from "next/navigation";
 import {
   BellIcon,
@@ -23,7 +21,7 @@ import axios from "axios";
 import { handleMarkRead } from "../../utils/userActions";
 import NotificationDropdown from "./notificationDropDown";
 import MobileSidebar from "./mobileSideBar";
-import { ThemeToggleButton } from "./ui/shadcn-io/theme-toggle-button";
+import HimelsLibraryLogoEmblem from "./logo";
 
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
@@ -196,11 +194,11 @@ export default function Header() {
     <>
       <header className="w-full fixed top-0 z-50 dark:bg-slate-900 dark:border-slate-700 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-20 h-20 sm:h-28">
         {/* Logo */}
-        <Link href="/" className="block md:hidden">
-          <Logo width={70} />
+        <Link href="/" className="mt-5 block md:hidden">
+          <HimelsLibraryLogoEmblem width={75} />
         </Link>
-        <Link href="/" className="hidden md:block">
-          <Logo width={100} />
+        <Link href="/" className="mt-5 md:block hidden">
+          <HimelsLibraryLogoEmblem width={100} />
         </Link>
 
         {/* Desktop Navigation */}

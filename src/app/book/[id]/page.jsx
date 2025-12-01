@@ -305,7 +305,9 @@ export default function Book() {
               <Badge
                 variant="secondary"
                 className={
-                  book.available_copies > 0 ? "bg-green-100 dark:text-gray-900" : "bg-red-100  dark:text-gray-900"
+                  book.available_copies > 0
+                    ? "bg-green-100 dark:text-gray-900"
+                    : "bg-red-100  dark:text-gray-900"
                 }
               >
                 {book.available_copies > 0 ? "Available" : "Unavailable"}
@@ -350,13 +352,21 @@ export default function Book() {
                     )}
                   </Button>
                 ) : (
-                  <Button
-                    variant="link"
-                    onClick={() => router.push("/login")}
-                    className="mt-4 w-full"
-                  >
-                    Log in to borrow
-                  </Button>
+                  <div className="flex mt-4 items-center justify-center">
+                    <span className="text-2xl font-light text-yellow-200">
+                      [
+                    </span>
+                    <Button
+                      variant="link"
+                      onClick={() => router.push("/auth/log-in")}
+                      className="w-full cursor-pointer"
+                    >
+                      Log in to borrow
+                    </Button>
+                    <span className="text-2xl font-light text-yellow-200">
+                      ]
+                    </span>
+                  </div>
                 )}
               </div>
             )}

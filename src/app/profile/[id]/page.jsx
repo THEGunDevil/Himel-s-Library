@@ -99,13 +99,6 @@ export default function Profile() {
     setEditingUserId(null);
     setEditedBio("");
   };
-  const startEditingProfileImg = (user) => {
-    setEditedProfileImg(user.profile_img);
-  };
-
-  const cancelEditingProfileImg = () => {
-    setEditedProfileImg("");
-  };
   const startEditing = (review) => {
     setEditingReviewId(review.id);
     setEditedComment(review.comment);
@@ -380,7 +373,7 @@ export default function Profile() {
           </h2>
           <Options
             type={profile?.user?.[0].bio ? "edit" : "bio"}
-            data={user.bio}
+            data={!!user.bio}
             onDelete={async () => {
               await handleDelete({
                 type: "bio",
@@ -525,20 +518,16 @@ export default function Profile() {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-gray-600 text-sm mt-1">{r.comment}</p>
+                    <p className="text-gray-600 text-sm mt-1 dark:text-slate-300">
+                      {r.comment}
+                    </p>
                   )}
                 </div>
                 <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
                   <Options
-                    onDelete={async () => {
-                      await handleDelete({
-                        type: "review",
-                        reviewId: r.id,
-                        reviewsByUser,
-                        setReviewsByUser,
-                        deleteReview, // from useBookReviews hook
-                      });
-                    }}
+                    type="edit"
+                    data={!!r.comment || !!r.rating}
+                    onDelete={async () => await deleteReview(r.id)}
                     onEdit={() => startEditing(r)}
                   />
                 </div>
@@ -551,7 +540,7 @@ export default function Profile() {
       {/* Logout Dialog */}
       {logoutDialogOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white rounded-lg p-6 w-80 shadow-lg text-center">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-80 shadow-lg text-center">
             <h2 className="text-lg font-bold mb-4">Confirm Logout</h2>
             <p className="mb-6">Are you sure you want to log out?</p>
             <div className="flex justify-center gap-4">
@@ -563,7 +552,7 @@ export default function Profile() {
               </button>
               <button
                 onClick={() => setLogoutDialogOpen(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-300 rounded dark:bg-slate-600 hover:bg-gray-400"
               >
                 Cancel
               </button>
@@ -575,7 +564,7 @@ export default function Profile() {
       {/* Unban Dialog */}
       {userUnBanID && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white rounded-lg p-6 w-80 shadow-lg text-center">
+          <div className="bg-white rounded-lg p-6 w-80 dark:bg-slate-800 shadow-lg text-center">
             <h2 className="text-lg font-bold mb-4">Confirm Unban</h2>
             <p className="mb-6">Are you sure you want to unban this user?</p>
             <div className="flex justify-center gap-4">
@@ -587,7 +576,7 @@ export default function Profile() {
               </button>
               <button
                 onClick={() => setUserUnBanID(null)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-300 rounded dark:bg-slate-600 hover:bg-gray-400"
               >
                 Cancel
               </button>
@@ -601,7 +590,7 @@ export default function Profile() {
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <form
             onSubmit={handleSubmit(onBanSubmit)}
-            className="bg-white rounded-lg p-6 w-80 shadow-lg text-center"
+            className="bg-white rounded-lg p-6 w-80 shadow-lg text-center dark:bg-slate-800"
           >
             <h2 className="text-lg font-bold mb-4">Confirm Ban</h2>
             <p className="mb-4 text-gray-700">
@@ -646,7 +635,7 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={() => setUserBanID(null)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors duration-200"
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 dark:bg-slate-600 transition-colors duration-200"
               >
                 Cancel
               </button>

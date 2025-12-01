@@ -275,7 +275,7 @@ export default function BookReviewSection({ bookId }) {
                     </div>
                     <Options
                       type="edit"
-                      data={r.comment || r.rating}
+                      data={!!r.comment || !!r.rating}
                       onDelete={() => handleDelete(r.id)}
                       onEdit={() => startEditing(r)}
                     />

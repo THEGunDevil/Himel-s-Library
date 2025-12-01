@@ -1,33 +1,33 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import Logo from "./logo";
+import HimelsLibraryLogoEmblem from "./logo";
 const Footer = () => {
   return (
     <>
       <footer className="bg-blue-200 dark:bg-slate-900 dark:border-slate-700 mt-auto">
         <div className="mx-auto w-full xl:px-20 lg:px-20 md:px-4 sm:px-4 px-4 py-6 lg:py-8">
           <div className="md:flex md:justify-between">
-            <div className="mb-6 md:mb-0">
+            <div>
               <Link
                 href="/"
                 className="self-center md:hidden block text-2xl font-semibold whitespace-nowrap dark:text-white"
               >
-                <Logo width={82} />
+                <HimelsLibraryLogoEmblem width={75} />
               </Link>
               <Link
                 href="/"
                 className="self-center hidden md:block text-2xl font-semibold whitespace-nowrap dark:text-white"
               >
-                <Logo width={112} />
+                <HimelsLibraryLogoEmblem  width={100} />
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
               <div>
-                <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase">
+                <h2 className="mb-6 text-sm font-semibold text-gray-900 dark:text-slate-200  uppercase">
                   Resources
                 </h2>
-                <ul className="text-gray-500 font-medium">
+                <ul className="text-gray-500 font-medium dark:text-slate-400">
                   <li className="mb-4">
                     <Link href="/" className="hover:underline">
                       Himel's Library
@@ -44,10 +44,10 @@ const Footer = () => {
                 </ul>
               </div>
               <div>
-                <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase">
+                <h2 className="mb-6 text-sm font-semibold dark:text-slate-200 text-gray-900 uppercase">
                   Follow us
                 </h2>
-                <ul className="text-gray-500 font-medium">
+                <ul className="text-gray-500 font-medium dark:text-slate-400">
                   <li className="mb-4">
                     <Link
                       href="https://github.com"
@@ -64,10 +64,10 @@ const Footer = () => {
                 </ul>
               </div>
               <div>
-                <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase">
+                <h2 className="mb-6 text-sm font-semibold text-gray-900 dark:text-slate-200 uppercase">
                   Legal
                 </h2>
-                <ul className="text-gray-500 font-medium">
+                <ul className="text-gray-500 font-medium dark:text-slate-400">
                   <li className="mb-4">
                     <Link href="/" className="hover:underline">
                       Privacy Policy
