@@ -20,7 +20,7 @@ export const getDueDate = (days) => {
 
 import Image from "next/image";
 
-export function Avatar({ name, profileImg, className = "", ...props }) {
+export function Avatar({ type, name, profileImg, className = "", ...props }) {
   const initials = name
     ? name
         .split(" ")
@@ -32,30 +32,51 @@ export function Avatar({ name, profileImg, className = "", ...props }) {
 
   return (
     <>
-      {profileImg ? (
-        <div
-          {...props}
-          className={`relative rounded-xl border-gray-700 border overflow-hidden bg-gray-100 cursor-pointer ${className}`}
-        >
-          <Image
-            src={profileImg}
-            alt={name || "Profile Image"}
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-      ) : (
-        <div
-          {...props}
-          className={`rounded-full bg-gray-100 flex items-center justify-center text-sm font-semibold cursor-pointer ${className}`}
-        >
-          {initials}
-        </div>
-      )}
+      {profileImg
+        ? type === "comment_sec"
+          ? (
+            // CASE 1: Has profile image + comment section
+            <div
+              {...props}
+              className={`relative h-10 w-10 rounded-full border-gray-700 border-2 overflow-hidden bg-gray-100 cursor-pointer ${className}`}
+            >
+              <Image
+                src={profileImg}
+                alt={name || "Profile Image"}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )
+          : (
+            // CASE 2: Has profile image (normal)
+            <div
+              {...props}
+              className={`relative rounded-xl border-gray-700 border-2 overflow-hidden bg-gray-100 cursor-pointer ${className}`}
+            >
+              <Image
+                src={profileImg}
+                alt={name || "Profile Image"}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )
+        : (
+          // CASE 3: No profile image → show initials
+          <div
+            {...props}
+            className={`rounded-full bg-gray-100 flex items-center justify-center text-sm font-semibold cursor-pointer ${className}`}
+          >
+            {initials}
+          </div>
+        )}
     </>
   );
 }
+
 
 
 export function StarDisplay({ rating }) {

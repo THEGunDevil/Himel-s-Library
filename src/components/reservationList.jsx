@@ -70,7 +70,6 @@ export default function ReservationList() {
     enabled: !!selectedStatus && !!accessToken,
     retry: 1,
   });
-  console.log(reservations);
   const [localReservations, setLocalReservations] = useState({});
 
   // Determine which data to use
@@ -329,7 +328,7 @@ export default function ReservationList() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="flex w-full items-center gap-4">
           <div className="flex w-full items-center justify-between">
-            <h1 className="text-2xl whitespace-nowrap sm:text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl whitespace-nowrap sm:text-3xl font-bold text-gray-800 dark:text-white">
               Reservation List
             </h1>
             <div className="sm:hidden block">
@@ -377,7 +376,7 @@ export default function ReservationList() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+      <div className="overflow-x-auto bg-white border border-gray-200 shadow-md rounded-lg">
         <div className="max-h-[60vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100 sticky top-0 z-10">
@@ -386,7 +385,7 @@ export default function ReservationList() {
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                      className="px-6 py-3 whitespace-nowrap text-left text-xs font-semibold dark:bg-slate-900 dark:border-slate-700 text-gray-600 uppercase tracking-wider"
                       scope="col"
                     >
                       {flexRender(
@@ -398,7 +397,7 @@ export default function ReservationList() {
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y dark:bg-slate-900 dark:border-slate-700 divide-gray-200">
               {isLoading ? (
                 <tr>
                   <td colSpan={columns.length} className="py-20 text-center">
@@ -421,7 +420,7 @@ export default function ReservationList() {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="group hover:bg-gray-50 transition-colors duration-200"
+                    className="group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
@@ -442,7 +441,7 @@ export default function ReservationList() {
         </div>
 
         {/* Pagination */}
-        <div className="flex relative flex-col sm:flex-row justify-between items-center px-6 py-5 bg-gray-50 border-t gap-4">
+        <div className="flex relative flex-col sm:flex-row justify-between items-center py-5 bg-gray-50 border-t gap-4">
           <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext}/>
         </div>
       </div>

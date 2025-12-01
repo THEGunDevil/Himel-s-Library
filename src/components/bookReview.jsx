@@ -60,6 +60,7 @@ export default function BookReviewSection({ bookId }) {
   useEffect(() => {
     if (reviews) setLocalReviews(reviews);
   }, [reviews]);
+  console.log(localReviews);
 
   const onSubmit = async (data) => {
     if (!accessToken) return;
@@ -70,8 +71,8 @@ export default function BookReviewSection({ bookId }) {
         `${process.env.NEXT_PUBLIC_API_URL}/reviews/review`,
         {
           bookId,
-          comment: data.comment,
-          rating: data.rating,
+          comment: data.comment || null,
+          rating: data.rating === 0 ? null : data.rating,
         },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
@@ -145,7 +146,7 @@ export default function BookReviewSection({ bookId }) {
   };
 
   return (
-    <div className="flex h-full w-full flex-col bg-white p-6 shadow-lg hover:shadow-xl">
+    <div className="flex h-full w-full flex-col bg-white dark:bg-slate-900 p-6 shadow-lg hover:shadow-xl">
       <header className="mb-6 text-center">
         <h2 className="text-2xl font-semibold text-blue-500">
           Readers' Reviews
@@ -184,7 +185,6 @@ export default function BookReviewSection({ bookId }) {
             <FormField
               control={form.control}
               name="comment"
-              rules={{ required: "Please write a comment." }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Your review</FormLabel>
@@ -250,20 +250,32 @@ export default function BookReviewSection({ bookId }) {
                 <div className="w-full">
                   <div className="relative flex flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
-                      <Avatar name={r.user_name} />
+                      <Avatar
+                        type="comment_sec"
+                        name={r.user_name}
+                        profileImg={r.profile_img}
+                      />
                       <div className="flex flex-col">
-                        <h3 className="truncate text-base font-semibold text-gray-900 sm:text-lg">
+                        <h3 className="truncate text-sm dark:text-gray-200 font-semibold text-gray-900 sm:text-md">
                           {r.user_name}
                         </h3>
                         <span className="text-xs text-gray-500">
                           {ConvertStringToDate(r.created_at)}
                         </span>
                         <div className="mt-1">
-                          <StarDisplay rating={r.rating} />
-                        </div>
+                          {editingReviewId === r.id ? (
+                            <StarRating
+                              rating={form.watch("rating")}
+                              setRating={(val) => form.setValue("rating", val)}
+                            />
+                          ) : (
+                            <StarDisplay rating={r.rating} />
+                          )}                        </div>
                       </div>
                     </div>
                     <Options
+                      type="edit"
+                      data={r.comment || r.rating}
                       onDelete={() => handleDelete(r.id)}
                       onEdit={() => startEditing(r)}
                     />
@@ -278,7 +290,6 @@ export default function BookReviewSection({ bookId }) {
                         <FormField
                           control={editForm.control}
                           name="comment"
-                          rules={{ required: "Please write a comment." }}
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
@@ -324,7 +335,7 @@ export default function BookReviewSection({ bookId }) {
                       </form>
                     </Form>
                   ) : (
-                    <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-gray-600">
+                    <p className="mt-3 whitespace-pre-wrap dark:text-gray-200 text-sm leading-relaxed text-gray-600">
                       {r.comment}
                     </p>
                   )}

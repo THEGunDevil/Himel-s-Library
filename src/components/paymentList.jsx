@@ -206,7 +206,7 @@ export default function PaymentList() {
       cell: ({ getValue }) => {
         const val = getValue();
         if (!val || val === "") {
-          return <span className="text-black text-xs">-</span>;
+          return <span className="text-black dark:text-white text-xs">-</span>;
         }
         return (
           <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">
@@ -236,7 +236,7 @@ export default function PaymentList() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4 md:mb-6">
         <div className="flex w-full items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Payments Dashboard
             </h1>
             <p className="text-gray-600 text-sm md:text-md">
@@ -299,19 +299,19 @@ export default function PaymentList() {
           </div>
         </div>
       </div>
-      <div className="flex gap-3">
-        <div className="flex flex-col">
-          <span className="text-gray-500 whitespace-nowrap text-sm">
+      <div className="flex gap-3 items-center">
+        <div className="md:hidden flex-col flex">
+          <span className="text-gray-500 dark:text-gray-300 whitespace-nowrap text-sm">
             Total Sales
           </span>
-          <span className="text-md text-green-600">
+          <span className="text-md text-green-600 dark:text-green-300">
             {new Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "USD",
             }).format(totalSales)}
           </span>
         </div>
-        <div className="md:hidden border flex h-fit border-gray-300 rounded-md items-center">
+        <div className="md:hidden border flex h-fit w-full border-gray-300 rounded-md items-center">
           <input
             type="search"
             value={localSearch}
@@ -339,13 +339,13 @@ export default function PaymentList() {
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             {/* Header */}
-            <thead className="bg-linear-to-r from-gray-50 to-gray-100">
+            <thead className="bg-linear-to-r from-gray-50 to-gray-100 ">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider"
+                      className="px-6 py-4 text-left whitespace-nowrap text-xs font-bold dark:bg-slate-900 text-gray-700 dark:text-gray-300 uppercase tracking-wider"
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -432,12 +432,12 @@ export default function PaymentList() {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="hover:bg-blue-50/50 transition-colors duration-200 group cursor-pointer"
+                    className="hover:bg-blue-50/50 dark:hover:bg-slate-700 transition-colors duration-200 group dark:bg-slate-800 cursor-pointer"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-6 py-5 text-sm text-gray-800 whitespace-nowrap"
+                        className="px-6 py-5 text-sm text-gray-400 whitespace-nowrap"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -453,7 +453,7 @@ export default function PaymentList() {
         </div>
 
         {/* Pagination */}
-        <div className="flex relative flex-col sm:flex-row justify-between items-center px-6 py-5 bg-gray-50 border-t gap-4">
+        <div className="flex relative flex-col sm:flex-row justify-between items-center py-5 bg-gray-50 border-t gap-4">
           <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext}/>
         </div>
       </div>

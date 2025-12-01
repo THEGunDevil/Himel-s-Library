@@ -220,7 +220,7 @@ export default function Profile() {
   const profileImg = profile?.user[0]?.profile_img;
   return (
     <div className="w-full md:pt-36 pt-32 mx-auto p-4 space-y-6 xl:px-20 lg:px-20 px-4">
-      <div className="bg-white rounded-lg sm:p-6 p-3 mb-8 shadow-sm">
+      <div className="bg-white dark:bg-slate-900 dark:border-slate-700 rounded-lg sm:p-6 p-3 mb-8 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 w-full">
             <div
@@ -272,7 +272,7 @@ export default function Profile() {
             <div className="flex justify-between items-center w-full">
               <div>
                 <div className="flex md:flex-row flex-col md:items-center gap-2">
-                  <h1 className="text-2xl sm:whitespace-nowrap whitespace-normal font-semibold text-gray-800">
+                  <h1 className="text-2xl dark:text-gray-200 sm:whitespace-nowrap whitespace-normal font-semibold text-gray-800">
                     {profile.user_name}
                   </h1>
                   {user.role === "admin" ? (
@@ -373,7 +373,7 @@ export default function Profile() {
         </div>
       </div>
 
-      <section className="bg-white rounded-lg sm:p-6 p-3 shadow-sm">
+      <section className="bg-white dark:bg-slate-900 dark:border-slate-700 rounded-lg sm:p-6 p-3 shadow-sm">
         <div className="flex justify-between group">
           <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
             <User size={18} /> Bio
@@ -398,7 +398,7 @@ export default function Profile() {
               rows={3}
               value={editedBio}
               onChange={(e) => setEditedBio(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full p-2 dark:text-white border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
             <div className="flex gap-2 mt-2">
               <button
@@ -424,11 +424,11 @@ export default function Profile() {
             </div>
           </div>
         ) : user.bio ? (
-          <p className="text-black text-sm leading-relaxed font-semibold italic">
+          <p className="text-black select-none dark:text-white text-sm leading-relaxed font-semibold italic">
             {user.bio}
           </p>
         ) : (
-          <p className="text-gray-500 text-sm italic font-bold text">
+          <p className="text-gray-500 select-none text-sm italic font-bold text">
             No bio available. Add a short introduction about yourself!
           </p>
         )}
@@ -441,7 +441,7 @@ export default function Profile() {
         {borrowsByUser.length === 0 ? (
           <p className="text-gray-500 text-sm">No borrowed books yet.</p>
         ) : (
-          <div className="divide-y divide-gray-200 max-h-[50vh] overflow-scroll scrollbar-hide bg-gray-50 rounded-lg shadow-sm">
+          <div className="divide-y divide-gray-200 dark:bg-slate-900 dark:border-slate-700 max-h-[50vh] overflow-scroll scrollbar-hide bg-gray-50 rounded-lg shadow-sm">
             {borrowsByUser.map((b) => (
               <div key={b.id} className="p-3 flex justify-between items-center">
                 <span>{b.book_title}</span>
@@ -461,7 +461,7 @@ export default function Profile() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
+        <h2 className="text-lg  font-semibold flex items-center gap-2 mb-3">
           <Star size={18} /> My Reviews
         </h2>
         {!reviewsByUser || reviewsByUser.length === 0 ? (
@@ -469,7 +469,7 @@ export default function Profile() {
             You haven’t written any reviews yet.
           </p>
         ) : (
-          <div className="divide-y max-h-[50vh] overflow-scroll scrollbar-hide divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
+          <div className="divide-y max-h-[50vh] dark:bg-slate-900 dark:border-slate-700 overflow-scroll scrollbar-hide divide-gray-200 bg-gray-50 rounded-lg shadow-sm">
             {reviewsByUser.map((r) => (
               <div
                 key={r.id}

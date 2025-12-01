@@ -23,6 +23,7 @@ import axios from "axios";
 import { handleMarkRead } from "../../utils/userActions";
 import NotificationDropdown from "./notificationDropDown";
 import MobileSidebar from "./mobileSideBar";
+import { ThemeToggleButton } from "./ui/shadcn-io/theme-toggle-button";
 
 export default function Header() {
   const { accessToken, logout, isAdmin, userID } = useAuth();
@@ -193,18 +194,18 @@ export default function Header() {
   const unreadCount = notifications.filter((n) => !n.is_read).length;
   return (
     <>
-      <header className="w-full fixed top-0 z-50 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-20 h-20 sm:h-28">
+      <header className="w-full fixed top-0 z-50 dark:bg-slate-900 dark:border-slate-700 bg-blue-200 border-b border-blue-300 flex items-center justify-between px-4 lg:px-20 h-20 sm:h-28">
         {/* Logo */}
-        <Link href="/" className="flex items-center md:hidden">
+        <Link href="/" className="block md:hidden">
           <Logo width={70} />
         </Link>
-        <Link href="/" className="hidden md:flex items-center">
+        <Link href="/" className="hidden md:block">
           <Logo width={100} />
         </Link>
 
         {/* Desktop Navigation */}
         <nav>
-          <ul className="hidden lg:flex gap-8 lg:gap-5 uppercase font-medium text-gray-700">
+          <ul className="hidden lg:flex gap-8 lg:gap-5 uppercase font-medium text-gray-700 dark:text-gray-300">
             {navigation.map((nav) => (
               <li key={nav.path}>
                 <Link
@@ -224,7 +225,7 @@ export default function Header() {
         {/* Sidebar (Mobile) */}
         <nav
           ref={sidebarRef}
-          className={`fixed lg:hidden top-0 left-0 h-screen md:w-80 border-r-8 border-blue-400 w-64 p-4 bg-blue-200 transform transition-transform duration-300 ease-in-out ${
+          className={`fixed lg:hidden dark:bg-slate-900 dark:border-slate-700 top-0 left-0 h-screen md:w-80 border-r-8 border-blue-400 w-64 p-4 bg-blue-200 transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -238,16 +239,15 @@ export default function Header() {
             accessToken={accessToken}
           />
         </nav>
-
         {/* Search & Notification */}
         <div className="flex items-center gap-2.5">
           {/* Search Buttons */}
           <button
             ref={searchBtnDesktopRef}
             onClick={handleSearchToggle}
-            className="hidden lg:block p-2 bg-white rounded-full"
+            className="hidden lg:block p-2 bg-white dark:bg-slate-800 rounded-full"
           >
-            <Search className="text-blue-400" />
+            <Search className="text-blue-400 dark:text-gray-300" />
           </button>
 
           {/* Mobile Controls */}
@@ -256,9 +256,9 @@ export default function Header() {
             <button
               ref={searchBtnMobileRef}
               onClick={handleSearchToggle}
-              className="p-2 bg-white rounded-full"
+              className="p-2 bg-white dark:bg-slate-800 rounded-full"
             >
-              <Search size={20} className="text-blue-400" />
+              <Search size={20} className="text-blue-400 dark:text-gray-300" />
             </button>
 
             {/* Mobile Notification */}
@@ -266,9 +266,12 @@ export default function Header() {
               <button
                 ref={bellBtnMobileRef}
                 onClick={() => setNotificationOpen((prev) => !prev)}
-                className="p-2 bg-white rounded-full"
+                className="p-2 bg-white rounded-full dark:bg-slate-800"
               >
-                <BellIcon size={20} className="text-blue-400" />
+                <BellIcon
+                  size={20}
+                  className="text-blue-400 dark:text-gray-300"
+                />
               </button>
 
               {unreadCount > 0 && (
@@ -303,9 +306,9 @@ export default function Header() {
             <button
               onClick={() => setNotificationOpen((prev) => !prev)}
               ref={bellBtnDesktopRef}
-              className="p-2 cursor-pointer rounded-full hover:bg-blue-50 transition duration-200"
+              className="p-2 cursor-pointer rounded-full hover:bg-blue-50 dark:hover:bg-slate-800 transition duration-200"
             >
-              <BellIcon className="text-blue-400 w-7 h-7" />
+              <BellIcon className="text-blue-400 w-7 h-7 dark:text-gray-300" />
             </button>
 
             {unreadCount > 0 && (

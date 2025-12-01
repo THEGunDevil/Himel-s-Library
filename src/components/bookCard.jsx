@@ -34,12 +34,12 @@ export default function BookCard({ book }) {
         e.stopPropagation();
         handleViewBook(book.id);
       }}
-      className="w-full max-w-[320px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[300px] xl:max-w-[320px]
+      className="w-full dark:bg-slate-900 max-w-[320px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-[300px] xl:max-w-[320px]
                  bg-blue-100 hover:shadow-lg shadow-md
                  overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
     >
       {/* Image Section */}
-      <div className="relative bg-blue-50 flex justify-center items-center h-56 sm:h-52 md:h-60 lg:h-64">
+      <div className="relative bg-blue-50 dark:bg-slate-800 flex justify-center items-center h-56 sm:h-52 md:h-60 lg:h-64">
         {isVisible ? (
           <Image
             src={book.image_url}
@@ -69,7 +69,7 @@ export default function BookCard({ book }) {
             <span
               className={`${
                 book.available_copies > 0
-                  ? "text-gray-800"
+                  ? "text-gray-800 dark:text-gray-300"
                   : "text-red-500 font-semibold"
               } text-sm`}
             >
@@ -77,13 +77,13 @@ export default function BookCard({ book }) {
             </span>
 
             {book.available_copies > 0 && (
-              <span className="text-xs bg-blue-200 text-gray-900 px-2 py-1 rounded-md">
+              <span className="text-xs bg-blue-200 dark:bg-gray-700 dark:text-gray-300 text-gray-900 px-2 py-1 rounded-md">
                 {book.available_copies}
               </span>
             )}
           </div>
 
-          <button className="text-blue-600 hover:text-blue-800 text-sm sm:text-base font-medium flex items-center gap-1">
+          <button className="text-blue-600 hover:text-blue-800 text-sm sm:text-base dark:text-gray-300 font-medium flex items-center gap-1">
             📖 View
           </button>
         </div>

@@ -305,7 +305,7 @@ export default function Book() {
               <Badge
                 variant="secondary"
                 className={
-                  book.available_copies > 0 ? "bg-green-100" : "bg-red-100"
+                  book.available_copies > 0 ? "bg-green-100 dark:text-gray-900" : "bg-red-100  dark:text-gray-900"
                 }
               >
                 {book.available_copies > 0 ? "Available" : "Unavailable"}

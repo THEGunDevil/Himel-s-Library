@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import Pagination from "./pagination";
 
 export default function SearchedPreview({ value = "", genre, setLocal, setOpen }) {
   const [page, setPage] = useState(1);
@@ -54,9 +55,9 @@ export default function SearchedPreview({ value = "", genre, setLocal, setOpen }
   const handlePrev = () => page > 1 && setPage((prev) => prev - 1);
 
   return (
-    <div className="absolute mt-2 w-full bg-white shadow-lg max-h-80 overflow-hidden z-50 rounded">
+    <div className="absolute mt-2 w-full border dark:border-slate-200 bg-white dark:bg-slate-900 shadow-lg max-h-80 overflow-hidden z-50 rounded">
       {/* Scrollable list */}
-      <div className="overflow-y-auto max-h-64 pb-16">
+      <div className="overflow-y-auto scrollbar-hide max-h-64 pb-16">
         {loading ? (
           <div className="px-4 py-3 text-sm text-gray-500 text-center">
             Searching...
@@ -78,7 +79,7 @@ export default function SearchedPreview({ value = "", genre, setLocal, setOpen }
               >
                 <Link
                   href={`/book/${book.id}`}
-                  className="block px-4 py-3 hover:bg-gray-50 transition-colors"
+                  className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
                 >
                   <div className="flex items-center space-x-4">
                     <img
@@ -87,7 +88,7 @@ export default function SearchedPreview({ value = "", genre, setLocal, setOpen }
                       className="w-12 h-16 object-cover"
                     />
                     <div>
-                      <div className="font-medium text-gray-900">{book.title}</div>
+                      <div className="font-medium text-gray-900 dark:text-gray-300">{book.title}</div>
                       <div className="text-sm text-gray-500">by {book.author}</div>
                     </div>
                   </div>
@@ -99,26 +100,8 @@ export default function SearchedPreview({ value = "", genre, setLocal, setOpen }
       </div>
 
       {/* Sticky Pagination */}
-      <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 px-3 py-2 flex items-center justify-center gap-3 text-sm">
-        <button
-          onClick={handlePrev}
-          disabled={page === 1}
-          className="px-2 py-1 bg-blue-500 text-white disabled:opacity-50 rounded hover:bg-blue-600 transition-colors"
-        >
-          <ArrowLeftIcon className="h-3 w-3 inline-block mr-1" /> Prev
-        </button>
-
-        <span className="text-gray-700">
-          {page} / {totalPages}
-        </span>
-
-        <button
-          onClick={handleNext}
-          disabled={page === totalPages}
-          className="px-2 py-1 bg-blue-500 text-white disabled:opacity-50 rounded hover:bg-blue-600 transition-colors"
-        >
-          Next <ArrowRightIcon className="h-3 w-3 inline-block ml-1" />
-        </button>
+      <div className="absolute bottom-0 left-0 w-full px-3 py-2 flex items-center justify-center gap-3 text-sm">
+          <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext}/>
       </div>
     </div>
   );

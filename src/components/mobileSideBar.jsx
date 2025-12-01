@@ -36,7 +36,7 @@ export default function MobileSidebar({
 }) {
   const [dashboardOpen, setDashboardOpen] = useState(false);
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col ">
       <div className="flex justify-between relative">
         <Link href={"/"}>
           <Logo width={82} />
@@ -56,7 +56,7 @@ export default function MobileSidebar({
             <li key={nav.path} onClick={() => setSidebarOpen(false)}>
               <Link
                 href={nav.path}
-                className={`hover:text-blue-400 flex items-center gap-2 ${
+                className={`hover:text-blue-400 flex dark:hover:text-blue-300 dark:text-gray-200 items-center gap-2 ${
                   pathname === nav.path
                     ? "text-blue-400 font-bold"
                     : "text-gray-700"
@@ -73,7 +73,7 @@ export default function MobileSidebar({
           <li>
             <button
               onClick={() => setDashboardOpen((prev) => !prev)}
-              className="w-full uppercase flex justify-between items-center text-gray-700 hover:text-blue-400 rounded-md"
+              className="w-full uppercase flex justify-between dark:text-gray-200 dark:hover:text-blue-300 items-center text-gray-700 hover:text-blue-400 rounded-md"
             >
               <div className="flex items-center gap-2">
                 <LayoutDashboard size={17} />
@@ -99,7 +99,7 @@ export default function MobileSidebar({
                     <li key={nav.path} onClick={() => setSidebarOpen(false)}>
                       <Link
                         href={nav.path}
-                        className={`flex items-center gap-2 hover:text-blue-400 ${
+                        className={`flex dark:text-gray-200 dark:hover:text-blue-300 items-center gap-2 hover:text-blue-400 ${
                           pathname === nav.path
                             ? "text-blue-400 font-bold"
                             : "text-gray-700"

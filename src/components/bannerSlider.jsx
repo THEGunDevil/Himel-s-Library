@@ -41,13 +41,13 @@ export default function BannerSlider({ bannerBooks = [] }) {
               src={b.image_url}
               alt={b.title}
               fill
-              className="object-contain brightness-75"
+              className="object-contain brightness-100 dark:bg-gray-400"
               priority={index === 0}   // Only FIRST slide loads immediately
               loading={index === 0 ? "eager" : "lazy"}   // Others lazy-load
             />
 
             {/* Overlay */}
-            <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/40 to-transparent"></div>
+            <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/40  to-transparent"></div>
 
             {/* Text */}
             <div className="relative z-10 h-full flex items-end px-6 md:px-16 pb-8 md:pb-10">

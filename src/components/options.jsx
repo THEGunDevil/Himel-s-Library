@@ -27,8 +27,8 @@ export default function Options({
             <MoreVertical size={20} />
           </Button>
         ) : (
-          <button className="opacity-100 text-gray-200 cursor-pointer">
-            <Edit size={18} />
+          <button className="opacity-100 text-gray-200 dark:text-blue-400 cursor-pointer">
+            <Edit size={18} strokeWidth={3}/>
           </button>
         )}
       </DropdownMenuTrigger>

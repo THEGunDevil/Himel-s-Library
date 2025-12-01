@@ -257,7 +257,7 @@ export default function BorrowList() {
     <div className="w-full mx-auto mt-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="flex w-full items-center gap-4 justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl sm:text-3xl font-bold dark:text-white text-gray-800">
             Borrow List
           </h1>
           {isAdmin && (
@@ -300,7 +300,7 @@ export default function BorrowList() {
             value={local}
             ref={inputRef}
             className={`px-4 py-2 border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm ${
-              option === "all" ? "bg-gray-100 cursor-not-allowed" : ""
+              option === "all" ? "bg-gray-100 dark:bg-transparent cursor-not-allowed" : ""
             }`}
             onChange={(e) => setLocal(e.target.value)}
             placeholder={
@@ -357,16 +357,16 @@ export default function BorrowList() {
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+      <div className="overflow-x-auto border border-gray-200 bg-white shadow-md rounded-lg">
         <div className="max-h-[60vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100 sticky top-0 z-10">
+            <thead className="bg-gray-100 dark:bg-slate-900 sticky top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                      className="px-6 py-3 whitespace-nowrap text-left dark:text-gray-300 text-xs font-semibold text-gray-600 uppercase tracking-wider"
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -377,7 +377,7 @@ export default function BorrowList() {
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200 dark:bg-slate-800">
               {isLoading ? (
                 <tr>
                   <td colSpan={columns.length} className="py-20 text-center">
@@ -413,12 +413,12 @@ export default function BorrowList() {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="group hover:bg-gray-50 transition-colors duration-200"
+                    className="group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
+                        className="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-400 text-gray-800"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -433,7 +433,7 @@ export default function BorrowList() {
           </table>
         </div>
 
-        <div className="flex relative flex-col sm:flex-row justify-between items-center px-6 py-5 bg-gray-50 border-t gap-4">
+        <div className="flex relative flex-col sm:flex-row justify-between items-center py-5 bg-gray-50 border-t gap-4">
           <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext}/>
         </div>
       </div>

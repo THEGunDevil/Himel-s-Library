@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/authContext";
 import Loader from "./loader";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, PlusCircleIcon, X } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
 import { useRouter } from "next/navigation";
 import Pagination from "./pagination";
@@ -217,15 +217,16 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
       {/* Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
         <div className="flex w-full items-center justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
             Book List
           </h1>
           <div className="sm:hidden flex gap-x-1.5">
             <button
               onClick={() => router.push(`/add-book`)}
-              className="bg-blue-400 px-2 rounded text-white hover:bg-blue-500 transition-colors duration-300"
+              className="bg-blue-400 flex gap-1 items-center px-2 rounded dark:bg-slate-800 text-white hover:bg-blue-500 transition-colors duration-300"
             >
               Add Book
+              <PlusCircleIcon size={16}/>
             </button>
             <DownloadOptions
               endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
@@ -294,16 +295,16 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+      <div className="overflow-x-auto border border-gray-200 bg-white shadow-md rounded-lg">
         <div className="max-h-[60vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100 sticky top-0 z-10">
+            <thead className="bg-gray-100 sticky dark:bg-slate-900 top-0 z-10">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                      className="px-6 py-3 whitespace-nowrap text-left text-xs dark:text-gray-100 font-semibold text-gray-600 uppercase tracking-wider"
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -314,7 +315,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y dark:bg-slate-800 divide-gray-200">
               {isLoading ? (
                 <tr>
                   <td colSpan={columns.length} className="py-20 text-center">
@@ -350,12 +351,12 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="group hover:bg-gray-50 transition-colors duration-200"
+                    className="group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
+                        className="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-300 text-gray-800"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -370,7 +371,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
           </table>
         </div>
 
-        <div className="flex relative flex-col sm:flex-row justify-between items-center px-6 py-5 bg-gray-50 border-t gap-4">
+        <div className="flex relative flex-col sm:flex-row justify-between items-center py-5 bg-gray-50 border-t gap-4">
           <Pagination
             page={page}
             totalPages={totalPages}

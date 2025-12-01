@@ -10,7 +10,7 @@ export const metadata = {
   title: "Himel's Library",
   description: "Your online book library management system",
   icons: {
-    icon: "/logo.svg", // this sets the tab icon
+    icon: "/logo.png", // this sets the tab icon
   },
 };
 

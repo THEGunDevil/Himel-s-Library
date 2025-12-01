@@ -30,7 +30,7 @@ function SearchBar({ open, setOpen }) {
     <section
       className={`
         absolute top-full left-1/2 mt-1 w-full transform -translate-x-1/2
-        bg-blue-200 flex flex-col justify-start items-center gap-1
+        bg-blue-200 dark:bg-slate-900 flex flex-col justify-start items-center gap-1
         transition-all duration-300 ease-out
         ${
           open
@@ -41,7 +41,7 @@ function SearchBar({ open, setOpen }) {
     >
       {/* Search Input */}
       <form className="flex items-center w-fit justify-between gap-1 py-2.5">
-        <div className="border border-blue-400  h-9 sm:flex hidden items-center">
+        <div className="border border-blue-400 dark:border-gray-400  h-9 sm:flex hidden items-center">
           <select
             className="h-full text-sm focus:outline-none"
             value={genre}
@@ -55,7 +55,7 @@ function SearchBar({ open, setOpen }) {
             ))}
           </select>
         </div>
-        <div className="border h-9 flex border-blue-400  sm:hidden items-center ">
+        <div className="border h-9 flex border-blue-400  dark:border-gray-400 sm:hidden items-center ">
           <select
             className="h-full text-sm w-20 focus:outline-none"
             value={genre}
@@ -75,21 +75,21 @@ function SearchBar({ open, setOpen }) {
           value={local}
           onChange={(e) => setLocal(e.target.value)}
           placeholder="Search books..."
-          className="h-9 border-blue-400  md:w-[350px] w-[180px] border p-4 focus:outline-none focus:ring-0"
+          className="h-9 border-blue-400 md:w-[350px] w-[180px] border p-4 dark:border-gray-400 focus:outline-none focus:ring-0"
         />
 
         {local && (
           <button
             type="button"
             onClick={handleClearText}
-            className="h-9 border-blue-400  border w-9 flex justify-center items-center text-red-400 hover:text-red-600"
+            className="h-9 border-blue-400 border w-9 flex justify-center items-center dark:border-gray-400 text-red-400 hover:text-red-600"
             aria-label="Clear search"
           >
             <X className="h-5 w-5" />
           </button>
         )}
 
-        <div className="mx-auto border-blue-400  border h-9 w-9 flex justify-center items-center text-blue-400 cursor-pointer">
+        <div className="mx-auto border-blue-400 border h-9 w-9 flex justify-center items-center dark:border-gray-400 text-blue-400 cursor-pointer">
           <SearchIcon className="h-5 w-5" />
         </div>
       </form>
