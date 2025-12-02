@@ -124,6 +124,7 @@ export default function Book() {
     if (!planID || !userID) return;
     setPaymentLoading(true);
     setLoadingPlanID(planID);
+    
     try {
       const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/payments/payment`,
@@ -135,6 +136,8 @@ export default function Book() {
           },
         }
       );
+      console.log(res);
+      
       window.location.href = res.data.redirect_url;
     } catch (error) {
       setPaymentError(error);
@@ -252,7 +255,6 @@ export default function Book() {
       </div>
     );
   }
-
   return (
     <>
       <section className="mb-10 flex w-full flex-col gap-5 pt-32 md:pt-36 lg:flex-row lg:px-20 xl:px-20">
