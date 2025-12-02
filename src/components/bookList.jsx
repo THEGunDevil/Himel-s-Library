@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "@/contexts/authContext";
 import Loader from "./loader";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { ArrowLeftIcon, ArrowRightIcon, PlusCircleIcon, X } from "lucide-react";
+import { PlusCircleIcon, X } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
 import { useRouter } from "next/navigation";
 import Pagination from "./pagination";
@@ -342,7 +342,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="py-20 text-center text-gray-500"
+                    className="py-20 text-center text-gray-500 dark:bg-slate-800"
                   >
                     No books found.
                   </td>

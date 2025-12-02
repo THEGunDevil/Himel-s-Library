@@ -430,7 +430,7 @@ export default function Book() {
       {/* Subscription Modal */}
       {openSubscriptionPlan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="relative w-full max-w-4xl animate-fadeIn rounded-2xl bg-white shadow-2xl">
+          <div className="relative w-full max-w-4xl animate-fadeIn rounded-2xl dark:bg-slate-900 bg-white shadow-2xl">
             <button
               className="absolute right-5 top-5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition hover:text-gray-800 sm:right-10 sm:top-10"
               onClick={() => setOpenSubscriptionPlan(false)}
@@ -439,7 +439,7 @@ export default function Book() {
             </button>
             <div className="max-h-[90vh] overflow-y-auto p-6">
               <div className="mb-8 text-center">
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-slate-100">
                   Active Subscription Required
                 </h3>
                 <p className="mt-2 text-gray-500">

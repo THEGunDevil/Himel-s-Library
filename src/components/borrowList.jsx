@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/authContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Loader from "./loader";
-import { ArrowLeftIcon, ArrowRightIcon, X } from "lucide-react";
+import { X } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
 import { useQuery } from "@tanstack/react-query";
 import FilterComponent from "./filterComponent";
@@ -100,7 +100,7 @@ export default function BorrowList() {
           headers: { Authorization: `Bearer ${accessToken}` },
           params: {
             query: trimmed,
-            status: option, // ← Changed from "option" to "status" for consistency with backend
+            status: option,
             page,
             limit: 10,
           },

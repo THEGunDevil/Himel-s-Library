@@ -60,7 +60,6 @@ export default function BookReviewSection({ bookId }) {
   useEffect(() => {
     if (reviews) setLocalReviews(reviews);
   }, [reviews]);
-  console.log(localReviews);
 
   const onSubmit = async (data) => {
     if (!accessToken) return;

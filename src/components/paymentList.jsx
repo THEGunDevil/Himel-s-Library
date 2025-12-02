@@ -53,7 +53,7 @@ export default function PaymentList() {
       const params = {
         page,
         limit: 10,
-        // ...(debouncedSearch && { search: debouncedSearch }),
+        ...(debouncedSearch && { search: debouncedSearch }),
       };
 
       const res = await axios.get(
@@ -84,7 +84,7 @@ export default function PaymentList() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken, isAdmin, page]);
+  }, [accessToken, isAdmin, page, debouncedSearch]);
 
   useEffect(() => {
     fetchPayments();
@@ -132,7 +132,9 @@ export default function PaymentList() {
       cell: ({ getValue, row }) => (
         <div>
           <div className="font-medium">{getValue()}</div>
-          <div className="text-xs text-gray-500">{row.original.email}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {row.original.email}
+          </div>
         </div>
       ),
     }),
@@ -257,10 +259,10 @@ export default function PaymentList() {
         <div className="flex items-center gap-3 justify-center">
           <div className="flex items-center w-full sm:w-auto gap-2">
             <div className="flex-col hidden md:flex">
-              <span className="text-gray-500 whitespace-nowrap text-sm">
+              <span className="text-gray-500 dark:text-slate-300 font-semibold whitespace-nowrap text-sm">
                 Total Sales
               </span>
-              <span className="text-md text-green-600">
+              <span className="text-md text-green-600 dark:text-blue-600">
                 {new Intl.NumberFormat("en-US", {
                   style: "currency",
                   currency: "USD",
@@ -358,7 +360,7 @@ export default function PaymentList() {
             </thead>
 
             {/* Body */}
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y dark:bg-slate-800 divide-gray-200">
               {loading ? (
                 <tr>
                   <td colSpan={columns.length} className="py-32 text-center">
@@ -372,9 +374,12 @@ export default function PaymentList() {
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={columns.length} className="py-24 text-center">
+                  <td
+                    colSpan={columns.length}
+                    className="py-24 text-center dark:bg-slate-800"
+                  >
                     <div className="max-w-sm mx-auto">
-                      <div className="text-red-600 text-lg font-semibold mb-2">
+                      <div className="text-red-500 text-lg font-semibold mb-2">
                         Failed to load payments
                       </div>
                       <p className="text-gray-600 text-sm mb-6">{error}</p>
@@ -437,7 +442,7 @@ export default function PaymentList() {
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-6 py-5 text-sm text-gray-400 whitespace-nowrap"
+                        className="px-6 py-5 text-sm dark:text-gray-300 whitespace-nowrap"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -454,7 +459,12 @@ export default function PaymentList() {
 
         {/* Pagination */}
         <div className="flex relative flex-col sm:flex-row justify-between items-center py-5 bg-gray-50 border-t gap-4">
-          <Pagination page={page} totalPages={totalPages} onPrev={handlePrev} onNext={handleNext}/>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
         </div>
       </div>
     </div>
