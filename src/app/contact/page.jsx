@@ -55,7 +55,7 @@ export default function Contact() {
   }, [user?.email, setValue]);
   return (
     <section className="md:pt-36 pt-32 min-h-screen flex flex-col items-center justify-center px-6 py-20 text-gray-800">
-      <div className="max-w-3xl w-full text-center space-y-10">
+      <div className="max-w-3xl w-full text-center dark:text-slate-100 space-y-10">
         <h1 className="text-4xl text-blue-400 md:text-5xl font-bold">
           Contact Us
         </h1>
@@ -89,8 +89,8 @@ export default function Contact() {
               type="text"
               placeholder="Your Name"
               {...register("user_name", { required: "name is required" })}
-              className="w-full bg-transparent border-b-2 border-gray-300 dark:border-gray-600 
-    focus:border-blue-500 focus:ring-0 focus:outline-none transition-colors duration-300 py-2 text-sm md:text-base"
+              className="w-full dark:text-slate-100 bg-transparent border-b-2 dark:placeholder:text-slate-500  border-gray-300 dark:border-gray-600 
+    focus:border-blue-500 focus:ring-0 focus:outline-none dark:focus:border-blue-500 dark:focus:ring-0 dark:focus:outline-none transition-colors duration-300 py-2 text-sm md:text-base"
             />
             {errors.user_name && (
               <p className="text-red-500 text-sm mt-1">
@@ -101,8 +101,8 @@ export default function Contact() {
               type="text"
               placeholder="Subject"
               {...register("subject", { required: "Subject is required" })}
-              className="w-full bg-transparent border-b-2 border-gray-300 dark:border-gray-600 
-    focus:border-blue-500 focus:ring-0 focus:outline-none transition-colors duration-300 py-2 text-sm md:text-base"
+              className="w-full bg-transparent border-b-2 border-gray-300 dark:placeholder:text-slate-500 dark:border-gray-600 dark:focus:border-blue-500 dark:focus:ring-0 dark:focus:outline-none
+    focus:border-blue-500 focus:ring-0 focus:outline-none dark:text-slate-100 transition-colors duration-300 py-2 text-sm md:text-base"
             />
             {errors.subject && (
               <p className="text-red-500 text-sm mt-1">
@@ -118,7 +118,7 @@ export default function Contact() {
                 required: "email is required",
                 pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
               })}
-              className="w-full bg-transparent cursor-not-allowed border-b-2 border-b-blue-500 text-gray-500 focus:outline-none py-2 text-sm md:text-base"
+              className="w-full bg-transparent cursor-not-allowed border-b-2 dark:text-slate-100 border-b-blue-500 dark:placeholder:text-slate-500 text-gray-500 focus:outline-none py-2 text-sm md:text-base "
             />
 
             {errors.user_email && (
@@ -130,8 +130,8 @@ export default function Contact() {
               placeholder="Your Message"
               rows={4}
               {...register("message", { required: "message is required" })}
-              className="w-full bg-transparent border-b-2 border-gray-300 dark:border-gray-600 
-    focus:border-blue-500 focus:ring-0 focus:outline-none transition-colors duration-300 py-2 resize-none text-sm md:text-base"
+              className="w-full bg-transparent border-b-2 border-gray-300 dark:border-gray-600 dark:placeholder:text-slate-500
+    focus:border-blue-500 focus:ring-0 focus:outline-none transition-colors duration-300 py-2 dark:text-slate-100 resize-none text-sm md:text-base dark:focus:border-blue-500 dark:focus:ring-0 dark:focus:outline-none"
             />
             {errors.message && (
               <p className="text-red-500 text-sm mt-1">
@@ -141,19 +141,23 @@ export default function Contact() {
 
             {!error ? (
               <button
-                disabled={!user?.email || loading || sending} // ← Changed: disabled when NO email
+                disabled={!user?.email || loading || sending}
                 type="submit"
-                className="mt-2 group flex items-center gap-1.5 hover:text-blue-500 w-fit mx-auto cursor-pointer py-1 px-4 font-semibold border-b-3 border-b-black transition-colors duration-300 hover:border-b-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-2 group flex items-center gap-1.5 w-fit mx-auto py-1 px-4 font-semibold 
+    border-b-3 border-b-black dark:border-b-gray-600 
+    hover:text-blue-500 dark:text-slate-500 dark:hover:text-slate-100 dark:hover:border-b-blue-500 hover:border-b-blue-500
+    transition-colors duration-300 ease-out 
+    disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {sending ? "Sending Email..." : "Send Email"}{" "}
+                {sending ? "Sending Email..." : "Send Email"}
                 <Send
                   size={17}
-                  className="text-black transition-colors duration-300 group-hover:text-blue-500"
+                  className="text-black dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-500 transition-colors duration-300 ease-out"
                 />
               </button>
             ) : (
               <button
-                disabled = {error}
+                disabled={error}
                 type="button"
                 className="mt-2 group flex items-center gap-1.5 w-fit mx-auto cursor-not-allowed py-1 px-4 font-semibold border-b-3 border-b-red-500"
               >

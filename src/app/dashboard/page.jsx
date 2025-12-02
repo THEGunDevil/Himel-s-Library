@@ -61,7 +61,7 @@ className={
 
 
           {/* Tab Panels */}
-          <div className="bg-blue-50 dark:bg-slate-900 px-2 py-1 shadow-inner min-h-[400px] transition-all duration-200 mt-4">
+          <div className="bg-blue-50 dark:bg-slate-900 px-2 py-1 shadow-inner min-h-[400px] transition-all duration-200 mt-1">
             <TabPanel>
               <BookLibraryOverview />
             </TabPanel>

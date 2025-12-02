@@ -356,7 +356,7 @@ export default function PaymentList() {
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             {/* Header */}
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+            <thead className="bg-linear-to-r from-gray-50 to-gray-100">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
