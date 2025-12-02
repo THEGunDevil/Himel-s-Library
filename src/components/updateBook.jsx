@@ -76,9 +76,9 @@ function UpdateBook({ updateBookID }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8">
-      <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-5 sm:p-8">
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-8">
+    <div className="min-h-screen flex items-center justify-center dark:bg-slate-900 bg-gray-100 py-8">
+      <div className="w-full max-w-4xl mx-auto dark:bg-slate-800 bg-white rounded-2xl shadow-lg p-5 sm:p-8">
+        <h2 className="text-3xl dark:text-slate-200 font-bold text-gray-800 dark:text-slate-100 text-center mb-8">
           Update Book
         </h2>
 
@@ -88,12 +88,12 @@ function UpdateBook({ updateBookID }) {
         >
           {/* Section 1: Book Details */}
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-gray-700 border-b border-gray-200 pb-2">
+            <h3 className="text-xl dark:text-slate-200 font-semibold text-gray-700 border-b border-gray-200 pb-2">
               Book Details
             </h3>
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 ID
               </label>
               <div className="relative">
@@ -122,7 +122,7 @@ function UpdateBook({ updateBookID }) {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 Title
               </label>
               <input
@@ -139,7 +139,7 @@ function UpdateBook({ updateBookID }) {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 Author
               </label>
               <input
@@ -156,7 +156,7 @@ function UpdateBook({ updateBookID }) {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 Published Year
               </label>
               <input
@@ -174,7 +174,7 @@ function UpdateBook({ updateBookID }) {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 ISBN
               </label>
               <input
@@ -193,12 +193,12 @@ function UpdateBook({ updateBookID }) {
 
           {/* Section 2: Additional Information */}
           <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-gray-700 border-b border-gray-200 pb-2">
+            <h3 className="text-xl dark:text-slate-200 font-semibold text-gray-700 border-b border-gray-200 pb-2">
               Additional Information
             </h3>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 Total Copies
               </label>
               <input
@@ -216,7 +216,7 @@ function UpdateBook({ updateBookID }) {
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 Available Copies
               </label>
               <input
@@ -235,7 +235,7 @@ function UpdateBook({ updateBookID }) {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 Genre
               </label>
               <input
@@ -252,7 +252,7 @@ function UpdateBook({ updateBookID }) {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 Description
               </label>
               <textarea
@@ -269,7 +269,7 @@ function UpdateBook({ updateBookID }) {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block dark:text-slate-200 text-sm font-semibold text-gray-700 mb-2">
                 Book Cover
               </label>
               <input

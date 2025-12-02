@@ -213,7 +213,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
     hasError?.response?.data?.error ||
     JSON.stringify(hasError);
   return (
-    <div className="w-full mx-auto mt-6">
+    <div className="w-full mx-auto mt-8">
       {/* Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
         <div className="flex w-full items-center justify-between">

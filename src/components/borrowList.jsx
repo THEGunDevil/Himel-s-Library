@@ -254,7 +254,7 @@ export default function BorrowList() {
     JSON.stringify(hasError);
 
   return (
-    <div className="w-full mx-auto mt-6">
+    <div className="w-full mx-auto mt-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="flex w-full items-center gap-4 justify-between">
           <h1 className="text-2xl sm:text-3xl font-bold dark:text-white text-gray-800">

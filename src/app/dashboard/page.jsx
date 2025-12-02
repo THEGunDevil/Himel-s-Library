@@ -27,7 +27,7 @@ export default function Dashboard() {
   const [updateBookID, setUpdateBookID] = useState(null); // store selected book
   return (
     <section className="pt-24 md:pt-32 xl:px-20 lg:px-20 px-4">
-      <div className="bg-white dark:bg-slate-900 border border-blue-100 shadow-lg p-5 my-10">
+      <div className="bg-blue-200 dark:bg-slate-900 border border-blue-100 shadow-lg p-5 my-10">
         <Tabs
           selectedIndex={selectedIndex}
           onSelect={(index) => setSelectedIndex(index)}
@@ -37,26 +37,31 @@ export default function Dashboard() {
   {tabNames.map((tab, i) => {
     const isSelected = i === selectedIndex;
     return (
-      <Tab key={tab} className="outline-none dark:bg-slate-900">
-        <button
-          type="button"
-          className={
-            (isSelected
-              ? "bg-blue-400 dark:bg-transparent dark:border-2 dark:border-slate-400 text-white shadow-sm"
-              : "bg-gray-100 dark:bg-slate-800 dark:text-slate-300 text-gray-700 hover:bg-blue-100 hover:text-blue-700") +
-            " px-5 py-2 text-sm sm:text-base font-medium cursor-pointer transition-colors duration-300 focus:ring-2 focus:ring-blue-400"
-          }
-        >
-          {tab}
-        </button>
-      </Tab>
+<Tab key={tab} className="outline-none dark:bg-slate-900">
+  <button
+    type="button"
+className={
+  (isSelected
+    ? "bg-blue-400 dark:bg-transparent dark:border-2 dark:border-slate-400 text-white shadow-sm"
+    : "bg-gray-100 dark:bg-slate-800 dark:text-slate-300 text-gray-700 hover:bg-blue-100 hover:text-blue-700") +
+  " px-5 py-2 text-sm sm:text-base font-medium cursor-pointer " +
+  "border-2 border-transparent " + 
+  "transition-all duration-300 ease-out " +
+  "hover:border-blue-500 dark:hover:border-slate-200"
+}
+
+  >
+    {tab}
+  </button>
+</Tab>
+
     );
   })}
 </TabList>
 
 
           {/* Tab Panels */}
-          <div className="bg-blue-50 dark:bg-slate-900 shadow-inner px-4 py-1 min-h-[400px] transition-all duration-200 mt-4">
+          <div className="bg-blue-50 dark:bg-slate-900 px-2 py-1 shadow-inner min-h-[400px] transition-all duration-200 mt-4">
             <TabPanel>
               <BookLibraryOverview />
             </TabPanel>

@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useCallback, useEffect, useState } from "react";
 import {
   useReactTable,
@@ -22,24 +21,28 @@ const columnHelper = createColumnHelper();
 export default function PaymentList() {
   const [page, setPage] = useState(1);
   const { isAdmin, accessToken } = useAuth();
+  
+  // State
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [payments, setPayments] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [totalSales, setTotalSales] = useState(0);
+  
+  // Search State
   const [localSearch, setLocalSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Debounce search
+  // 1. Debounce Logic
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(localSearch.trim());
-      setPage(1);
+      setPage(1); // Reset to page 1 on new search
     }, 400);
     return () => clearTimeout(timer);
   }, [localSearch]);
 
-  // Fetch payments
+  // 2. Unified Fetch Function
   const fetchPayments = useCallback(async () => {
     if (!accessToken || !isAdmin) {
       setLoading(false);
@@ -50,29 +53,43 @@ export default function PaymentList() {
     setError(null);
 
     try {
+      // Determine if we are searching or listing all
+      const isSearching = !!debouncedSearch;
+      
+      // Dynamic Endpoint Selection based on search state
+      const endpoint = isSearching 
+        ? `${process.env.NEXT_PUBLIC_API_URL}/payments/search-payments`
+        : `${process.env.NEXT_PUBLIC_API_URL}/payments/all-payments`;
+
       const params = {
         page,
         limit: 10,
-        ...(debouncedSearch && { search: debouncedSearch }),
+        // Only add search param if we are actually searching
+        ...(isSearching && { search: debouncedSearch }),
       };
 
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/payments/`,
-        {
-          params,
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const res = await axios.get(endpoint, {
+        params,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       const data = res.data;
+
       setPayments(data.payments || []);
-      const totalItems = data.metadata?.total || 0;
-      const totalSales = data.metadata?.totalSales || 0;
-      const limit = data.metadata?.limit || 10;
-      setTotalPages(Math.ceil(totalItems / limit));
-      setTotalSales(totalSales);
+      
+      // Handle Metadata safely
+      const meta = data.metadata || {};
+      const totalItems = meta.total || 0;
+      const limit = meta.limit || 10;
+      
+      // If backend provides totalPages, use it; otherwise calculate it
+      const calculatedPages = meta.totalPages || Math.ceil(totalItems / limit);
+      
+      setTotalPages(calculatedPages || 1);
+      setTotalSales(meta.totalSales || 0);
+
     } catch (err) {
       const message =
         err.response?.data?.message ||
@@ -86,13 +103,14 @@ export default function PaymentList() {
     }
   }, [accessToken, isAdmin, page, debouncedSearch]);
 
+  // 3. Trigger Fetch on dependency change
   useEffect(() => {
     fetchPayments();
   }, [fetchPayments]);
 
   const handlePrev = () => page > 1 && setPage((p) => p - 1);
   const handleNext = () => page < totalPages && setPage((p) => p + 1);
-
+  
   const handleCopy = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -126,7 +144,6 @@ export default function PaymentList() {
         );
       },
     }),
-
     columnHelper.accessor("user_name", {
       header: "User",
       cell: ({ getValue, row }) => (
@@ -138,7 +155,6 @@ export default function PaymentList() {
         </div>
       ),
     }),
-
     columnHelper.accessor("amount", {
       header: "Amount",
       cell: ({ row }) => {
@@ -153,7 +169,6 @@ export default function PaymentList() {
         );
       },
     }),
-
     columnHelper.accessor("payment_gateway", {
       header: "Gateway",
       cell: ({ getValue }) => {
@@ -174,7 +189,6 @@ export default function PaymentList() {
         );
       },
     }),
-
     columnHelper.accessor("status", {
       header: "Status",
       cell: ({ getValue }) => {
@@ -192,7 +206,6 @@ export default function PaymentList() {
           label: status || "Unknown",
           color: "bg-gray-100 text-gray-700",
         };
-
         return (
           <span
             className={`px-3 py-1.5 text-xs font-bold rounded-full ${item.color}`}
@@ -202,7 +215,6 @@ export default function PaymentList() {
         );
       },
     }),
-
     columnHelper.accessor("refund_status", {
       header: "Refund",
       cell: ({ getValue }) => {
@@ -217,7 +229,6 @@ export default function PaymentList() {
         );
       },
     }),
-
     columnHelper.accessor("created_at", {
       header: "Payment Date",
       cell: ({ getValue }) => (
@@ -247,7 +258,7 @@ export default function PaymentList() {
           </div>
           <div className="sm:hidden flex gap-x-1.5">
             <DownloadOptions
-              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
+              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/payments`}
               page={page}
               limit={10}
               token={accessToken}
@@ -255,7 +266,6 @@ export default function PaymentList() {
             />
           </div>
         </div>
-
         <div className="flex items-center gap-3 justify-center">
           <div className="flex items-center w-full sm:w-auto gap-2">
             <div className="flex-col hidden md:flex">
@@ -269,30 +279,33 @@ export default function PaymentList() {
                 }).format(totalSales)}
               </span>
             </div>
-            <input
-              type="search"
-              value={localSearch}
-              className="px-4 py-2 hidden md:block border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm"
-              onChange={(e) => setLocalSearch(e.target.value)}
-              placeholder="Search user..."
-            />
-
-            {localSearch && (
-              <button
-                type="button"
-                onClick={() => {
-                  setLocalSearch("");
-                  setPage(1);
-                }}
-                className="p-2 text-red-500 hidden md:block cursor-pointer hover:text-red-600 transition-colors duration-200"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
+            
+            {/* Search Input */}
+            <div className="relative">
+              <input
+                type="search"
+                value={localSearch}
+                className="px-4 py-2 hidden md:block border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm"
+                onChange={(e) => setLocalSearch(e.target.value)}
+                placeholder="Search by email..."
+              />
+              {localSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocalSearch("");
+                    setPage(1);
+                  }}
+                  className="absolute right-2 top-2.5 hidden md:block text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              )}
+            </div>
           </div>
           <div className="hidden sm:block">
             <DownloadOptions
-              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
+              endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/payments`}
               page={page}
               limit={10}
               token={accessToken}
@@ -301,8 +314,10 @@ export default function PaymentList() {
           </div>
         </div>
       </div>
-      <div className="flex gap-3 items-center">
-        <div className="md:hidden flex-col flex">
+
+      {/* Mobile Search & Stats */}
+      <div className="flex gap-3 items-center md:hidden mb-4">
+        <div className="flex-col flex">
           <span className="text-gray-500 dark:text-gray-300 whitespace-nowrap text-sm">
             Total Sales
           </span>
@@ -313,13 +328,13 @@ export default function PaymentList() {
             }).format(totalSales)}
           </span>
         </div>
-        <div className="md:hidden border flex h-fit w-full border-gray-300 rounded-md items-center">
+        <div className="relative flex w-full">
           <input
             type="search"
             value={localSearch}
-            className="px-4 py-2 h-8  focus:outline-none w-full sm:w-64 text-sm"
+            className="px-4 py-2 h-10 border border-gray-300 rounded-md focus:outline-none w-full text-sm"
             onChange={(e) => setLocalSearch(e.target.value)}
-            placeholder="Search user..."
+            placeholder="Search by email..."
           />
           {localSearch && (
             <button
@@ -328,7 +343,7 @@ export default function PaymentList() {
                 setLocalSearch("");
                 setPage(1);
               }}
-              className="p-2 h-8 text-red-500 cursor-pointer hover:text-red-600 transition-colors duration-200"
+              className="absolute right-2 top-2.5 text-gray-400 hover:text-red-500"
             >
               <X className="h-5 w-5" />
             </button>
@@ -341,7 +356,7 @@ export default function PaymentList() {
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             {/* Header */}
-            <thead className="bg-linear-to-r from-gray-50 to-gray-100 ">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
@@ -358,7 +373,6 @@ export default function PaymentList() {
                 </tr>
               ))}
             </thead>
-
             {/* Body */}
             <tbody className="bg-white divide-y dark:bg-slate-800 divide-gray-200">
               {loading ? (
@@ -387,19 +401,6 @@ export default function PaymentList() {
                         onClick={fetchPayments}
                         className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition shadow-md"
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                          />
-                        </svg>
                         Retry
                       </button>
                     </div>
@@ -427,7 +428,7 @@ export default function PaymentList() {
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
                         {debouncedSearch
-                          ? "Try adjusting your search"
+                          ? `No matches for "${debouncedSearch}"`
                           : "There are no transactions yet"}
                       </p>
                     </div>
@@ -456,7 +457,6 @@ export default function PaymentList() {
             </tbody>
           </table>
         </div>
-
         {/* Pagination */}
         <div className="flex relative flex-col sm:flex-row justify-between items-center py-5 bg-gray-50 border-t gap-4">
           <Pagination
