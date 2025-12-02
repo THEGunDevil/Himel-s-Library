@@ -186,6 +186,8 @@ export default function Book() {
               ? subscriptionPlansData.plans
               : []
           );
+          console.log(subscriptionPlansData);
+          
         } catch (fetchErr) {
           console.error("Error fetching plans:", fetchErr);
           toast.error("Failed to load subscription plans.");

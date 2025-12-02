@@ -27,7 +27,9 @@ const SubscriptionPlans = ({ plans, onSelectPlan, loadingPlanID }) => {
         // Handle empty or missing features
         const features = plan.features && typeof plan.features === "object" ? plan.features : {};
         const hasFeatures = Object.keys(features).length > 0;
+          console.log(plan.price);
 
+        
         return (
           <Card
             key={plan.id}
@@ -42,10 +44,10 @@ const SubscriptionPlans = ({ plans, onSelectPlan, loadingPlanID }) => {
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="flex-grow">
+            <CardContent className="grow">
               <div className="flex items-baseline text-gray-900">
-                <span className="text-4xl font-extrabold tracking-tight">
-                  ${Math.round(plan.price)}
+                <span className="text-4xl dark:text-slate-100 font-extrabold tracking-tight">
+                  {plan.price}
                 </span>
                 <span className="ml-1 text-xl font-medium text-muted-foreground">
                   /{plan.duration_days === 365 ? "yr" : "mo"}
