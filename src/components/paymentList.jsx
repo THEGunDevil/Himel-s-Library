@@ -252,7 +252,7 @@ export default function PaymentList() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Payments Dashboard
             </h1>
-            <p className="text-gray-600 text-sm md:text-md">
+            <p className="text-gray-500 text-sm md:text-md">
               Manage and view all transactions
             </p>
           </div>
@@ -374,7 +374,7 @@ export default function PaymentList() {
               ))}
             </thead>
             {/* Body */}
-            <tbody className="bg-white divide-y dark:bg-slate-800 divide-gray-200">
+            <tbody className="bg-white divide-y dark:bg-slate-800 divide-gray-200 dark:divide-gray-600">
               {loading ? (
                 <tr>
                   <td colSpan={columns.length} className="py-32 text-center">

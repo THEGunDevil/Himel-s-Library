@@ -43,7 +43,7 @@ export default function Providers({ children }) {
         <BanCheck>
           {/* Header and Footer only show for non-banned users */}
           <Header />
-          <div className="fixed top-24 sm:top-[116px] right-4 z-50">
+          <div className="fixed top-24 sm:top-[116px] right-4 z-10">
             <ThemeToggleButton theme={theme} onClick={toggleTheme} variant="circle-blur" start="top-right"/>
           </div>
           <main className="min-h-screen">{children}</main>

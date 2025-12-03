@@ -377,7 +377,7 @@ export default function BorrowList() {
                 </tr>
               ))}
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200 dark:bg-slate-800">
+            <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-600 dark:bg-slate-800">
               {isLoading ? (
                 <tr>
                   <td colSpan={columns.length} className="py-20 text-center">
@@ -418,7 +418,7 @@ export default function BorrowList() {
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-400 text-gray-800"
+                        className="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-300 text-gray-800"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

@@ -224,7 +224,6 @@ export default function Profile() {
   const borrowsByUser = profile.borrows || [];
   const profileImg = profile?.user[0]?.profile_img;
   const isProfileOwner = uID === userID;
-  console.log(user);
 
   // --- PLACHOLDER DATA FOR DESIGN ---
   const activityData = [
@@ -272,10 +271,10 @@ export default function Profile() {
   return (
     <div className="w-full max-w-7xl md:pt-36 pt-32 mx-auto p-4 space-y-8 xl:px-20 lg:px-20 px-4">
       {/* --- MERGED HERO CARD: Profile Details + Activity + Bio --- */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 lg:p-8 shadow-xl shadow-indigo-100/50 dark:shadow-none transition-all duration-300">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 lg:p-8 shadow-xl shadow-indigo-100/50 dark:shadow-none transition-all duration-300">
         {/* SECTION 1: Profile Header and Controls */}
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-6 w-full">
+          <div className="flex md:items-center items-start gap-6 w-full">
             <div
               className={`${
                 profileImg ? "" : "p-4 bg-indigo-100"
@@ -300,7 +299,7 @@ export default function Profile() {
                 }}
                 name={profile.user_name}
                 profileImg={profileImg}
-                className="h-24 w-24 xl:h-20 xl:w-20 ring-4 ring-indigo-500/30 cursor-pointer"
+                className="h-20 w-20 xl:h-20 xl:w-20 ring-4 ring-indigo-500/30 cursor-pointer"
               />
               {/* Profile Image Options - Visible only to owner */}
               {isProfileOwner && (
@@ -326,7 +325,7 @@ export default function Profile() {
               <div>
                 {/* Name and Role/Status */}
                 <div className="flex md:flex-row flex-col md:items-center gap-2">
-                  <h1 className="text-3xl dark:text-gray-100 sm:whitespace-nowrap whitespace-normal font-bold text-gray-900">
+                  <h1 className="text-lg md:text-3xl dark:text-gray-100 sm:whitespace-nowrap whitespace-normal font-bold text-gray-900">
                     {profile.user_name}
                   </h1>
                   {user.role === "admin" ? (
@@ -350,13 +349,13 @@ export default function Profile() {
                   )}
                 </div>
                 {/* Contact and Join Date */}
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="dark:text-gray-300 text-slate-500 text-sm mt-1">
                   Email: {user.email || "N/A"}
                 </p>
-                <p className="text-gray-500 text-sm">
+                <p className="dark:text-gray-300 text-slate-500 text-sm">
                   Phone: {user.phone_number || "N/A"}
                 </p>
-                <p className="text-gray-500 text-sm">
+                <p className="dark:text-gray-300 text-slate-500 text-sm">
                   Joined on {ConvertStringToDate(user.created_at)}
                 </p>
                 {/* Mobile Logout (Owner Only) */}

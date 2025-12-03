@@ -385,7 +385,7 @@ export default function ReservationList() {
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 whitespace-nowrap text-left text-xs font-semibold dark:bg-slate-900 dark:border-slate-700 text-gray-600 uppercase tracking-wider"
+                      className="px-6 py-3 whitespace-nowrap text-left text-xs font-semibold dark:text-gray-100 dark:bg-slate-900 text-gray-600 uppercase tracking-wider"
                       scope="col"
                     >
                       {flexRender(
@@ -425,7 +425,7 @@ export default function ReservationList() {
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
+                        className="px-6 py-4 whitespace-nowrap text-sm dark:text-gray-300 text-gray-800"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

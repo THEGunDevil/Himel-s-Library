@@ -311,7 +311,7 @@ export default function UserList() {
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-3 whitespace-nowrap text-left text-xs font-semibold dark:text-gray-300 text-gray-600 uppercase tracking-wider"
+                      className="px-6 py-3 whitespace-nowrap text-left text-xs font-semibold dark:text-gray-100 text-gray-600 uppercase tracking-wider"
                     >
                       {flexRender(
                         header.column.columnDef.header,
