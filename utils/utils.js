@@ -3,14 +3,20 @@ export function ConvertStringToDate(dateStr) {
   if (!dateStr) return "-";
 
   const date = new Date(dateStr);
+
+  // If invalid date, return the raw cleaned string
   if (isNaN(date.getTime())) {
     const cleanStr = dateStr.split("T")[0] || dateStr.split(" ")[0];
     return cleanStr === "0001-01-01" ? "-" : cleanStr || "-";
   }
 
-  const formatted = date.toISOString().split("T")[0];
-  return formatted === "0001-01-01" ? "-" : formatted;
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
 }
+
 
 export const getDueDate = (days) => {
   const date = new Date();

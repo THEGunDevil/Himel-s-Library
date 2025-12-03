@@ -1,9 +1,13 @@
+import { Lora } from "next/font/google";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
 
 const inter = Inter({
   subsets: ["latin"],
+});
+const lora = Lora({
+  subsets: ["Semi-Bold"],
 });
 
 export const metadata = {
@@ -17,7 +21,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={lora.className}>
         <Providers>{children}</Providers>
       </body>
     </html>
