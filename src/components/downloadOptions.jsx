@@ -71,7 +71,7 @@ export default function DownloadOptions({ token, endpoint, page = 1, limit = 10,
       </button>
 
       {open && (
-        <div className="absolute right-0 top-0 bg-white border border-gray-400 z-50 w-40 shadow-lg">
+        <div className="absolute dark:text-slate-800 right-0 top-0 bg-white border border-gray-400 z-50 w-40 shadow-lg">
           <button
             onClick={() => handleDownload("csv")}
             disabled={disabled || loadingFormat !== null}
