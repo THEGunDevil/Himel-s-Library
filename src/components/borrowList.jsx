@@ -82,7 +82,7 @@ export default function BorrowList() {
 
   const fetchFilteredBorrows = useCallback(async () => {
     // Only search if a valid option is selected
-    if (option !== "user_name" && option !== "book_title") return;
+    // if (option !== "user_name" && option !== "book_title") return;
 
     const trimmed = debouncedSearch;
     if (!trimmed) {
@@ -277,23 +277,25 @@ export default function BorrowList() {
               />
             </div>
           )} */}
-          {selectedStatus && (
+          {/* {selectedStatus && (
             <span className="text-sm text-gray-600">
               (Filtered by:{" "}
               <span className="font-semibold">{selectedStatus}</span>)
             </span>
-          )}
+          )} */}
         </div>
         <div className="flex items-center w-full sm:w-auto gap-2">
-            <select
-              className="px-4 py-2 h-10 w-20 border border-gray-300 rounded-md focus:outline-none shadow-sm text-sm"
-              value={option}
-              onChange={(e) => setOption(e.target.value)}
-            >
-              <option value="all">All</option>
-              <option value="user_name">User</option>
-              <option value="book_title">Book</option>
-            </select>
+          {isAdmin && (
+            <FilterComponent
+              options={[
+                { label: "Borrowed At", value: "borrowed_at" },
+                { label: "Returned At", value: "returned_at" },
+                { label: "Not Returned", value: "not_returned" },
+              ]}
+              selectedStatus={selectedStatus}
+              setSelectedStatus={setSelectedStatus}
+            />
+          )}
 
           <input
             type="search"
@@ -325,19 +327,8 @@ export default function BorrowList() {
             </button>
           )}
         </div>
-        <div className="flex gap-2 items-center justify-end">
-          {isAdmin && tableData.length > 0 && (
-            <FilterComponent
-              options={[
-                { label: "Borrowed At", value: "borrowed_at" },
-                { label: "Returned At", value: "returned_at" },
-                { label: "Not Returned", value: "not_returned" },
-              ]}
-              selectedStatus={selectedStatus}
-              setSelectedStatus={setSelectedStatus}
-            />
-          )}
-          {/* {isAdmin && (
+        {/* <div className="flex gap-2 items-center justify-end">
+          {isAdmin && (
             <div className="hidden sm:block">
               <DownloadOptions
                 endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/borrows`}
@@ -353,8 +344,8 @@ export default function BorrowList() {
                 }}
               />
             </div>
-          )} */}
-        </div>
+          )}
+        </div> */}
       </div>
 
       <div className="overflow-x-auto border border-gray-200 bg-white shadow-md rounded-lg">

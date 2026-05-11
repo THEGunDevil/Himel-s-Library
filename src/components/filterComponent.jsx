@@ -13,7 +13,7 @@ export default function FilterComponent({
 
   const handleSelect = (value) => {
     // toggle off if same value clicked
-    setSelectedStatus(value === selectedStatus ? "" : value);
+    setSelectedStatus(value);
     setIsOpen(false);    
   };
 
@@ -31,17 +31,18 @@ export default function FilterComponent({
   }, [isOpen]);
 
   // Helper: find label by value for button display
-  const getLabel = (value) => {
-    if (!value) return "All Statuses";
-    const found = options.find((opt) => opt.value === value);
-    return found ? found.label : "Unknown";
-  };
+const getLabel = (value) => {
+  if (value === "All") return "All";
+
+  const found = options.find((opt) => opt.value === value);
+  return found ? found.label : "All";
+};
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-2 py-2 bg-white dark:bg-transparent border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="px-2 py-2 bg-white dark:bg-transparent border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors duration-200"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -52,28 +53,28 @@ export default function FilterComponent({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 md:right-0 mt-2 w-48 dark:bg-slate-900 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+        <div className="absolute md:right-0 mt-2 w-48 dark:bg-slate-900 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
           <div className="py-1 max-h-48 overflow-y-auto">
             {/* "All" option */}
             <button
-              onClick={() => handleSelect("")}
+              onClick={() => handleSelect("all")}
               className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
                 !selectedStatus
                   ? "bg-blue-50 text-blue-600 font-medium"
                   : "text-gray-700"
               }`}
             >
-              All Statuses
+              All
             </button>
 
             {options.map((option) => (
               <button
                 key={option.value}
                 onClick={() => handleSelect(option.value)}
-                className={`w-full whitespace-nowrap text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
+                className={`w-full whitespace-nowrap text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-500 hover:cursor-pointer transition-colors ${
                   selectedStatus === option.value
-                    ? "bg-blue-50 text-blue-600 font-medium"
-                    : "text-gray-700 dark:text-gray-400"
+                    ? "bg-blue-50 dark:bg-gray-300 text-blue-600 font-medium"
+                    : "text-gray-700 dark:text-gray-100"
                 }`}
               >
                 {option.label}

@@ -341,12 +341,12 @@ export default function ReservationList() {
               />
             </div> */}
           </div>
-          {selectedStatus && (
+          {/* {selectedStatus && (
             <span className="text-sm text-gray-600">
               (Filtered by:{" "}
               <span className="font-semibold">{selectedStatus}</span>)
             </span>
-          )}
+          )} */}
         </div>
         <div className="flex gap-2">
           {isAdmin && tableData !== 0 && (

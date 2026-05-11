@@ -267,12 +267,12 @@ export default function UserList() {
             />
           </div> */}
         </div>
-        <div className="flex items-center gap-3 justify-center">
-          <div className="flex items-center w-full sm:w-auto gap-2">
+        {/* <div className="flex items-center gap-3 justify-center"> */}
+          <div className="flex w-full items-center gap-2">
             <input
               type="search"
               value={local}
-              className="px-4 py-2 border h-10 border-gray-300 rounded-md focus:outline-none w-full sm:w-64 shadow-sm text-sm"
+              className="px-4 py-2 w-full border h-10 border-gray-300 rounded-md focus:outline-none shadow-sm text-sm"
               onChange={(e) => setLocal(e.target.value)}
               placeholder="Search user..."
             />
@@ -299,7 +299,7 @@ export default function UserList() {
               filters={{ search: debouncedSearch }}
             />
           </div> */}
-        </div>
+        {/* </div> */}
       </div>
 
       <div className="overflow-x-auto bg-white border border-gray-200 shadow-md rounded-lg">

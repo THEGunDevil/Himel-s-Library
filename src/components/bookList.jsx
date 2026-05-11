@@ -16,7 +16,8 @@ import { PlusCircleIcon, X } from "lucide-react";
 import DownloadOptions from "./downloadOptions";
 import { useRouter } from "next/navigation";
 import Pagination from "./pagination";
-
+import FilterComponent from "./filterComponent";
+import { label } from "framer-motion/client";
 const columnHelper = createColumnHelper();
 
 export default function BookList({ setSelectedIndex, setUpdateBookID }) {
@@ -44,7 +45,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
     const fetchGenres = async () => {
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/books/genres`
+          `${process.env.NEXT_PUBLIC_API_URL}/books/genres`,
         );
         if (Array.isArray(res.data)) {
           setGenres(res.data);
@@ -61,8 +62,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
     error,
     refetch,
     totalPages: baseTotalPages,
-  } = useBookData({ page });
-
+  } = useBookData({ page, genre });
   const fetchFilteredBooks = useCallback(async () => {
     const trimmed = debouncedSearch;
 
@@ -79,12 +79,12 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
         query: trimmed,
         page,
         limit: 10,
-        genre: genre || "all",
+        genre: genre,
       };
 
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/books/search`,
-        { params }
+        { params },
       );
 
       setFilteredBooks(res.data.books || []);
@@ -116,7 +116,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
         `${process.env.NEXT_PUBLIC_API_URL}/books/${bookToDelete}`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
-        }
+        },
       );
       toast.success("Book deleted successfully!");
       setBookToDelete(null);
@@ -223,10 +223,10 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
           <div className="sm:hidden flex gap-x-1.5">
             <button
               onClick={() => router.push(`/add-book`)}
-              className="bg-blue-400 flex gap-1 items-center px-2 rounded dark:bg-slate-800 text-white hover:bg-blue-500 transition-colors duration-300"
+              className="bg-blue-400 text-sm flex gap-1 items-center p-1.5 rounded dark:bg-slate-800 text-white hover:bg-blue-500 transition-colors duration-300"
             >
               Add Book
-              <PlusCircleIcon size={16}/>
+              <PlusCircleIcon size={16} />
             </button>
             {/* <DownloadOptions
               endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
@@ -242,18 +242,14 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
         </div>
 
         <div className="flex items-center w-full sm:w-auto gap-2">
-          <select
-            className="px-4 py-2 text-gray-500 h-10 w-20 md:w-30 border border-gray-300 rounded-md focus:outline-none shadow-sm text-sm block"
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-          >
-            <option value="all">ALL</option>
-            {genres.map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </select>
+          <FilterComponent
+            options={genres.map((g) => ({
+              label: g,
+              value: g,
+            }))}
+            selectedStatus={genre}
+            setSelectedStatus={setGenre}
+          />
 
           <input
             type="search"
@@ -308,7 +304,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
                     >
                       {flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                     </th>
                   ))}
@@ -360,7 +356,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </td>
                     ))}
