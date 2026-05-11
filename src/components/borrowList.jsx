@@ -260,7 +260,7 @@ export default function BorrowList() {
           <h1 className="text-2xl sm:text-3xl font-bold dark:text-white text-gray-800">
             Borrow List
           </h1>
-          {isAdmin && (
+          {/* {isAdmin && (
             <div className="sm:hidden block">
               <DownloadOptions
                 endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/borrows`}
@@ -276,7 +276,7 @@ export default function BorrowList() {
                 }}
               />
             </div>
-          )}
+          )} */}
           {selectedStatus && (
             <span className="text-sm text-gray-600">
               (Filtered by:{" "}
@@ -337,7 +337,7 @@ export default function BorrowList() {
               setSelectedStatus={setSelectedStatus}
             />
           )}
-          {isAdmin && (
+          {/* {isAdmin && (
             <div className="hidden sm:block">
               <DownloadOptions
                 endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/borrows`}
@@ -353,7 +353,7 @@ export default function BorrowList() {
                 }}
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
 

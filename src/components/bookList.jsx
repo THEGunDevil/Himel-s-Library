@@ -228,7 +228,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
               Add Book
               <PlusCircleIcon size={16}/>
             </button>
-            <DownloadOptions
+            {/* <DownloadOptions
               endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
               page={page}
               limit={10}
@@ -237,7 +237,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
                 search: debouncedSearch || undefined,
                 genre: genre !== "all" ? genre : undefined,
               }}
-            />
+            /> */}
           </div>
         </div>
 
@@ -278,7 +278,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
             </button>
           )}
         </div>
-        {isAdmin && (
+        {/* {isAdmin && (
           <div className="hidden sm:block">
             <DownloadOptions
               endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/books`}
@@ -291,7 +291,7 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
               }}
             />
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Table */}

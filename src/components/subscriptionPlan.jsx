@@ -27,8 +27,6 @@ const SubscriptionPlans = ({ plans, onSelectPlan, loadingPlanID }) => {
         // Handle empty or missing features
         const features = plan.features && typeof plan.features === "object" ? plan.features : {};
         const hasFeatures = Object.keys(features).length > 0;
-          console.log(plan.price);
-
         
         return (
           <Card

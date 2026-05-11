@@ -257,7 +257,7 @@ export default function UserList() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
             User List
           </h1>
-          <div className="sm:hidden flex gap-x-1.5">
+          {/* <div className="sm:hidden flex gap-x-1.5">
             <DownloadOptions
               endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
               page={page}
@@ -265,7 +265,7 @@ export default function UserList() {
               token={accessToken}
               filters={{ search: debouncedSearch }}
             />
-          </div>
+          </div> */}
         </div>
         <div className="flex items-center gap-3 justify-center">
           <div className="flex items-center w-full sm:w-auto gap-2">
@@ -290,7 +290,7 @@ export default function UserList() {
               </button>
             )}
           </div>
-          <div className="hidden sm:block">
+          {/* <div className="hidden sm:block">
             <DownloadOptions
               endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/users`}
               page={page}
@@ -298,7 +298,7 @@ export default function UserList() {
               token={accessToken}
               filters={{ search: debouncedSearch }}
             />
-          </div>
+          </div> */}
         </div>
       </div>
 

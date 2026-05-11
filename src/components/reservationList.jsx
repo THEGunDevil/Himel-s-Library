@@ -331,7 +331,7 @@ export default function ReservationList() {
             <h1 className="text-2xl whitespace-nowrap sm:text-3xl font-bold text-gray-800 dark:text-white">
               Reservation List
             </h1>
-            <div className="sm:hidden block">
+            {/* <div className="sm:hidden block">
               <DownloadOptions
                 endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/reservations`}
                 page={page}
@@ -339,7 +339,7 @@ export default function ReservationList() {
                 token={accessToken}
                 filters={{ status: selectedStatus }} // passes current filter for CSV/XLSX export
               />
-            </div>
+            </div> */}
           </div>
           {selectedStatus && (
             <span className="text-sm text-gray-600">
@@ -361,7 +361,7 @@ export default function ReservationList() {
               setSelectedStatus={setSelectedStatus}
             />
           )}
-          {isAdmin && (
+          {/* {isAdmin && (
             <div className="hidden sm:block">
               <DownloadOptions
                 endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/reservations`}
@@ -371,7 +371,7 @@ export default function ReservationList() {
                 filters={{ status: selectedStatus }} // passes current filter for CSV/XLSX export
               />
             </div>
-          )}
+          )} */}
         </div>
       </div>
 

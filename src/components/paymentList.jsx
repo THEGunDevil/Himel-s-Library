@@ -256,7 +256,7 @@ export default function PaymentList() {
               Manage and view all transactions
             </p>
           </div>
-          <div className="sm:hidden flex gap-x-1.5">
+          {/* <div className="sm:hidden flex gap-x-1.5">
             <DownloadOptions
               endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/payments`}
               page={page}
@@ -264,7 +264,7 @@ export default function PaymentList() {
               token={accessToken}
               filters={{ search: debouncedSearch }}
             />
-          </div>
+          </div> */}
         </div>
         <div className="flex items-center gap-3 justify-center">
           <div className="flex items-center w-full sm:w-auto gap-2">
@@ -303,7 +303,7 @@ export default function PaymentList() {
               )}
             </div>
           </div>
-          <div className="hidden sm:block">
+          {/* <div className="hidden sm:block">
             <DownloadOptions
               endpoint={`${process.env.NEXT_PUBLIC_API_URL}/download/payments`}
               page={page}
@@ -311,7 +311,7 @@ export default function PaymentList() {
               token={accessToken}
               filters={{ search: debouncedSearch }}
             />
-          </div>
+          </div> */}
         </div>
       </div>
 
