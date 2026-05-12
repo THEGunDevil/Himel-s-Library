@@ -17,7 +17,6 @@ import DownloadOptions from "./downloadOptions";
 import { useRouter } from "next/navigation";
 import Pagination from "./pagination";
 import FilterComponent from "./filterComponent";
-import { label } from "framer-motion/client";
 const columnHelper = createColumnHelper();
 
 export default function BookList({ setSelectedIndex, setUpdateBookID }) {
@@ -104,7 +103,14 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
 
   const handleNext = () => page < totalPages && setPage((p) => p + 1);
   const handlePrev = () => page > 1 && setPage((p) => p - 1);
-
+  const handleUpdate = (book) => {
+    if (setSelectedIndex && setUpdateBookID) {
+      setSelectedIndex(5);
+      setUpdateBookID(book.id);
+    } else {
+      router.push(`/update-book/${book.id}`);
+    }
+  };
   const handleDelete = async () => {
     if (!bookToDelete) return;
     if (!isAdmin || !accessToken) {
@@ -127,25 +133,6 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
     }
   };
   const columns = [
-    columnHelper.accessor("id", {
-      header: "ID",
-      cell: ({ getValue }) => {
-        const id = getValue();
-        const shortId = id ? id.slice(0, 8) + "..." : "N/A";
-        return (
-          <div className="flex items-center gap-2 group">
-            <span className="font-mono">{shortId}</span>
-            <button
-              onClick={() => navigator.clipboard.writeText(id)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-500"
-              title="Copy ID"
-            >
-              📋
-            </button>
-          </div>
-        );
-      },
-    }),
     columnHelper.accessor("title", { header: "Book Title" }),
     columnHelper.accessor("author", { header: "Author" }),
     columnHelper.accessor("available_copies", { header: "Available Copies" }),
@@ -160,19 +147,9 @@ export default function BookList({ setSelectedIndex, setUpdateBookID }) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedIndex(5);
-                setUpdateBookID(book.id);
+                handleUpdate(book);
               }}
-              className="hidden sm:block px-3 py-1 bg-blue-400 text-white rounded-md hover:bg-blue-500 transition-colors duration-200 text-sm font-medium"
-            >
-              Update
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/update-book/${book.id}`);
-              }}
-              className="px-3 py-1 sm:hidden block bg-blue-400 text-white rounded-md hover:bg-blue-500 transition-colors duration-200 text-sm font-medium"
+              className="px-3 py-1 bg-blue-400 text-white rounded-md hover:bg-blue-500 text-sm"
             >
               Update
             </button>

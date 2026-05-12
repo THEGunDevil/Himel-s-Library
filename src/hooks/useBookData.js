@@ -6,7 +6,7 @@ import axios from "axios";
 export function useBookData({
   page = 1,
   limit = 10,
-  genre = "Adventure",
+  genre = "Classic",
 } = {}) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);

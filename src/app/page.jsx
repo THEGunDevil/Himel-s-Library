@@ -32,7 +32,7 @@ const CardGridSkeleton = () => (
 export default function Home() {
   const [page, setPage] = useState(1);
   const [genre, setGenre] = useState("Adventure");
-  const { data: books = [], loading: booksLoading } = useBookData({ page: 1 });
+  const { data: books = [], loading: booksLoading } = useBookData({ page: 1, limit: 10 });
   const {
     data: booksFiltered = [],
     loading: booksFilteredLoading,

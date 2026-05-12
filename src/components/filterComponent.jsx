@@ -53,8 +53,8 @@ const getLabel = (value) => {
       </button>
 
       {isOpen && (
-        <div className="absolute md:right-0 mt-2 w-48 dark:bg-slate-900 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
-          <div className="py-1 max-h-48 overflow-y-auto">
+        <div className="absolute sm:right-0 mt-2 w-48 dark:bg-slate-900 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+          <div className="py-1 scrollbar-hide max-h-48 overflow-y-auto">
             {/* "All" option */}
             <button
               onClick={() => handleSelect("all")}

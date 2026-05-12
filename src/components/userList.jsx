@@ -152,25 +152,6 @@ export default function UserList() {
   };
 
   const columns = [
-    columnHelper.accessor("id", {
-      header: "ID",
-      cell: ({ getValue }) => {
-        const id = getValue();
-        const shortId = id ? id.slice(0, 8) + "..." : "N/A";
-        return (
-          <div className="flex items-center gap-2 group">
-            <span className="font-mono">{shortId}</span>
-            <button
-              onClick={() => handleCopy(id)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-500"
-              title="Copy ID"
-            >
-              📋
-            </button>
-          </div>
-        );
-      },
-    }),
     columnHelper.accessor((row) => `${row.first_name} ${row.last_name}`, {
       id: "fullName",
       header: "User",

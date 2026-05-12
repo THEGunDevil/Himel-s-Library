@@ -10,9 +10,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function BannerSlider({ bannerBooks = [] }) {
-  const books = bannerBooks.slice(0, 5);
+  const books = bannerBooks.slice(0, 5);  
   if (books.length === 0) return null;
-
   const hasMultipleSlides = books.length > 1;
 
   return (
