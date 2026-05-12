@@ -124,7 +124,7 @@ export function StarRating({ rating, setRating }) {
             onClick={() => setRating(s)}
             onMouseEnter={() => setHover(s)}
             onMouseLeave={() => setHover(0)}
-            className="p-1 rounded hover:bg-gray-100 focus:outline-none"
+            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-transparent focus:outline-none"
             aria-pressed={s <= rating}
             title={`${s} star${s > 1 ? "s" : ""}`}
           >
