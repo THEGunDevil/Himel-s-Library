@@ -32,9 +32,9 @@ function SearchBar({ open, setOpen }) {
             value={genre}
             onChange={(e) => setGenre(e.target.value)}
           >
-            <option value="all">ALL</option>
+            <option value="all" className="dark:text-gray-800">ALL</option>
             {genres.map((g) => (
-              <option key={g} value={g}>
+              <option key={g} value={g} className="dark:text-gray-800">
                 {g}
               </option>
             ))}
